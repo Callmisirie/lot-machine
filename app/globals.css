@@ -2,3 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+.h1 {
+  @apply font-poppins font-semibold text-[64px] leading-[150%]
+}
+
+.h2 {
+  @apply font-poppins font-semibold text-[48px] leading-[150%]
+}
+
+.h3 {
+  @apply font-poppins font-semibold text-[32px] leading-[150%]
+}
+
+.h4 {
+  @apply font-poppins font-semibold text-[24px] leading-[150%]
+}
+
+.h5 {
+  @apply font-poppins font-semibold text-[18px] leading-[150%]
+}
+
+.h6 {
+  @apply font-poppins font-semibold text-[16px] leading-[150%]
+}
+
+
+.p1b {
+  @apply font-montserrat font-medium text-[16px] leading-[125%]
+}
+
+.p1r {
+  @apply font-montserrat font-normal text-[16px] leading-[125%]
+}
+
+.p2b {
+  @apply font-montserrat font-medium text-[14px] leading-[125%]
+}
+
+.p2r {
+  @apply font-montserrat font-normal text-[14px] leading-[125%]
+}
+
+.p3b {
+  @apply font-montserrat font-medium text-[12px] leading-[125%]
+}
+
+.p3r {
+  @apply font-montserrat font-normal text-[12px] leading-[125%]
+}
+
+.l1b {
+  @apply font-poppins font-semibold text-[16px] leading-[150%]
+}
+
+.l1r {
+  @apply font-poppins font-normal text-[16px] leading-[150%]
+}
+
+.l2b {
+  @apply font-poppins font-semibold text-[14px] leading-[150%]
+}
+
+.l2r {
+  @apply font-poppins font-normal text-[14px] leading-[150%]
+}
+
+.l3b {
+  @apply font-poppins font-semibold text-[12px] leading-[150%]
+}
+
+.l3r {
+  @apply font-poppins font-normal text-[12px] leading-[150%]
+}

@@ -12,6 +12,10 @@ module.exports = {
 				poppins: "var(--font-poppins)",
 				montserrat: "var(--font-montserrat)",
 			},
+			backgroundColor: {
+        'custom-opacity-15': 'rgba(247, 249, 248, 0.15)',
+				'custom-opacity-25': 'rgba(247, 249, 248, 0.25)',
+      },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
