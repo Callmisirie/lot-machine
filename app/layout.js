@@ -1,8 +1,7 @@
-import "./globals.css";
 import Navbar from "@/components/Navbar";
+import "./globals.css";
 import NextAuthProvider from "./Providers";
-import { Poppins, Montserrat} from "next/font/google"
-import { lmLogo } from "@/public";
+import { Poppins, Montserrat} from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -32,7 +31,7 @@ export default function RootLayout({ children }) {
       >
         <NextAuthProvider>
           <div className="font-poppins h-screen w-full bg-custom-opacity-15">
-            <Navbar />
+            {/* <Navbar /> */}
             {children}
           </div>
         </NextAuthProvider>

@@ -2,13 +2,13 @@
 
 import Image from 'next/image';
 import { lmLogo } from '@/public';
-import { PopoverProfile } from './ProfilePopover';
+import { ProfilePopover } from './ProfilePopover';
 
 const Navbar = () => {
 
 
   return (
-    <div className='w-full flex justify-between p-[32px] h-fit'>
+    <div className='w-full flex justify-between p-[32px] h-fit fixed'>
       <div className='flex items-end'>
         <Image 
           src={lmLogo} 
@@ -19,7 +19,7 @@ const Navbar = () => {
           />   
           <h3 className='h3 text-n-700'>Lot machine</h3>     
       </div>
-        <PopoverProfile />
+        <ProfilePopover />
     </div>
   )
 }

@@ -17,11 +17,12 @@ import signout from "./signout.png";
 import template from "./template.png";
 import twitter from "./twitter.png";
 import user from "./user.png";
+import sOut from "./sOut.svg";
 
 export {
   add, bolt, cancel, caution,
   chartline, clipboard, copyright, 
   create, deleteIcon, dropArrow, email, 
   google, list, reset, settings, signout, 
-  template, twitter, user,
+  template, twitter, user, sOut
 }
