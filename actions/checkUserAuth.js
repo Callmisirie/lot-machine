@@ -10,14 +10,14 @@ const checkUserAuth = async (email) => {
 
     if (!userExists) {
       console.log("User not found in DB");
-      return {isAuth: false}
+      return false
     } else {
       console.log("User authenticated in DB");
-      return {isAuth: true} 
+      return true 
     }   
   } catch (error) {
     console.log("Failed to authenticate user in DB: ", error);
-    return {isAuth: false}
+    return false
   }
 };
 

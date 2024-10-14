@@ -14,9 +14,12 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "unauthenticated" || !checkUserAuth(session?.user?.email)) {
+    if (status === "unauthenticated") {
       redirect(paths.auth());
-    }
+    } else if (status === "authenticated" ) {
+      if (!checkUserAuth(session?.user?.email))
+      redirect(paths.auth());
+    } 
   }, [status]);
 
   return (
