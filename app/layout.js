@@ -1,13 +1,13 @@
-import Navbar from "@/components/Navbar";
 import "./globals.css";
 import NextAuthProvider from "./Providers";
-import { Poppins, Montserrat} from "next/font/google";
+import { Montserrat } from "next/font/google";
+import localfont from "next/font/local";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-poppins",
-});
+const poppins = localfont({
+  src: "./fonts/Poppins-Regular.ttf",
+  variable: "--font-poppins", 
+  display: "swap"
+})
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -31,7 +31,6 @@ export default function RootLayout({ children }) {
       >
         <NextAuthProvider>
           <div className="font-poppins h-screen w-full bg-custom-opacity-15">
-            {/* <Navbar /> */}
             {children}
           </div>
         </NextAuthProvider>

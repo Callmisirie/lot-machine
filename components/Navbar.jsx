@@ -8,7 +8,7 @@ const Navbar = () => {
 
 
   return (
-    <div className='w-full flex justify-between p-[32px] h-fit fixed'>
+    <div className='w-full flex justify-between p-[32px] h-fit absolute'>
       <div className='flex items-end'>
         <Image 
           src={lmLogo} 
