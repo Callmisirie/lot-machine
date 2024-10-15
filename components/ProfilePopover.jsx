@@ -33,6 +33,7 @@ export function ProfilePopover() {
               height={24} 
               alt="account" 
               className="ml-2"
+              priority
               />
         </Button>        
       </form>
@@ -47,6 +48,7 @@ export function ProfilePopover() {
               height={24} 
               alt="sign out" 
               className="ml-2"
+              priority
               />
         </Button>        
       </form>      

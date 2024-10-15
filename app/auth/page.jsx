@@ -27,11 +27,12 @@ const page = () => {
           width={98} 
           height={98} 
           alt='logo'
+          className="md:w-[98px] md:h-[98px] max-md:w-[38px] max-md:h-[40px]"
           priority
-          />   
-          <h3 className='h3 text-n-700'>Lot machine</h3>     
+          />
+        <h3 className='h3 text-n-700'>Lot machine</h3>     
       </div>
-      <h2 className='h2 text-n-700 absolute left-[32px] top-[304px] w-[741px] z-10'>
+      <h2 className='h2 text-n-700 absolute left-[32px] top-[304px] max-w-[741px] z-10'>
       Enjoy the full <span className='h1'>benefits </span>of
       your trading <span className='h1'>positions</span>.
       </h2>
@@ -41,13 +42,16 @@ const page = () => {
           width={950} 
           height={680} 
           alt='lm bg image'
+          priority
           />         
       </div>
-  
       <div className='flex h-full w-[480px] 
-      bg-n-700 rounded-s-[56px] fixed 
-      right-0 top-0 justify-center z-20'>
-        <div className='flex flex-col gap-[64px] absolute top-[192px] h-fit'>
+      max-md:w-full max-md:h-[560px] max-md:bottom-0
+      bg-n-700 md:rounded-s-[56px] fixed max-md:rounded-t-[32px]
+      right-0 md:top-0 justify-center z-20'>
+        <div className='flex flex-col 
+        gap-[64px] absolute top-[192px] 
+        max-md:top-[73px] h-fit'>
           <div className='flex flex-col items-center gap-[56px]'>
             <div  className='flex flex-col items-center'>
               <h2 className='h2 text-n-500'>Sign in</h2>
