@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+.h1r {
+  @apply font-poppins font-semibold xl:text-[64px] leading-[150%] max-md:text-[24px] lg:text-[48px]
+}
+
+.h2r {
+  @apply font-poppins font-semibold xl:text-[48px] leading-[150%] max-md:text-[18px] lg:text-[32px]
+}
+
+.h3r {
+  @apply font-poppins font-semibold text-[32px] leading-[150%] max-md:text-[16px]
+}
+
 .h1 {
   @apply font-poppins font-semibold text-[64px] leading-[150%]
 }
@@ -11,7 +23,7 @@
 }
 
 .h3 {
-  @apply font-poppins font-semibold text-[32px] leading-[150%] max-md:text-[16px]
+  @apply font-poppins font-semibold text-[32px] leading-[150%]
 }
 
 .h4 {

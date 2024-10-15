@@ -15,10 +15,11 @@ const Navbar = () => {
           width={98} 
           height={98} 
           alt='logo'
-          className="md:w-[98px] md:h-[98px] max-md:w-[38px] max-md:h-[40px]"
-          priorty
+          className="md:w-[98px] md:h-[98px] 
+          max-md:w-[38px] max-md:h-[40px]
+          transition-all duration-300"
           />
-          <h3 className='h3 text-n-700'>Lot machine</h3>     
+          <h3 className='h3r text-n-700'>Lot machine</h3>     
       </div>
         <ProfilePopover />
     </div>
