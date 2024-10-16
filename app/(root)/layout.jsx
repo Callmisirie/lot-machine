@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 export default async function RootLayout({children}) {
 
   return (
-    <main className="h-screen w-full">
+    <main className="">
       <Navbar />
         {children}        
     </main>

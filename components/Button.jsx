@@ -10,6 +10,7 @@ const Button = ({rightIcon,
   leftIconImgSrc, 
   label, 
   buttonColor
+  
 }) => {
   return (
     <button onClick={ () => signIn("google")}
@@ -23,7 +24,9 @@ const Button = ({rightIcon,
             width={24} 
             height={24} 
             alt="left icon" 
-            className="" />          
+            className="" 
+            priority
+            />          
         )}
         <p className='l2b text-n-900'>
           {label}
@@ -34,7 +37,9 @@ const Button = ({rightIcon,
             width={24} 
             height={24} 
             alt="right icon" 
-            className="" />            
+            className="" 
+            priority
+            />            
         )}
       </div>
     </button>

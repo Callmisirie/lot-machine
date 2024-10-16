@@ -17,7 +17,7 @@ const page = () => {
     if (status === "authenticated" && checkUserAuth(session?.user?.email)) {
       redirect(paths.home());
     }
-  }, [status]);
+  }, [status, session]);
 
   return (
     <main className='h-screen relative'>
@@ -31,6 +31,7 @@ const page = () => {
           className="md:w-[98px] md:h-[98px] 
           max-md:w-[38px] max-md:h-[40px]
           transition-all duration-300"
+          priority
           />
         <h3 className='h3r text-n-700'>Lot machine</h3>     
       </div>
@@ -46,12 +47,13 @@ const page = () => {
       transition-all duration-300'>
         <Image 
           src={lmImage} 
-          width={950} 
-          height={680} 
+          width="auto" 
+          height="auto" 
           alt='lm bg image'
           className="md:w-[950px] md:h-680px] 
           max-md:w-[370px] max-md:h-[264px]
           transition-all duration-300"
+          priority
           />         
       </div>
       <div className='flex h-full w-[480px] 
