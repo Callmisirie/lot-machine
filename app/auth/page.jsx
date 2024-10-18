@@ -1,6 +1,5 @@
 "use client";
 
-import checkUserAuth from '@/actions/checkUserAuth';
 import paths from '@/common/paths'
 import Button from '@/components/Button'
 import { lmImage, lmLogo } from '@/public'
@@ -14,7 +13,7 @@ const page = () => {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "authenticated" && checkUserAuth(session?.user?.email)) {
+    if (status === "authenticated") {
       redirect(paths.home());
     }
   }, [status, session]);

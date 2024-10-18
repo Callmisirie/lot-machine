@@ -14,13 +14,26 @@ const authOptions = {
   ],
   callbacks: {
     async signIn({user, account}) {
-      console.log("User: ", user);
-
       if (account.provider === "google") {
         const {name, email} = user;        
-        userAuth(name, email);
+        const activeUser = await userAuth(name, email);
+
+        if (activeUser) {
+          return true;
+        } else {
+          return false;
+        }
       }
-      return user;
+    },
+    async jwt({token, account}) {
+      if (account) {
+        token.access_token = account.access_token;
+      }
+      return token;
+    }, 
+    async session({session, token}) {
+      session.access_token = token.access_token;
+      return session;
     }
   }
 };
