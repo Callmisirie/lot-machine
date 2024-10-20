@@ -1,7 +1,7 @@
 "use client";
 
 import paths from '@/common/paths'
-import Button from '@/components/Button'
+import GoogleButton from '@/components/GoogleButton'
 import { lmImage, lmLogo } from '@/public'
 import { google } from '@/public/icons'
 import { useSession } from 'next-auth/react'
@@ -14,7 +14,7 @@ const page = () => {
 
   useEffect(() => {
     if (status === "authenticated") {
-      redirect(paths.home());
+      redirect(Googlepaths.home());
     }
   }, [status, session]);
 
@@ -68,7 +68,7 @@ const page = () => {
               <h2 className='h2 text-n-500'>Sign in</h2>
               <p className='p2b text-n-100'>Already have an account with us?</p>              
             </div>
-            <Button 
+            <GoogleButton 
               leftIcon 
               leftIconImgSrc={google} 
               label="Continue with google"/>
@@ -80,7 +80,7 @@ const page = () => {
           </div>
           <div className='flex flex-col items-center gap-[16px]'>
             <p className='p2r text-n-300'>Don't have an account?</p>              
-            <Button 
+            <GoogleButton 
               leftIcon 
               leftIconImgSrc={google} 
               label="Sign up with google"

@@ -26,7 +26,13 @@ export default function Home() {
 
   return (
     <div className="w-full h-screen flex items-center">
-    <CardFrame />
+      <CardFrame 
+        button
+        buttonLabel={"Calculate"}
+        title={"Machine"}
+      >
+
+      </CardFrame>
     </div>
   );
 }

@@ -1,23 +1,21 @@
 "use client"
 
+import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import React from 'react'
 
-const Button = ({rightIcon, 
+const GoogleButton = ({rightIcon, 
   leftIcon, 
   rightIconImgSrc, 
   leftIconImgSrc, 
   label, 
-  whiteButton,
-  blackButton,
+  buttonColor
   
 }) => {
   return (
-    <button
-    className={`${whiteButton ? "bg-white" 
-      : blackButton ? "bg-n-900" 
-      : "bg-white"} w-[245px] h-[56px]
-    rounded-[32px] shadow-md`}>
+    <button onClick={ () => signIn("google")}
+    className={`${buttonColor ? buttonColor : "bg-white"} w-[245px] h-[56px]
+    rounded-[32px]`}>
       <div className='gap-2 flex justify-center 
       items-center'>
         {leftIcon && (
@@ -30,9 +28,7 @@ const Button = ({rightIcon,
             priority
             />          
         )}
-        <p className={`${ whiteButton ? "text-n-900" 
-          : blackButton ? "text-n-100" 
-          : "text-900"} l1b `}>
+        <p className='l2b text-n-900'>
           {label}
         </p>
         {rightIcon && (
@@ -50,4 +46,4 @@ const Button = ({rightIcon,
   )
 }
 
-export default Button;
+export default GoogleButton;
