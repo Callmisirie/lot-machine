@@ -29,7 +29,6 @@ export default function Home() {
       <CardFrame 
         button
         buttonLabel={"Calculate"}
-        title={"Machine"}
       >
 
       </CardFrame>

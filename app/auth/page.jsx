@@ -14,7 +14,7 @@ const page = () => {
 
   useEffect(() => {
     if (status === "authenticated") {
-      redirect(Googlepaths.home());
+      redirect(paths.home());
     }
   }, [status, session]);
 
