@@ -5,12 +5,12 @@ import { addWhite, boltWhite, listWhite } from '@/public/icons/white';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
-const ThreeSwitch = ({setTitle}) => {
+const ThreeSwitch = ({setMachineState}) => {
   const [switchType, setSwitchType] = useState("Machine");
 
   const handleSwitch = (currentSwitch) => {
     setSwitchType(currentSwitch); 
-    setTitle(currentSwitch);
+    setMachineState(currentSwitch);
   }
 
   return (

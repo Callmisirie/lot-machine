@@ -13,7 +13,7 @@ const Button = ({rightIcon,
   
 }) => {
   return (
-    <button
+    <button type='sumbit'
     className={`${whiteButton ? "bg-white" 
       : blackButton ? "bg-n-900" 
       : "bg-white"} w-[245px] h-[56px]
