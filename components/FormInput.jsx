@@ -42,8 +42,7 @@ const FormInput = ({name, label, form, description, optional}) => {
         </FormControl>
         <FormMessage />
       </FormItem>
-    )}
-  />
+    )}/>
   )
 }
 

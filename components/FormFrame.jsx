@@ -32,10 +32,9 @@ export function FormFrame({children, machineState}) {
   const { data: session } = useSession();
 
   function onSubmit(data) {
-
     console.log(data);
-    addInstrument(session?.user?.email, data.instrument, data.nickname)
-    
+
+    addInstrument(session?.user?.email, data.instrument, data.nickname);
   }
 
   // Return the form only if machineState is "Machine"

@@ -4,9 +4,10 @@ import ThreeSwitch from './ThreeSwitch'
 import TwoSwitch from './TwoSwitch';
 
 const CardFrame = ({
-  children, button, buttonLabel, 
-  threeSwitch, twoSwitch, staticTitle, 
-  chartType, smallFrame, machineState, setMachineState
+  children, threeSwitch, twoSwitch, 
+  staticTitle, chartType, smallFrame, 
+  machineState, setMachineState, 
+  chartState, setChartState
 }) => {
  
   return (
@@ -18,16 +19,16 @@ const CardFrame = ({
           {threeSwitch && (<ThreeSwitch setMachineState={setMachineState} />)}
           {chartType && 
             <div className='flex justify-between items-center w-full'>
-              <TwoSwitch />
+              <TwoSwitch setChartState={setChartState} />
               <div className="flex flex-col items-center">
                 <h4 className='h5'>
-                  {staticTitle ? staticTitle : machineState}
+                  GBPUSD
                 </h4>
                 <p className='p2r'>
-                  {staticTitle ? staticTitle : machineState}
+                  Lohymn
                 </p>
               </div>
-              <TwoSwitch /> 
+              <TwoSwitch setChartState={setChartState} /> 
             </div>
           }
         </div>

@@ -8,12 +8,15 @@ import { connectMongoDB } from "@/lib/mongodb";
 import CardFrame from "@/components/CardFrame";
 import { FormFrame } from "@/components/FormFrame";
 import Button from "@/components/Button";
+import PartialContainer from "@/components/PartialContainer";
+import { clipboardBlack, deleteIconBlack } from "@/public/icons/black";
 
 export default function Home() {
 //  connectMongoDB();
 
   const { data: session, status } = useSession();
   const [machineState, setMachineState] = useState("Machine");
+  const [chartState, setChartState] = useState("Chart");
   
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -32,12 +35,22 @@ export default function Home() {
 
   return (
     <div className="w-full h-screen flex items-center">
-
       <div className="w-full h-fit flex items-start justify-between">
       <CardFrame 
         staticTitle={"Partials"}
         >
-
+          <div className="relative top-[98px]">
+            <PartialContainer 
+              name={"name"}
+              nickname={"nickname"}
+              partials={"partials"}
+              dateNTime={"dateNTime"}
+              leftIconImgSrc={clipboardBlack}
+              rightIconImgSrc={deleteIconBlack}
+              leftIconContainer
+              active
+            />            
+          </div>
       </CardFrame>
       <div className="flex flex-col items-center gap-10">
         <div className="h-[72px]">
@@ -45,19 +58,17 @@ export default function Home() {
             <h2 className="h2 text-n-900">Hi, {firstName}!</h2>           
           )}          
         </div>
-
         <CardFrame
           chartType 
-          staticTitle={"GBPUSD"}
           twoSwitch
+          chartState={chartState}
+          setChartState={setChartState}
           >
 
         </CardFrame>          
       </div>
      
       <CardFrame 
-        button
-        buttonLabel={"Calculate"}
         threeSwitch
         machineState={machineState}
         setMachineState={setMachineState}
@@ -71,7 +82,6 @@ export default function Home() {
                   : null}
               />              
             </div>
-          
           </FormFrame>
       </CardFrame>        
       </div>

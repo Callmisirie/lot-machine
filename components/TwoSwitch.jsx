@@ -1,16 +1,16 @@
 "use client"
 
-import { boltBlack, listBlack } from '@/public/icons/black';
-import { boltWhite, listWhite } from '@/public/icons/white';
+import { chartlineBlack, templateBlack } from '@/public/icons/black';
+import { chartlineWhite, templateWhite } from '@/public/icons/white';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
-const TwoSwitch = ({setTitle}) => {
-  const [switchType, setSwitchType] = useState(1);
+const TwoSwitch = ({setChartState}) => {
+  const [switchType, setSwitchType] = useState("Chart");
 
   const handleSwitch = (currentSwitch) => {
     setSwitchType(currentSwitch); 
-    setTitle(currentSwitch);
+    setChartState(currentSwitch);
   }
 
   return (
@@ -21,14 +21,14 @@ const TwoSwitch = ({setTitle}) => {
       absolute bg-n-900 justify-center 
       w-[27px] h-[27px] rounded-full
       transition-all delay-100 ease-in-out 
-      ${switchType === 1 ? "translate-x-0" 
-        : switchType === 2 ? "translate-x-[31px]" 
+      ${switchType === "Chart" ? "translate-x-0" 
+        : switchType === "Template" ? "translate-x-[31px]" 
         : "translate-x-0"}`}/>
       <div className="flex items-center 
       justify-center w-[27px] h-[27px] z-10"
-      onClick={() => handleSwitch(1)}>
+      onClick={() => handleSwitch("Chart")}>
         <Image 
-          src={switchType === 1 ? boltWhite : boltBlack} 
+          src={switchType === "Chart" ? chartlineWhite : chartlineBlack} 
           width={24} 
           height={24} 
           alt='switch'
@@ -38,9 +38,9 @@ const TwoSwitch = ({setTitle}) => {
       </div>
       <div className="flex items-center 
       justify-center w-[27px] h-[27px] z-10"
-      onClick={() => handleSwitch(2)}>
+      onClick={() => handleSwitch("Template")}>
         <Image 
-          src={switchType === 2 ? listWhite : listBlack} 
+          src={switchType === "Template" ? templateWhite : templateBlack} 
           width={24} 
           height={24} 
           alt='switch'
