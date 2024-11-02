@@ -1,6 +1,5 @@
 import "./globals.css";
 import NextAuthProvider from "./Providers";
-import { Montserrat } from "next/font/google";
 import localfont from "next/font/local";
 
 const poppins = localfont({
@@ -9,11 +8,11 @@ const poppins = localfont({
   display: "swap"
 })
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-montserrat",
-});
+const montserrat = localfont({
+  src: "./fonts/Montserrat-Regular.ttf",
+  variable: "--font-montserrat", 
+  display: "swap"
+})
 
 export const metadata = {
   title: "Lot machine",
