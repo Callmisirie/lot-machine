@@ -38,9 +38,8 @@ const FormInput = ({name, label, form, description, optional}) => {
           )}
         </div>
         <FormControl>
-          <Input {...field} className="h-[40px]"/>
+          <Input {...field} className="h-[32px] w-[184px]"/>
         </FormControl>
-        <FormMessage />
       </FormItem>
     )}/>
   )

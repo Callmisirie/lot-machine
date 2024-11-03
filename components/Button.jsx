@@ -16,7 +16,7 @@ const Button = ({rightIcon,
     <button type='sumbit'
     className={`${whiteButton ? "bg-white" 
       : blackButton ? "bg-n-900" 
-      : "bg-white"} w-[245px] h-[56px]
+      : "bg-white"} w-full h-[48px]
     rounded-[32px] shadow-md`}>
       <div className='gap-2 flex justify-center 
       items-center'>

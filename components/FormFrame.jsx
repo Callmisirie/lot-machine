@@ -37,12 +37,11 @@ export function FormFrame({children, machineState}) {
     addInstrument(session?.user?.email, data.instrument, data.nickname);
   }
 
-  // Return the form only if machineState is "Machine"
-  if (machineState === "Machine") {
+  if (machineState === "Add instrument") {
     return (
-      <div className="relative top-[52px] w-[184px]">
+      <div className="">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
             <FormInput name={"instrument"} label={"Instrument"} form={form} />
             <FormInput name={"nickname"} label={"Nickname"} optional form={form} />
             {children}

@@ -6,10 +6,10 @@ import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { connectMongoDB } from "@/lib/mongodb";
 import CardFrame from "@/components/CardFrame";
-import { FormFrame } from "@/components/FormFrame";
-import Button from "@/components/Button";
 import PartialContainer from "@/components/PartialContainer";
 import { clipboardBlack, deleteIconBlack } from "@/public/icons/black";
+import ChartCardFrame from "@/components/ChartCardFrame";
+import CardFrameInnerContainer from "@/components/CardFrameInnerContainer";
 
 export default function Home() {
 //  connectMongoDB();
@@ -39,7 +39,7 @@ export default function Home() {
       <CardFrame 
         staticTitle={"Partials"}
         >
-          <div className="relative top-[98px]">
+          <div className="flex flex-col gap-2">
             <PartialContainer 
               name={"name"}
               nickname={"nickname"}
@@ -49,7 +49,17 @@ export default function Home() {
               rightIconImgSrc={deleteIconBlack}
               leftIconContainer
               active
-            />            
+            />    
+            <PartialContainer 
+              name={"name"}
+              nickname={"nickname"}
+              partials={"partials"}
+              dateNTime={"dateNTime"}
+              leftIconImgSrc={clipboardBlack}
+              rightIconImgSrc={deleteIconBlack}
+              leftIconContainer
+              active
+            />                     
           </div>
       </CardFrame>
       <div className="flex flex-col items-center gap-10">
@@ -58,14 +68,12 @@ export default function Home() {
             <h2 className="h2 text-n-900">Hi, {firstName}!</h2>           
           )}          
         </div>
-        <CardFrame
-          chartType 
-          twoSwitch
+        <ChartCardFrame
           chartState={chartState}
           setChartState={setChartState}
           >
 
-        </CardFrame>          
+        </ChartCardFrame>          
       </div>
      
       <CardFrame 
@@ -73,16 +81,9 @@ export default function Home() {
         machineState={machineState}
         setMachineState={setMachineState}
         >
-          <FormFrame machineState={machineState}>
-            <div className="absolute top-[394px] right-[-29px]">
-              <Button 
-                blackButton
-                label={machineState === "Machine" ? "Calculate"
-                  : machineState === "Add instrument" ? "Add"
-                  : null}
-              />              
-            </div>
-          </FormFrame>
+          <CardFrameInnerContainer
+            machineState={machineState} 
+          />
       </CardFrame>        
       </div>
     </div>

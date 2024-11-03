@@ -1,44 +1,29 @@
-import React, { useState } from 'react'
-import Button from './Button'
+import React from 'react'
 import ThreeSwitch from './ThreeSwitch'
-import TwoSwitch from './TwoSwitch';
 
 const CardFrame = ({
-  children, threeSwitch, twoSwitch, 
-  staticTitle, chartType, smallFrame, 
+  children, threeSwitch, 
+  staticTitle, smallFrame, 
   machineState, setMachineState, 
-  chartState, setChartState
+
 }) => {
  
   return (
-    <div className={`${chartType ? "w-[438px] h-[336px]" : "w-[303px] h-[608px]"} 
+    <div className={`w-[300px] h-[420px] 
     bg-white rounded-[32px] shadow-lg relative`}>
-      <div className="w-full h-full flex flex-col
+      <div className="w-full h-full 
+      flex flex-col rounded-[32px]
       items-center bg-custom-opacity-25 px-[32px]">
-        <div className='flex justify-between items-center w-full mt-[32px]'>
-          {threeSwitch && (<ThreeSwitch setMachineState={setMachineState} />)}
-          {chartType && 
-            <div className='flex justify-between items-center w-full'>
-              <TwoSwitch setChartState={setChartState} />
-              <div className="flex flex-col items-center">
-                <h4 className='h5'>
-                  GBPUSD
-                </h4>
-                <p className='p2r'>
-                  Lohymn
-                </p>
-              </div>
-              <TwoSwitch setChartState={setChartState} /> 
-            </div>
-          }
-        </div>
-        {!chartType && (
-          <h4 className='h4 absolute top-[64px]'>
-            {staticTitle ? staticTitle : machineState}
-          </h4>          
-        )}
-        <div className="">
-          {children}          
+        <div className="h-full w-full flex flex-col items-center gap-1">
+          <div className='flex justify-between items-center h-[33px] w-full mt-4'>
+            {threeSwitch && (<ThreeSwitch setMachineState={setMachineState} />)}
+          </div>
+            <h4 className='h4 pt-[8px]'>
+              {staticTitle ? staticTitle : machineState}
+            </h4>          
+          <div className="relative w-fit h-full">
+            {children}          
+          </div>          
         </div>
       </div>
     </div>
