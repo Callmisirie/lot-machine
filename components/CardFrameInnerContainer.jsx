@@ -5,26 +5,31 @@ import PartialContainer from './PartialContainer';
 import { FormFrame } from './FormFrame';
 import Button from './Button';
 import { cancelBlack } from '@/public/icons/black';
-import getInstruments from '@/actions/getInstruments';
 import { useSession } from 'next-auth/react';
+import { notFound } from "next/navigation";
 
 const CardFrameInnerContainer = ({machineState}) => {
   const { data: session, status } = useSession();
   const email = session?.user?.email;
   const [instruments, setInstruments] = useState([]);
 
-  // useEffect(() => {
-  //   if (status === "authenticated") {
-  //     const fetchInstruments = async () => {
-  //       console.log("Checking log", email);        
-  //       const instruments = await getInstruments(email);
-  //       setInstruments(instruments);
+  useEffect(() => {
+    if (status === "authenticated") {
+      const fetchInstruments = async () => {
+        const res = await fetch(`http://localhost:3000/api/getInstruments?email=${email}`, { cache: "no-store" });
+        
+        if (!res.ok) return notFound();
+        
+        const data = await res.json()
 
-  //     };
-  //     fetchInstruments();
-  //   }
-  // }, [session, instruments]); 
-  
+        // console.log(data);  
+        
+        setInstruments(data);
+      };
+      fetchInstruments();
+    }
+  }, [session, status]);   
+
   if (machineState === "Add instrument") {
     return (
       <FormFrame machineState={machineState}>
@@ -43,8 +48,9 @@ const CardFrameInnerContainer = ({machineState}) => {
   if (machineState === "Instruments") {
     return (
       <div className="flex flex-col gap-2">
-        {instruments?.map((instrument) => (
-            <PartialContainer 
+        {instruments?.map((instrument, idx) => (
+            <PartialContainer
+              key={idx}
               name={instrument.instrument}
               nickname={instrument.nickname}
               rightIconImgSrc={cancelBlack}
