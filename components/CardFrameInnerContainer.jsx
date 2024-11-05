@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import PartialContainer from './PartialContainer';
-import { FormFrame } from './FormFrame';
+import FormFrame from './FormFrame';
 import Button from './Button';
 import { cancelBlack } from '@/public/icons/black';
 import { useSession } from 'next-auth/react';
 import { notFound } from "next/navigation";
+import { ComboboxInput } from "./Combobox";
+import { createWhite } from "@/public/icons/white";
+
 
 const CardFrameInnerContainer = ({machineState}) => {
   const { data: session, status } = useSession();
   const email = session?.user?.email;
   const [instruments, setInstruments] = useState([]);
+  const [selectInstrument, setSelectInstrument] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -36,6 +40,8 @@ const CardFrameInnerContainer = ({machineState}) => {
         <div className="pb-4 gap-1 w-full absolute bottom-0">
           <Button 
             blackButton
+            rightIcon
+            rightIconImgSrc={createWhite}            
             label={machineState === "Machine" ? "Calculate"
               : machineState === "Add instrument" ? "Add"
               : null}
@@ -56,6 +62,31 @@ const CardFrameInnerContainer = ({machineState}) => {
               rightIconImgSrc={cancelBlack}
             />             
         ))}              
+      </div>
+    )
+  }
+
+  if (machineState === "Machine") {
+    return (
+      <div className="flex flex-col gap-2 w-[184px]">
+        <ComboboxInput 
+          userInstruments={instruments}
+          selectInstrument={selectInstrument}
+          setSelectInstrument={setSelectInstrument}
+        />
+        <FormFrame 
+          machineState={machineState}
+          selectInstrument={selectInstrument}
+        >
+          <div className="pb-4 gap-1 w-full absolute bottom-0">
+            <Button 
+              blackButton
+              label={machineState === "Machine" ? "Calculate"
+                : machineState === "Add instrument" ? "Add"
+                : null}
+            />              
+          </div>
+        </FormFrame>
       </div>
     )
   }
