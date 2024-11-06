@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Input from "./Input";
-import { addBlack } from "@/public/icons/black";
+import { addBlack, resetBlack } from "@/public/icons/black";
 import Image from "next/image";
 import addInstrument from "@/actions/addInstrument";
 import { useSession } from "next-auth/react";
+import createPartial from "@/actions/createPartial";
 
 const FormFrame = ({children, machineState, selectInstrument}) => {
   const [lotSize, setLotSize] = useState("");
@@ -49,15 +50,18 @@ const FormFrame = ({children, machineState, selectInstrument}) => {
       ) {
         return;
       }     
-      console.log({
-        selectInstrument,
-        lotSize,
-        partialTPs, 
-        finalTP,
-      });
+      
+      createPartial(
+        session?.user?.email, selectInstrument, 
+        Number(lotSize), Number(finalTP),
+        partialTPs.map(Number),
+      )
     }
     
     if (machineState === "Add instrument") {
+      if (!instrument) {
+        return;
+      }   
       addInstrument(session?.user?.email, instrument, nickname);
     }
   } 
@@ -83,23 +87,35 @@ const FormFrame = ({children, machineState, selectInstrument}) => {
         className="flex flex-col gap-2 w-full">
         <div className="flex gap-2">
           <Input
-            handleChange={setFinalTP}
-            value={finalTP}
-            name="finalTP"
-            label="Final TP"
-            small
-          />
-          <Input
             handleChange={setLotSize}
             value={lotSize}
             name="lotSize"
             label="Lot size"
             small
           />
+          <Input
+            handleChange={setFinalTP}
+            value={finalTP}
+            name="finalTP"
+            label="Final TP"
+            small
+          />
         </div>
         <div className="w-fit">
-          <label className="l2r text-n-500 w-full">
+          <label className="l2r text-n-500 w-full flex justify-between">
             Partial TPs
+            <span className="l3r text-n-700 flex items-center"
+              onClick={() => setPartialTPs([""])}>
+              <Image 
+                src={resetBlack} 
+                width={24} 
+                height={24} 
+                alt="reset icon" 
+                className="" 
+                priority
+                />
+                reset
+            </span>
           </label>
           <div className="w-fit grid grid-cols-2 gap-x-2 gap-y-1">
             {partialTPs.map((partial, idx) => (

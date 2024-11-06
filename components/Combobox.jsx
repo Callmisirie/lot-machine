@@ -41,6 +41,7 @@ export function ComboboxInput({userInstruments, selectInstrument, setSelectInstr
             aria-expanded={open}
             className="justify-between"
           >
+            <div className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             {selectInstrument
               ? instruments.find((instrument) => instrument.value === selectInstrument)?.label
               : "Select instrument..."}

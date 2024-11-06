@@ -4,20 +4,20 @@ import paths from "@/common/paths";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import { connectMongoDB } from "@/lib/mongodb";
 import CardFrame from "@/components/CardFrame";
 import PartialContainer from "@/components/PartialContainer";
 import { clipboardBlack, deleteIconBlack } from "@/public/icons/black";
 import ChartCardFrame from "@/components/ChartCardFrame";
 import CardFrameInnerContainer from "@/components/CardFrameInnerContainer";
+import partialCalc from "@/common/partialCalc";
 
 export default function Home() {
-//  connectMongoDB();
-
   const { data: session, status } = useSession();
+  const email = session?.user?.email;
   const [machineState, setMachineState] = useState("Machine");
   const [chartState, setChartState] = useState("Chart");
-  
+  const [partials, setPartials] = useState([]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       redirect(paths.auth());
@@ -27,64 +27,78 @@ export default function Home() {
       if (!lmAt) {
         redirect(paths.auth());
       }
+
+      const fetchPartials = async () => {
+        const res = await fetch(`http://localhost:3000/api/getPartials?email=${email}`, { cache: "no-store" });
+        
+        if (!res.ok) return notFound();
+        
+        const data = await res.json();
+        
+        setPartials(data);
+      };
+      fetchPartials();
     } 
   }, [status, session]);
 
   const firstName = session?.user?.name.split(' ')[0]?.charAt(0)
-  .toUpperCase() + session?.user?.name.split(' ')[0]?.slice(1).toLowerCase();
+    .toUpperCase() + session?.user?.name.split(' ')[0]?.slice(1).toLowerCase();
 
   return (
     <div className="w-full h-screen flex items-center">
       <div className="w-full h-fit flex items-start justify-between">
-      <CardFrame 
-        staticTitle={"Partials"}
-        >
+        <CardFrame staticTitle={"Partials"}>
           <div className="flex flex-col gap-2">
-            <PartialContainer 
-              name={"name"}
-              nickname={"nickname"}
-              partials={"partials"}
-              dateNTime={"dateNTime"}
-              leftIconImgSrc={clipboardBlack}
-              rightIconImgSrc={deleteIconBlack}
-              leftIconContainer
-              active
-            />    
-            <PartialContainer 
-              name={"name"}
-              nickname={"nickname"}
-              partials={"partials"}
-              dateNTime={"dateNTime"}
-              leftIconImgSrc={clipboardBlack}
-              rightIconImgSrc={deleteIconBlack}
-              leftIconContainer
-              active
-            />                     
+            {partials.map((partial, idx) => {
+              const partials = partialCalc(partial.lotSize, partial.finalTP, partial.partialTPs)
+              const dateNTime = new Date(partial.createdAt).toLocaleDateString("en-US", {
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                // hour: '2-digit', 
+                // minute: '2-digit'
+              });
+              return (
+                <PartialContainer 
+                  key={idx}
+                  name={partial.instrument}
+                  nickname={partial.nickname}
+                  partials={
+                    partials
+                      .map((tp, index) => `TP${index + 1}: ${tp}`)
+                      .join(", ")
+                      .slice(0, 20) + (partials.join(", ").length > 9 ? "..." : "")
+                  }
+                  
+                  dateNTime={dateNTime}
+                  leftIconImgSrc={clipboardBlack}
+                  rightIconImgSrc={deleteIconBlack}
+                  leftIconContainer
+                  active
+                />
+              );      
+            })}
           </div>
-      </CardFrame>
-      <div className="flex flex-col items-center gap-10">
-        <div className="h-[72px]">
-          {session?.user?.name && (
-            <h2 className="h2 text-n-900">Hi, {firstName}!</h2>           
-          )}          
-        </div>
-        <ChartCardFrame
-          chartState={chartState}
-          setChartState={setChartState}
-          >
-
-        </ChartCardFrame>          
-      </div>
-     
-      <CardFrame 
-        threeSwitch
-        machineState={machineState}
-        setMachineState={setMachineState}
-        >
-          <CardFrameInnerContainer
-            machineState={machineState} 
+        </CardFrame>
+        <div className="flex flex-col items-center gap-10">
+          <div className="h-[72px]">
+            {session?.user?.name && (
+              <h2 className="h2 text-n-900">Hi, {firstName}!</h2>           
+            )}          
+          </div>
+          <ChartCardFrame
+            chartState={chartState}
+            setChartState={setChartState}
           />
-      </CardFrame>        
+        </div>
+     
+        <CardFrame 
+          threeSwitch
+          machineState={machineState}
+          setMachineState={setMachineState}
+        >
+          <CardFrameInnerContainer machineState={machineState} />
+        </CardFrame>        
       </div>
     </div>
   );

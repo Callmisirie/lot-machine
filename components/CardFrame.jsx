@@ -5,7 +5,6 @@ const CardFrame = ({
   children, threeSwitch, 
   staticTitle, smallFrame, 
   machineState, setMachineState, 
-
 }) => {
  
   return (
