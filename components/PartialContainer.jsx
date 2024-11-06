@@ -1,3 +1,7 @@
+"use client";
+
+import deleteInstrument from '@/actions/deleteInstrument';
+import deletePartial from '@/actions/deletePartial';
 import Image from 'next/image';
 import React from 'react';
 
@@ -10,7 +14,22 @@ const PartialContainer = ({
   partials,
   dateNTime,
   leftIconContainer,
+  instrumentId,
+  partialId,
+  email,
+  machineSideDelete,
+  partialSideDelete
 }) => {
+  
+  const handleDelete = async () => {   
+    if (machineSideDelete) {
+      await deleteInstrument(email, instrumentId)      
+    }
+    if (partialSideDelete) {
+      await deletePartial(email, partialId)      
+    }
+  } 
+
   return (
     <div className='w-fit h-fit rounded-[16px] relative shadow-lg'>
       <div className='w-full h-full flex justify-between px-[16px] py-[8px] gap-4'>
@@ -40,7 +59,9 @@ const PartialContainer = ({
           {partials && <p className='p3b text-n-900'>{partials}</p>}
           {dateNTime && <p className='p3r text-n-300'>{dateNTime}</p>}
         </div>
-        <div className='w-[24px] h-[24px] mt-[8px]'>
+        <div className='w-[24px] h-[24px] mt-[8px]'
+          onClick={handleDelete}
+        >
           <Image
             src={rightIconImgSrc}
             width={24}

@@ -75,6 +75,9 @@ export default function Home() {
                   rightIconImgSrc={deleteIconBlack}
                   leftIconContainer
                   active
+                  partialId={partial._id}
+                  email={email}
+                  partialSideDelete
                 />
               );      
             })}

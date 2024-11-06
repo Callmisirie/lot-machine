@@ -60,6 +60,9 @@ const CardFrameInnerContainer = ({machineState}) => {
               name={instrument.instrument}
               nickname={instrument.nickname}
               rightIconImgSrc={cancelBlack}
+              instrumentId={instrument._id}
+              email={email}
+              machineSideDelete
             />             
         ))}              
       </div>
