@@ -10,6 +10,7 @@ import { clipboardBlack, deleteIconBlack } from "@/public/icons/black";
 import ChartCardFrame from "@/components/ChartCardFrame";
 import CardFrameInnerContainer from "@/components/CardFrameInnerContainer";
 import partialCalc from "@/common/partialCalc";
+import ChartFrameInnerContainer from "@/components/ChartFrameInnerContainer";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -17,6 +18,7 @@ export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
   const [chartState, setChartState] = useState("Chart");
   const [partials, setPartials] = useState([]);
+  const [selectedPartialIndex, setSelectedPartialIndex] = useState(0)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -59,26 +61,30 @@ export default function Home() {
                 // minute: '2-digit'
               });
               return (
-                <PartialContainer 
-                  key={idx}
-                  name={partial.instrument}
-                  nickname={partial.nickname}
-                  partials={
-                    partials
-                      .map((tp, index) => `TP${index + 1}: ${tp}`)
-                      .join(", ")
-                      .slice(0, 20) + (partials.join(", ").length > 9 ? "..." : "")
-                  }
-                  
-                  dateNTime={dateNTime}
-                  leftIconImgSrc={clipboardBlack}
-                  rightIconImgSrc={deleteIconBlack}
-                  leftIconContainer
-                  active
-                  partialId={partial._id}
-                  email={email}
-                  partialSideDelete
-                />
+                <div key={idx}
+                  onClick={() => setSelectedPartialIndex(idx)}
+                >
+                  <PartialContainer 
+                    name={partial.instrument}
+                    nickname={partial.nickname}
+                    partials={
+                      partials
+                        .map((tp, index) => `TP${index + 1}: ${tp}`)
+                        .join(", ")
+                        .slice(0, 20) + (partials.join(", ").length > 9 ? "..." : "")
+                    }
+                    dateNTime={dateNTime}
+                    leftIconImgSrc={clipboardBlack}
+                    rightIconImgSrc={deleteIconBlack}
+                    leftIconContainer
+                    active={selectedPartialIndex === idx ? true : false}
+                    partialId={partial._id}
+                    email={email}
+                    partialSideDelete
+                    partialIdx={idx}
+                    setSelectedPartialIndex={setSelectedPartialIndex}
+                  />
+                </div>
               );      
             })}
           </div>
@@ -92,7 +98,13 @@ export default function Home() {
           <ChartCardFrame
             chartState={chartState}
             setChartState={setChartState}
-          />
+          >
+            <ChartFrameInnerContainer chartState={chartState}
+              selectedPartialIndex={selectedPartialIndex}
+              partials={partials}
+            />
+
+          </ChartCardFrame>
         </div>
      
         <CardFrame 

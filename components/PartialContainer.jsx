@@ -31,14 +31,16 @@ const PartialContainer = ({
   } 
 
   return (
-    <div className='w-fit h-fit rounded-[16px] relative shadow-lg'>
+    <div className={`w-fit h-fit rounded-[16px] relative shadow-lg ${leftIconContainer && "cursor-pointer"}`}>
       <div className='w-full h-full flex justify-between px-[16px] py-[8px] gap-4'>
-        <div className='flex flex-col items-center gap-5 mt-[8px]'>
-          {leftIconContainer ? (
-            <>
-              {active && (
-                <div className='w-[12px] h-[12px] bg-n-700 rounded-full' />
-              )}
+        {leftIconContainer ? (
+          <div className='flex flex-col items-center mt-[8px]'>
+            <div className='flex flex-col gap-2 justify-between mt-[8px]'>
+              <div className='flex justify-center items-center w-[24px] h-[24px]'>
+                {active && (
+                  <div className='w-[12px] h-[12px] bg-n-700 rounded-full' />
+                )}
+              </div>
               <div className='w-[24px] h-[24px]'>
                 <Image
                   src={leftIconImgSrc}
@@ -48,9 +50,9 @@ const PartialContainer = ({
                   priority
                 />
               </div>
-            </>
-          ) : null}
-        </div>
+            </div>
+          </div>
+        ) : null}
         <div className='flex flex-col items-start gap-1 w-[124px]'>
           <div className='flex flex-col'>
             <h5 className='h5 text-n-500'>{name}</h5>

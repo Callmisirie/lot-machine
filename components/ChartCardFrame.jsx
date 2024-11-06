@@ -8,10 +8,11 @@ const ChartCardFrame = ({
  
   return (
     <div className={`w-[438px] h-[336px]
-    bg-white rounded-[32px] shadow-lg relative`}>
+    bg-white rounded-[32px] shadow-lg relative
+    border-2 border-n-300`}>
       <div className="w-full h-full flex flex-col
-      items-center bg-custom-opacity-25 px-[32px]">
-        <div className='flex justify-between items-center w-full mt-[32px]'>
+      items-center bg-custom-opacity-25 px-[32px] py-[16px]">
+        <div className='flex justify-between items-center w-full'>
           <div className='flex justify-between items-center w-full'>
             <TwoSwitch setChartState={setChartState} />
             <div className="flex flex-col items-center">
@@ -25,7 +26,7 @@ const ChartCardFrame = ({
             <TwoSwitch setChartState={setChartState} /> 
           </div>
         </div>          
-        <div className="">
+        <div className="w-full h-full">
           {children}          
         </div>
       </div>
