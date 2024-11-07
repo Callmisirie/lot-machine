@@ -6,19 +6,10 @@ import Image from 'next/image';
 import React from 'react';
 
 const PartialContainer = ({
-  leftIconImgSrc,
-  rightIconImgSrc,
-  active,
-  name,
-  nickname,
-  partials,
-  dateNTime,
-  leftIconContainer,
-  instrumentId,
-  partialId,
-  email,
-  machineSideDelete,
-  partialSideDelete
+  leftIconImgSrc, rightIconImgSrc,
+  active, name, nickname, partials,
+  dateNTime, leftIconContainer, instrumentId,
+  partialId, email, machineSideDelete, partialSideDelete
 }) => {
   
   const handleDelete = async () => {   

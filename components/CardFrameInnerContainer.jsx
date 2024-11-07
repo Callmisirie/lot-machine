@@ -58,7 +58,7 @@ const CardFrameInnerContainer = ({machineState}) => {
             <PartialContainer
               key={idx}
               name={instrument.instrument}
-              nickname={instrument.nickname}
+              nickname={instrument?.nickname}
               rightIconImgSrc={cancelBlack}
               instrumentId={instrument._id}
               email={email}

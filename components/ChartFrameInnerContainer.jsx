@@ -1,34 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import PartialContainer from './PartialContainer';
-import { cancelBlack } from '@/public/icons/black';
-import { useSession } from 'next-auth/react';
-import { notFound } from "next/navigation";
 import Pill from "./Pill";
 import partialCalc from "@/common/partialCalc";
+import { curveLine } from "@/public/icons";
+import Image from "next/image";
+import { clipboardWhite } from "@/public/icons/white";
 
 const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) => {
-  const { data: session, status } = useSession();
-  const email = session?.user?.email;
-  const [instruments, setInstruments] = useState([]);
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
+  const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0)
 
   useEffect(() => {
-    console.log(partials);
     const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
 
     if (partial) {
       const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
 
       setSelectedPartialTPs(partialTPs)
-
-      console.log({
-        partial,
-        partialTPs
-      });
     }
-    
   }, [partials, selectedPartialIndex]);   
 
   if (chartState === "Template") {
@@ -40,19 +30,43 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) 
   }
 
   if (chartState === "Chart") {
+    const partialTP = selectedPartialTPs.find((partialTP, idx) => selectedPartialTPIndex === idx );
     return (
       <div className="flex flex-col items-center justify-between w-full h-full">
-        <div></div>
+        {selectedPartialTPs.length > 0 ? 
+          <div className="relative mt-[16px]">
+            <div className='w-[290px] h-[160px]'>
+              <Image
+                src={curveLine}
+                width={290}
+                height={160}
+                alt='curve-line icon'
+                priority
+              />
+            </div>
+            <div className="absolute top-0 right-0">
+              <Pill
+                partialTP={`TP${selectedPartialTPIndex + 1}: ${partialTP}`}
+                leftIconImgSrc={clipboardWhite}
+                blackPill
+              />
+            </div>
+          </div>
+        :null}
         {selectedPartialTPs.length > 0 ? 
           <div className="flex w-[261px] 
           h-fit gap-2 p-4 rounded-[16px] 
           border border-n-300 shadow-lg">
             {selectedPartialTPs?.map((partialTP, idx) => {
               return (
-                <Pill 
-                  key={idx}
-                  partialTP={`TP${idx + 1}: ${partialTP}`}
-                />              
+                <div key={idx}
+                  onClick={() => setSelectedPartialTPIndex(idx)}
+                >
+                  <Pill 
+                    partialTP={`TP${idx + 1}: ${partialTP}`}
+                    active={selectedPartialTPIndex === idx ? true : false}
+                  />              
+                </div>
               )
             })}
           </div>

@@ -82,7 +82,6 @@ export default function Home() {
                     email={email}
                     partialSideDelete
                     partialIdx={idx}
-                    setSelectedPartialIndex={setSelectedPartialIndex}
                   />
                 </div>
               );      
@@ -98,6 +97,8 @@ export default function Home() {
           <ChartCardFrame
             chartState={chartState}
             setChartState={setChartState}
+            selectedPartialIndex={selectedPartialIndex}
+            partials={partials}
           >
             <ChartFrameInnerContainer chartState={chartState}
               selectedPartialIndex={selectedPartialIndex}
