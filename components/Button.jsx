@@ -3,14 +3,14 @@
 import Image from 'next/image'
 import React from 'react'
 
-const Button = ({rightIcon, 
+const Button = ({
+  rightIcon, 
   leftIcon, 
   rightIconImgSrc, 
   leftIconImgSrc, 
   label, 
   whiteButton,
   blackButton,
-  
 }) => {
   return (
     <button type='sumbit'

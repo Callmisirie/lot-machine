@@ -15,7 +15,7 @@ const TwoSwitch = ({setChartState}) => {
 
   return (
     <div className='flex items-center relative
-    border border-n-300 gap-[4px] 
+    border border-n-300 gap-[4px] cursor-pointer
     h-[27px] rounded-[16px]'>
       <div className={`flex items-center 
       absolute bg-n-900 justify-center 

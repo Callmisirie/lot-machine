@@ -2,16 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import TwoSwitch from './TwoSwitch';
+import TemplatePill from './TemplatePill';
+import { dropArrowBlack } from '@/public/icons/black';
+import { dropArrowWhite } from '@/public/icons/white';
 
 const ChartCardFrame = ({
   children, twoSwitch, 
   smallFrame, chartState, setChartState,
-  selectedPartialIndex, partials
+  selectedPartialIndex, partials,
+  templateState, setTemplateState
 }) => {
   const [selectedPartial, setSelectedPartial] = useState();
 
   useEffect(() => {
-    console.log(partials);
     const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
 
     if (partial) {
@@ -28,7 +31,16 @@ const ChartCardFrame = ({
       items-center bg-custom-opacity-25 px-[32px] py-[16px]">
         <div className='flex justify-between items-center w-full'>
           <div className='flex justify-between items-start w-full h-[44px]'>
-            <TwoSwitch setChartState={setChartState} />
+            <div className='flex justify-start w-[98px]'>
+              {chartState === "Chart" && (
+                <TemplatePill
+                  leftIconImgSrc={templateState === "D" ? dropArrowWhite
+                  : dropArrowBlack}
+                  templateState={templateState}
+                  setTemplateState={setTemplateState}
+                />
+              )}
+            </div>
             {chartState === "Chart" ? 
               <div className="flex flex-col items-center">
                 <h4 className='h5 text-n-900'>
@@ -48,10 +60,12 @@ const ChartCardFrame = ({
                 </p >
               </div>
             :null}
-            <TwoSwitch setChartState={setChartState} /> 
+            <div className='flex justify-end w-[98px]'>
+              <TwoSwitch setChartState={setChartState} />  
+            </div>
           </div>
         </div>          
-        <div className="w-full h-full">
+        <div className="w-full h-full flex items-start justify-center">
           {children}          
         </div>
       </div>

@@ -16,7 +16,7 @@ const ThreeSwitch = ({setMachineState}) => {
   return (
     <div className='flex items-center relative
     border border-n-300 gap-[4px] 
-    h-[27px] rounded-[16px]'>
+    h-[27px] rounded-[16px] cursor-pointer'>
       <div className={`flex items-center 
       absolute bg-n-900 justify-center 
       w-[27px] h-[27px] rounded-full

@@ -6,26 +6,80 @@ import partialCalc from "@/common/partialCalc";
 import { curveLine } from "@/public/icons";
 import Image from "next/image";
 import { clipboardWhite } from "@/public/icons/white";
+import FormFrame from "./FormFrame";
+import DualButton from "./DualButton";
+import { useSession } from "next-auth/react";
+import { cancelBlack } from "@/public/icons/black";
+import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
 
 const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0)
+  const [customTemplate, setCustomTemplate] = useState("");
+  const { data: session, status } = useSession();
+  const email = session?.user?.email;
+  const [userCustomTemplate, setUserCustomTemplate] = useState("");
 
+  // useEffect(() => {
+  //   const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
+
+  //   if (partial) {
+  //     const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
+
+  //     setSelectedPartialTPs(partialTPs)
+  //   }
+  // }, [partials, selectedPartialIndex]); 
+  
   useEffect(() => {
-    const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
+    if (status === "authenticated") {
+      const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
 
-    if (partial) {
-      const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
+      if (partial) {
+        const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
+        setSelectedPartialTPs(partialTPs)
+      }
+      const fetchUserCustomTemplate = async () => {
+        const res = await fetch(`http://localhost:3000/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
+        
+        if (!res.ok) return notFound();
+        
+        const data = await res.json()
 
-      setSelectedPartialTPs(partialTPs)
+        console.log(data);  
+        
+        setUserCustomTemplate(data);
+      };
+      fetchUserCustomTemplate();
     }
-  }, [partials, selectedPartialIndex]);   
+  }, [partials, selectedPartialIndex]); 
 
   if (chartState === "Template") {
     return (
-      <div>
-
-      </div>
+      !userCustomTemplate ? 
+        <div className="flex flex-col justify-start items-center w-full h-full">
+          <FormFrame
+            chartState={chartState}
+            customTemplate={customTemplate}
+            setCustomTemplate={setCustomTemplate}
+          >
+            <DualButton 
+              leftLabel={"Cancel"}
+              rightlabel={"Save"}
+              valueReset={setCustomTemplate}
+            />
+          </FormFrame>
+        </div>
+        
+      : <div className="flex h-full w-full items-center justify-center">
+          <Pill 
+            partialTP={userCustomTemplate.customValue + "%"}
+            leftIconImgSrc={cancelBlack}
+            active
+            action={deleteCustomTemplate}
+            email={email}
+            userCustomTemplateId={userCustomTemplate._id}
+          />
+        </div>
     )
   }
 

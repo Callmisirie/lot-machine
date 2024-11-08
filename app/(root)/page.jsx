@@ -19,6 +19,7 @@ export default function Home() {
   const [chartState, setChartState] = useState("Chart");
   const [partials, setPartials] = useState([]);
   const [selectedPartialIndex, setSelectedPartialIndex] = useState(0)
+  const [templateState, setTemplateState] = useState("D")
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -99,8 +100,11 @@ export default function Home() {
             setChartState={setChartState}
             selectedPartialIndex={selectedPartialIndex}
             partials={partials}
+            templateState={templateState}
+            setTemplateState={setTemplateState}
           >
-            <ChartFrameInnerContainer chartState={chartState}
+            <ChartFrameInnerContainer 
+              chartState={chartState}
               selectedPartialIndex={selectedPartialIndex}
               partials={partials}
             />

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import React from 'react'
 
-const Pill = ({partialTP, leftIconImgSrc, blackPill, active}) => {
+const Pill = ({partialTP, leftIconImgSrc, blackPill, active, action, email, userCustomTemplateId}) => {
   return (
     <div className={`flex items-center 
     justify-center w-fit cursor-pointer
@@ -11,7 +11,9 @@ const Pill = ({partialTP, leftIconImgSrc, blackPill, active}) => {
      : "text-n-300 border-n-300 border"}`}>
       <p className='p3b text-nowrap'>{partialTP}</p>
       {leftIconImgSrc ? 
-        <div className='w-[24px] h-[24px]'>
+        <div className='w-[24px] h-[24px]'
+        onClick={() => action(email, userCustomTemplateId)}
+        >
           <Image
             src={leftIconImgSrc}
             width={24}

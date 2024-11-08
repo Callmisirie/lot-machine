@@ -7,38 +7,20 @@ import Image from "next/image";
 import addInstrument from "@/actions/addInstrument";
 import { useSession } from "next-auth/react";
 import createPartial from "@/actions/createPartial";
+import { cautionAccent } from "@/public/icons/accent";
+import createCustomTemplate from "@/actions/createCustomTemple";
 
-const FormFrame = ({children, machineState, selectInstrument}) => {
+const FormFrame = ({
+  children, machineState, 
+  chartState, selectInstrument, 
+  customTemplate, setCustomTemplate
+}) => {
   const [lotSize, setLotSize] = useState("");
   const [partialTPs, setPartialTPs] = useState([""]);
   const [finalTP, setFinalTP] = useState("");
   const [instrument, setInstrument] = useState("");
   const [nickname, setNickname] = useState("");
   const { data: session } = useSession();
-
-  // function handleAddGoal() {
-  //   if (
-  //     !lotSize ||
-  //     partialTPs.some((partial) => partial.trim() === "") ||
-  //     !finalTP
-  //   ) {
-  //     return;
-  //   }
-
-  //   const targets = partialTP(
-  //     partialTPs.map(Number),
-  //     Number(finalTP),
-  //     Number(lotSize)
-  //   );
-
-  //   const newGoal = { instrument: , targets };
-  //   const updatedGoals = [...goals, newGoal];
-  //   setGoals(updatedGoals);
-  //   localStorage.setItem("goals", JSON.stringify(updatedGoals));
-  //   setLotSize("");
-  //   setPartialTPs([""]);
-  //   setFinalTP("");
-  // }
 
   const handleServerAction = () => {
     if (machineState === "Machine") {
@@ -63,6 +45,13 @@ const FormFrame = ({children, machineState, selectInstrument}) => {
         return;
       }   
       addInstrument(session?.user?.email, instrument, nickname);
+    }
+
+    if (chartState === "Template") {
+      if (!customTemplate) {
+        return
+      }
+      createCustomTemplate(session?.user?.email, Number(customTemplate));
     }
   } 
 
@@ -176,6 +165,23 @@ const FormFrame = ({children, machineState, selectInstrument}) => {
         {children}
       </form>     
     );
+  }
+
+  if (chartState === "Template") {
+    return (
+      <form action={handleServerAction}
+        className="flex flex-col gap-2 pt-[44px] w-full">
+        <Input
+          handleChange={setCustomTemplate}
+          value={customTemplate}
+          name="customTemplate"
+          label="Offload"
+          description={"eg.30%"}
+          descriptionImg={cautionAccent}
+        />
+        {children}
+      </form> 
+    )
   }
 };
 
