@@ -19,7 +19,9 @@ export default function Home() {
   const [chartState, setChartState] = useState("Chart");
   const [partials, setPartials] = useState([]);
   const [selectedPartialIndex, setSelectedPartialIndex] = useState(0)
-  const [templateState, setTemplateState] = useState("D")
+  const [templateState, setTemplateState] = useState("D");
+  const [serverUpdate, setServerUpdate] = useState(true);
+  const [selectInstrument, setSelectInstrument] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -42,7 +44,7 @@ export default function Home() {
       };
       fetchPartials();
     } 
-  }, [status, session]);
+  }, [status, session, serverUpdate]);
 
   const firstName = session?.user?.name.split(' ')[0]?.charAt(0)
     .toUpperCase() + session?.user?.name.split(' ')[0]?.slice(1).toLowerCase();
@@ -83,6 +85,8 @@ export default function Home() {
                     email={email}
                     partialSideDelete
                     partialIdx={idx}
+                    serverUpdate={serverUpdate}
+                    setServerUpdate={setServerUpdate}
                   />
                 </div>
               );      
@@ -107,6 +111,8 @@ export default function Home() {
               chartState={chartState}
               selectedPartialIndex={selectedPartialIndex}
               partials={partials}
+              serverUpdate={serverUpdate}
+              setServerUpdate={setServerUpdate}
             />
 
           </ChartCardFrame>
@@ -117,7 +123,13 @@ export default function Home() {
           machineState={machineState}
           setMachineState={setMachineState}
         >
-          <CardFrameInnerContainer machineState={machineState} />
+          <CardFrameInnerContainer 
+            machineState={machineState} 
+            serverUpdate={serverUpdate}
+            setServerUpdate={setServerUpdate}
+            selectInstrument={selectInstrument}
+            setSelectInstrument={setSelectInstrument}
+          />
         </CardFrame>        
       </div>
     </div>

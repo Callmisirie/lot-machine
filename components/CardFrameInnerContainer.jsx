@@ -11,11 +11,10 @@ import { ComboboxInput } from "./Combobox";
 import { createWhite } from "@/public/icons/white";
 
 
-const CardFrameInnerContainer = ({machineState}) => {
+const CardFrameInnerContainer = ({machineState, serverUpdate, setServerUpdate, selectInstrument, setSelectInstrument}) => {
   const { data: session, status } = useSession();
   const email = session?.user?.email;
   const [instruments, setInstruments] = useState([]);
-  const [selectInstrument, setSelectInstrument] = useState("");
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -32,11 +31,15 @@ const CardFrameInnerContainer = ({machineState}) => {
       };
       fetchInstruments();
     }
-  }, [session, status]);   
+  }, [session, status, serverUpdate]);   
 
   if (machineState === "Add instrument") {
     return (
-      <FormFrame machineState={machineState}>
+      <FormFrame 
+        machineState={machineState}
+        serverUpdate={serverUpdate}
+        setServerUpdate={setServerUpdate}
+      >
         <div className="pb-4 gap-1 w-full absolute bottom-0">
           <Button 
             blackButton
@@ -63,6 +66,8 @@ const CardFrameInnerContainer = ({machineState}) => {
               instrumentId={instrument._id}
               email={email}
               machineSideDelete
+              serverUpdate={serverUpdate}
+              setServerUpdate={setServerUpdate}
             />             
         ))}              
       </div>
@@ -80,6 +85,9 @@ const CardFrameInnerContainer = ({machineState}) => {
         <FormFrame 
           machineState={machineState}
           selectInstrument={selectInstrument}
+          serverUpdate={serverUpdate}
+          setServerUpdate={setServerUpdate}
+          setSelectInstrument={setSelectInstrument}
         >
           <div className="pb-4 gap-1 w-full absolute bottom-0">
             <Button 

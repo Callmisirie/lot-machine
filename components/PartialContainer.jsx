@@ -9,15 +9,18 @@ const PartialContainer = ({
   leftIconImgSrc, rightIconImgSrc,
   active, name, nickname, partials,
   dateNTime, leftIconContainer, instrumentId,
-  partialId, email, machineSideDelete, partialSideDelete
+  partialId, email, machineSideDelete, partialSideDelete,
+  serverUpdate, setServerUpdate
 }) => {
   
   const handleDelete = async () => {   
     if (machineSideDelete) {
-      await deleteInstrument(email, instrumentId)      
+      await deleteInstrument(email, instrumentId)
+      setServerUpdate(!serverUpdate)      
     }
     if (partialSideDelete) {
-      await deletePartial(email, partialId)      
+      await deletePartial(email, partialId)
+      setServerUpdate(!serverUpdate)      
     }
   } 
 

@@ -13,7 +13,9 @@ import createCustomTemplate from "@/actions/createCustomTemple";
 const FormFrame = ({
   children, machineState, 
   chartState, selectInstrument, 
-  customTemplate, setCustomTemplate
+  customTemplate, setCustomTemplate,
+  serverUpdate, setServerUpdate,
+  setSelectInstrument
 }) => {
   const [lotSize, setLotSize] = useState("");
   const [partialTPs, setPartialTPs] = useState([""]);
@@ -22,7 +24,7 @@ const FormFrame = ({
   const [nickname, setNickname] = useState("");
   const { data: session } = useSession();
 
-  const handleServerAction = () => {
+  const handleServerAction = async () => {
     if (machineState === "Machine") {
       if (
         !selectInstrument||
@@ -33,25 +35,41 @@ const FormFrame = ({
         return;
       }     
       
-      createPartial(
+      const res = await createPartial(
         session?.user?.email, selectInstrument, 
         Number(lotSize), Number(finalTP),
         partialTPs.map(Number),
       )
+      if (res.success) {
+        setSelectInstrument("");
+        setLotSize("");
+        setFinalTP("");
+        setPartialTPs([""]);
+      }
+      setServerUpdate(!serverUpdate);
     }
     
     if (machineState === "Add instrument") {
       if (!instrument) {
         return;
       }   
-      addInstrument(session?.user?.email, instrument, nickname);
+      const res = await addInstrument(session?.user?.email, instrument, nickname);
+      if (res.success) {
+        setInstrument("");
+        setNickname("");
+      }
+      setServerUpdate(!serverUpdate);
     }
 
     if (chartState === "Template") {
       if (!customTemplate) {
         return
       }
-      createCustomTemplate(session?.user?.email, Number(customTemplate));
+      const res = await createCustomTemplate(session?.user?.email, Number(customTemplate));
+      if (res) {
+        setCustomTemplate("");
+      }
+      setServerUpdate(!serverUpdate);
     }
   } 
 

@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react";
 import { cancelBlack } from "@/public/icons/black";
 import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
 
-const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) => {
+const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex, serverUpdate, setServerUpdate}) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0)
   const [customTemplate, setCustomTemplate] = useState("");
@@ -43,15 +43,13 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) 
         
         if (!res.ok) return notFound();
         
-        const data = await res.json()
-
-        console.log(data);  
-        
+        const data = await res.json();
         setUserCustomTemplate(data);
-      };
+      }
+
       fetchUserCustomTemplate();
     }
-  }, [partials, selectedPartialIndex]); 
+  }, [partials, selectedPartialIndex, serverUpdate]); 
 
   if (chartState === "Template") {
     return (
@@ -61,6 +59,8 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) 
             chartState={chartState}
             customTemplate={customTemplate}
             setCustomTemplate={setCustomTemplate}
+            serverUpdate={serverUpdate}
+            setServerUpdate={setServerUpdate}
           >
             <DualButton 
               leftLabel={"Cancel"}
@@ -78,6 +78,8 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex}) 
             action={deleteCustomTemplate}
             email={email}
             userCustomTemplateId={userCustomTemplate._id}
+            serverUpdate={serverUpdate}
+            setServerUpdate={setServerUpdate}
           />
         </div>
     )
