@@ -62,7 +62,7 @@ const FormFrame = ({
     }
 
     if (chartState === "Template") {
-      if (!customTemplate) {
+      if (!customTemplate || customTemplate <= 0 || customTemplate >= 100 ) {
         return
       }
       const res = await createCustomTemplate(session?.user?.email, Number(customTemplate));

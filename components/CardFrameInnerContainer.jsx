@@ -11,7 +11,11 @@ import { ComboboxInput } from "./Combobox";
 import { createWhite } from "@/public/icons/white";
 
 
-const CardFrameInnerContainer = ({machineState, serverUpdate, setServerUpdate, selectInstrument, setSelectInstrument}) => {
+const CardFrameInnerContainer = ({
+  machineState, serverUpdate, 
+  setServerUpdate, selectInstrument, 
+  setSelectInstrument
+}) => {
   const { data: session, status } = useSession();
   const email = session?.user?.email;
   const [instruments, setInstruments] = useState([]);

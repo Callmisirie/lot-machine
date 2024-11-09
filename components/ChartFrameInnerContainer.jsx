@@ -12,30 +12,32 @@ import { useSession } from "next-auth/react";
 import { cancelBlack } from "@/public/icons/black";
 import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
 
-const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex, serverUpdate, setServerUpdate}) => {
+const ChartFrameInnerContainer = ({
+  chartState, partials, 
+  selectedPartialIndex, serverUpdate, 
+  setServerUpdate, userCustomTemplate, 
+  setUserCustomTemplate, templateState,
+  setTemplateState
+}) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0)
   const [customTemplate, setCustomTemplate] = useState("");
   const { data: session, status } = useSession();
   const email = session?.user?.email;
-  const [userCustomTemplate, setUserCustomTemplate] = useState("");
-
-  // useEffect(() => {
-  //   const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
-
-  //   if (partial) {
-  //     const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
-
-  //     setSelectedPartialTPs(partialTPs)
-  //   }
-  // }, [partials, selectedPartialIndex]); 
   
   useEffect(() => {
     if (status === "authenticated") {
       const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
 
       if (partial) {
-        const partialTPs = partialCalc(partial?.lotSize, partial?.finalTP, partial?.partialTPs);  
+        const partialTPs = partialCalc(
+          partial?.lotSize, 
+          partial?.finalTP, 
+          partial?.partialTPs, 
+          templateState,
+          userCustomTemplate.customValue
+        );  
+        
         setSelectedPartialTPs(partialTPs)
       }
       const fetchUserCustomTemplate = async () => {
@@ -49,7 +51,7 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex, s
 
       fetchUserCustomTemplate();
     }
-  }, [partials, selectedPartialIndex, serverUpdate]); 
+  }, [partials, selectedPartialIndex, serverUpdate, templateState]); 
 
   if (chartState === "Template") {
     return (
@@ -70,26 +72,27 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex, s
           </FormFrame>
         </div>
         
-      : <div className="flex h-full w-full items-center justify-center">
+      : <div className="flex h-full w-full items-center justify-center relative bottom-[28px]">
           <Pill 
             partialTP={userCustomTemplate.customValue + "%"}
-            leftIconImgSrc={cancelBlack}
+            rightIconImgSrc={cancelBlack}
             active
             action={deleteCustomTemplate}
             email={email}
             userCustomTemplateId={userCustomTemplate._id}
             serverUpdate={serverUpdate}
             setServerUpdate={setServerUpdate}
+            setTemplateState={setTemplateState}
           />
         </div>
     )
   }
 
   if (chartState === "Chart") {
-    const partialTP = selectedPartialTPs.find((partialTP, idx) => selectedPartialTPIndex === idx );
+    const partialTP = selectedPartialTPs?.find((partialTP, idx) => selectedPartialTPIndex === idx );
     return (
       <div className="flex flex-col items-center justify-between w-full h-full">
-        {selectedPartialTPs.length > 0 ? 
+        {selectedPartialTPs?.length > 0 ? 
           <div className="relative mt-[16px]">
             <div className='w-[290px] h-[160px]'>
               <Image
@@ -103,13 +106,13 @@ const ChartFrameInnerContainer = ({chartState, partials, selectedPartialIndex, s
             <div className="absolute top-0 right-0">
               <Pill
                 partialTP={`TP${selectedPartialTPIndex + 1}: ${partialTP}`}
-                leftIconImgSrc={clipboardWhite}
+                rightIconImgSrc={clipboardWhite}
                 blackPill
               />
             </div>
           </div>
         :null}
-        {selectedPartialTPs.length > 0 ? 
+        {selectedPartialTPs?.length > 0 ? 
           <div className="flex w-[261px] 
           h-fit gap-2 p-4 rounded-[16px] 
           border border-n-300 shadow-lg">

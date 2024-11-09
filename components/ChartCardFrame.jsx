@@ -8,9 +8,10 @@ import { dropArrowWhite } from '@/public/icons/white';
 
 const ChartCardFrame = ({
   children, twoSwitch, 
-  smallFrame, chartState, setChartState,
-  selectedPartialIndex, partials,
-  templateState, setTemplateState
+  smallFrame, chartState, 
+  setChartState, selectedPartialIndex, 
+  partials, templateState, 
+  setTemplateState, userCustomTemplate
 }) => {
   const [selectedPartial, setSelectedPartial] = useState();
 
@@ -38,6 +39,7 @@ const ChartCardFrame = ({
                   : dropArrowBlack}
                   templateState={templateState}
                   setTemplateState={setTemplateState}
+                  userCustomTemplate={userCustomTemplate}
                 />
               )}
             </div>

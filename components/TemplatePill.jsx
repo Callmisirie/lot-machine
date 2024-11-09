@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
 
-const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState}) => {
+const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState, userCustomTemplate}) => {
   const [openTemplate, setOpenTemplate] = useState(false)
 
   const handleTempleteChange = (templateValue) => {
@@ -12,13 +12,17 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState}) => {
   }
 
   return (
-    <div className={`flex h-fit w-fit cursor-pointer
+    <div className={`flex h-fit w-fit ${userCustomTemplate ? "cursor-pointer" : "cursor-default"}
     ${templateState === "D" ? "bg-n-900" 
       : "bg-white"}
     ${!openTemplate ? "border border-n-900" 
       : ""}
     rounded-[16px] items-center z-10`}
-    onClick={() => setOpenTemplate(!openTemplate)}>
+    onClick={() => {
+      if (userCustomTemplate) {
+        setOpenTemplate(!openTemplate)         
+      }
+    }}>
         {!openTemplate ? 
           <div className={`flex items-center 
           ${templateState === "D" ? "text-n-100" 
@@ -43,7 +47,7 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState}) => {
             </div>
           </div>
         }
-        {leftIconImgSrc && !openTemplate ? 
+        {leftIconImgSrc && !openTemplate && userCustomTemplate ? 
           <div className='w-[27px] h-[27px]'>
             <Image
               src={leftIconImgSrc}
@@ -53,7 +57,7 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState}) => {
               priority
             />
           </div>
-        :null}
+        : null}
     </div>
   )
 }

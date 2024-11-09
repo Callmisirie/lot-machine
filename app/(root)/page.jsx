@@ -22,6 +22,7 @@ export default function Home() {
   const [templateState, setTemplateState] = useState("D");
   const [serverUpdate, setServerUpdate] = useState(true);
   const [selectInstrument, setSelectInstrument] = useState("");
+  const [userCustomTemplate, setUserCustomTemplate] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -55,7 +56,11 @@ export default function Home() {
         <CardFrame staticTitle={"Partials"}>
           <div className="flex flex-col gap-2">
             {partials.map((partial, idx) => {
-              const partials = partialCalc(partial.lotSize, partial.finalTP, partial.partialTPs)
+              const partials = partialCalc(
+                partial.lotSize, partial.finalTP, 
+                partial.partialTPs, templateState, 
+                userCustomTemplate?.customValue
+              )
               const dateNTime = new Date(partial.createdAt).toLocaleDateString("en-US", {
                 year: 'numeric', 
                 month: 'short', 
@@ -71,10 +76,9 @@ export default function Home() {
                     name={partial.instrument}
                     nickname={partial.nickname}
                     partials={
-                      partials
-                        .map((tp, index) => `TP${index + 1}: ${tp}`)
+                      partials?.map((tp, index) => `TP${index + 1}: ${tp}`)
                         .join(", ")
-                        .slice(0, 20) + (partials.join(", ").length > 9 ? "..." : "")
+                        .slice(0, 20) + (partials?.join(", ").length > 9 ? "..." : "")
                     }
                     dateNTime={dateNTime}
                     leftIconImgSrc={clipboardBlack}
@@ -106,6 +110,7 @@ export default function Home() {
             partials={partials}
             templateState={templateState}
             setTemplateState={setTemplateState}
+            userCustomTemplate={userCustomTemplate}
           >
             <ChartFrameInnerContainer 
               chartState={chartState}
@@ -113,6 +118,10 @@ export default function Home() {
               partials={partials}
               serverUpdate={serverUpdate}
               setServerUpdate={setServerUpdate}
+              setUserCustomTemplate={setUserCustomTemplate}
+              userCustomTemplate={userCustomTemplate}
+              templateState={templateState}
+              setTemplateState={setTemplateState}
             />
 
           </ChartCardFrame>
