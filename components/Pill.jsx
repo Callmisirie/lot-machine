@@ -1,12 +1,15 @@
-import Image from 'next/image'
-import React from 'react'
+"use client"
+
+import Image from 'next/image';
+import React from 'react';
 
 const Pill = ({
   partialTP, rightIconImgSrc, 
   blackPill, active, 
   action, email, 
   userCustomTemplateId, serverUpdate, 
-  setServerUpdate, setTemplateState
+  setServerUpdate, setTemplateState,
+  content, copy
 }) => {
   return (
     <div className={`flex items-center 
@@ -15,15 +18,20 @@ const Pill = ({
      ${blackPill ? "bg-n-900 text-white" 
      : active ? "text-n-700 border-n-700 border" 
      : "text-n-300 border-n-300 border"}`}>
-      <p className='p3b text-nowrap'>{partialTP}</p>
+      <p className='p3b text-nowrap'>{content}</p>
       {rightIconImgSrc ? 
         <div className='w-[24px] h-[24px]'
         onClick={async() => {
-          const res = await action(email, userCustomTemplateId)
-          if (res.success) {
-            setServerUpdate(!serverUpdate);
-            setTemplateState("D");
-          } 
+          if (action) {
+            const res = await action(email, userCustomTemplateId)
+            if (res.success) {
+              setServerUpdate(!serverUpdate);
+              setTemplateState("D");
+            } 
+          }
+          if (copy) {
+            navigator.clipboard.writeText(partialTP)
+          }
         }}>
           <Image
             src={rightIconImgSrc}

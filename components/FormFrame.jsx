@@ -5,10 +5,10 @@ import Input from "./Input";
 import { addBlack, resetBlack } from "@/public/icons/black";
 import Image from "next/image";
 import addInstrument from "@/actions/addInstrument";
-import { useSession } from "next-auth/react";
 import createPartial from "@/actions/createPartial";
 import { cautionAccent } from "@/public/icons/accent";
 import createCustomTemplate from "@/actions/createCustomTemple";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 const FormFrame = ({
   children, machineState, 
@@ -22,7 +22,7 @@ const FormFrame = ({
   const [finalTP, setFinalTP] = useState("");
   const [instrument, setInstrument] = useState("");
   const [nickname, setNickname] = useState("");
-  const { data: session } = useSession();
+  const {user} = useKindeBrowserClient();
 
   const handleServerAction = async () => {
     if (machineState === "Machine") {
@@ -36,7 +36,7 @@ const FormFrame = ({
       }     
       
       const res = await createPartial(
-        session?.user?.email, selectInstrument, 
+        user?.email, selectInstrument, 
         Number(lotSize), Number(finalTP),
         partialTPs.map(Number),
       )
@@ -53,7 +53,7 @@ const FormFrame = ({
       if (!instrument) {
         return;
       }   
-      const res = await addInstrument(session?.user?.email, instrument, nickname);
+      const res = await addInstrument(user?.email, instrument, nickname);
       if (res.success) {
         setInstrument("");
         setNickname("");
@@ -65,7 +65,7 @@ const FormFrame = ({
       if (!customTemplate || customTemplate <= 0 || customTemplate >= 100 ) {
         return
       }
-      const res = await createCustomTemplate(session?.user?.email, Number(customTemplate));
+      const res = await createCustomTemplate(user?.email, Number(customTemplate));
       if (res) {
         setCustomTemplate("");
       }
@@ -91,7 +91,7 @@ const FormFrame = ({
   if (machineState === "Machine") {
     return (
       <form action={handleServerAction}
-        className="flex flex-col gap-2 w-full">
+        className="flex flex-col gap-2 w-full items-center">
         <div className="flex gap-2">
           <Input
             handleChange={setLotSize}
@@ -164,7 +164,7 @@ const FormFrame = ({
   if (machineState === "Add instrument") {
     return (
       <form action={handleServerAction}
-        className="flex flex-col gap-2 w-full">
+        className="flex flex-col gap-2 w-full items-center">
         <Input
           handleChange={setInstrument}
           value={instrument}

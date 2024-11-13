@@ -8,25 +8,26 @@ import Image from "next/image";
 import { clipboardWhite } from "@/public/icons/white";
 import FormFrame from "./FormFrame";
 import DualButton from "./DualButton";
-import { useSession } from "next-auth/react";
 import { cancelBlack } from "@/public/icons/black";
 import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { ScrollAreaFrame } from "./ScrollArea";
+import { ScrollBar } from "./ui/scroll-area";
 
 const ChartFrameInnerContainer = ({
   chartState, partials, 
   selectedPartialIndex, serverUpdate, 
   setServerUpdate, userCustomTemplate, 
   setUserCustomTemplate, templateState,
-  setTemplateState
+  setTemplateState, selectedPartialTPIndex, 
+  setSelectedPartialTPIndex
 }) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
-  const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0)
   const [customTemplate, setCustomTemplate] = useState("");
-  const { data: session, status } = useSession();
-  const email = session?.user?.email;
+  const {isAuthenticated, user} = useKindeBrowserClient();
   
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
 
       if (partial) {
@@ -35,13 +36,13 @@ const ChartFrameInnerContainer = ({
           partial?.finalTP, 
           partial?.partialTPs, 
           templateState,
-          userCustomTemplate.customValue
+          userCustomTemplate?.customValue
         );  
         
         setSelectedPartialTPs(partialTPs)
       }
       const fetchUserCustomTemplate = async () => {
-        const res = await fetch(`http://localhost:3000/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
+        const res = await fetch(`http://localhost:3000/api/getCustomTemplate?email=${user?.email}`, { cache: "no-store" });
         
         if (!res.ok) return notFound();
         
@@ -51,7 +52,7 @@ const ChartFrameInnerContainer = ({
 
       fetchUserCustomTemplate();
     }
-  }, [partials, selectedPartialIndex, serverUpdate, templateState]); 
+  }, [isAuthenticated, partials, selectedPartialIndex, serverUpdate, templateState]); 
 
   if (chartState === "Template") {
     return (
@@ -74,11 +75,11 @@ const ChartFrameInnerContainer = ({
         
       : <div className="flex h-full w-full items-center justify-center relative bottom-[28px]">
           <Pill 
-            partialTP={userCustomTemplate.customValue + "%"}
+            content={userCustomTemplate.customValue + "%"}
             rightIconImgSrc={cancelBlack}
             active
             action={deleteCustomTemplate}
-            email={email}
+            email={user?.email}
             userCustomTemplateId={userCustomTemplate._id}
             serverUpdate={serverUpdate}
             setServerUpdate={setServerUpdate}
@@ -105,29 +106,38 @@ const ChartFrameInnerContainer = ({
             </div>
             <div className="absolute top-0 right-0">
               <Pill
-                partialTP={`TP${selectedPartialTPIndex + 1}: ${partialTP}`}
+                content={`TP${selectedPartialTPIndex + 1}: ${partialTP}`}
                 rightIconImgSrc={clipboardWhite}
                 blackPill
+                partialTP={partialTP}
+                copy
               />
             </div>
           </div>
         :null}
         {selectedPartialTPs?.length > 0 ? 
           <div className="flex w-[261px] 
-          h-fit gap-2 p-4 rounded-[16px] 
-          border border-n-300 shadow-lg">
-            {selectedPartialTPs?.map((partialTP, idx) => {
-              return (
-                <div key={idx}
-                  onClick={() => setSelectedPartialTPIndex(idx)}
-                >
-                  <Pill 
-                    partialTP={`TP${idx + 1}: ${partialTP}`}
-                    active={selectedPartialTPIndex === idx ? true : false}
-                  />              
-                </div>
-              )
-            })}
+          h-[56px] px-4 rounded-[16px] 
+          justify-center items-center
+          border border-n-300 shadow-md 
+          no-select">
+            <ScrollAreaFrame 
+            horizontal>
+              {selectedPartialTPs?.map((partialTP, idx) => {
+                return (
+                  <div key={idx}
+                    onClick={() => setSelectedPartialTPIndex(idx)}
+                    className=""
+                  >
+                    <Pill 
+                      content={`TP${idx + 1}: ${partialTP}`}
+                      active={selectedPartialTPIndex === idx ? true : false}
+                    />              
+                  </div>
+                )
+              })}
+              <ScrollBar orientation="horizontal" />
+            </ScrollAreaFrame>
           </div>
         : null}
       </div>

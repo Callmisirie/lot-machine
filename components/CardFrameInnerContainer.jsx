@@ -5,29 +5,28 @@ import PartialContainer from './PartialContainer';
 import FormFrame from './FormFrame';
 import Button from './Button';
 import { cancelBlack } from '@/public/icons/black';
-import { useSession } from 'next-auth/react';
 import { notFound } from "next/navigation";
 import { ComboboxInput } from "./Combobox";
 import { createWhite } from "@/public/icons/white";
-
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { ScrollAreaFrame } from "./ScrollArea";
 
 const CardFrameInnerContainer = ({
   machineState, serverUpdate, 
   setServerUpdate, selectInstrument, 
   setSelectInstrument
 }) => {
-  const { data: session, status } = useSession();
-  const email = session?.user?.email;
   const [instruments, setInstruments] = useState([]);
+  const {isAuthenticated, isLoading, user} = useKindeBrowserClient();
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       const fetchInstruments = async () => {
-        const res = await fetch(`http://localhost:3000/api/getInstruments?email=${email}`, { cache: "no-store" });
+        const res = await fetch(`http://localhost:3000/api/getInstruments?email=${user?.email}`, { cache: "no-store" });
         
         if (!res.ok) return notFound();
         
-        const data = await res.json()
+        const data = await res.json();
 
         // console.log(data);  
         
@@ -35,7 +34,7 @@ const CardFrameInnerContainer = ({
       };
       fetchInstruments();
     }
-  }, [session, status, serverUpdate]);   
+  }, [isLoading, isAuthenticated, serverUpdate]);   
 
   if (machineState === "Add instrument") {
     return (
@@ -60,21 +59,24 @@ const CardFrameInnerContainer = ({
 
   if (machineState === "Instruments") {
     return (
-      <div className="flex flex-col gap-2">
+      <ScrollAreaFrame
+      vertical>
         {instruments?.map((instrument, idx) => (
+          <div className="no-select">
             <PartialContainer
               key={idx}
               name={instrument.instrument}
               nickname={instrument?.nickname}
               rightIconImgSrc={cancelBlack}
               instrumentId={instrument._id}
-              email={email}
+              email={user?.email}
               machineSideDelete
               serverUpdate={serverUpdate}
               setServerUpdate={setServerUpdate}
             />             
-        ))}              
-      </div>
+          </div>
+        ))}            
+      </ScrollAreaFrame>
     )
   }
 

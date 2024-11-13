@@ -32,7 +32,11 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState, userCust
               {templateState}
             </p>
           </div>
-        : <div className='flex flex-col items-center justify-center w-fit h-fit gap-2 rounded-[16px] bg-n-100 shadow-lg'>
+        : <div className={`flex flex-col 
+          items-center justify-center 
+          w-fit h-fit gap-2 
+          rounded-[16px] bg-n-100 shadow-lg 
+          ${templateState === "C" && "flex-col-reverse"}`}>
             <div className='flex items-center justify-center w-[98px] h-[32px] bg-n-900 rounded-[16px] cursor-pointer'
               onClick={() => handleTempleteChange("D")}
             >

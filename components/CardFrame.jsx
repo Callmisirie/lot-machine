@@ -1,5 +1,5 @@
-import React from 'react'
-import ThreeSwitch from './ThreeSwitch'
+import React from 'react';
+import ThreeSwitch from './ThreeSwitch';
 
 const CardFrame = ({
   children, threeSwitch, 
@@ -8,7 +8,7 @@ const CardFrame = ({
 }) => {
  
   return (
-    <div className={`w-[300px] h-[420px] 
+    <div className={`w-[300px] h-[420px] overflow-hidden 
     bg-white rounded-[32px] shadow-lg relative`}>
       <div className="w-full h-full 
       flex flex-col rounded-[32px]
@@ -20,7 +20,7 @@ const CardFrame = ({
             <h4 className='h4 pt-[8px]'>
               {staticTitle ? staticTitle : machineState}
             </h4>          
-          <div className="relative w-fit h-full">
+          <div className="relative flex flex-col items-center w-full h-full">
             {children}          
           </div>          
         </div>
@@ -29,4 +29,4 @@ const CardFrame = ({
   )
 }
 
-export default CardFrame
+export default CardFrame;

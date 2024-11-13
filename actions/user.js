@@ -11,14 +11,14 @@ const userAuth = async (name, email) => {
     if (!userExists) {
       await User.create({name, email});
       console.log("Successfully registered user");
-      return true;
+      return { success: true };
     } else {
       console.log("User already exists");
-      return true; 
+      return { success: true }; 
     }   
   } catch (error) {
     console.log("Failed to authenticate user on mongoDB: ", error);
-    return false;
+    return { success: false };
   }
 };
 

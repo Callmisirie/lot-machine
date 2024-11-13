@@ -10,7 +10,8 @@ const PartialContainer = ({
   active, name, nickname, partials,
   dateNTime, leftIconContainer, instrumentId,
   partialId, email, machineSideDelete, partialSideDelete,
-  serverUpdate, setServerUpdate
+  serverUpdate, setServerUpdate,
+  copy
 }) => {
   
   const handleDelete = async () => {   
@@ -25,7 +26,7 @@ const PartialContainer = ({
   } 
 
   return (
-    <div className={`w-fit h-fit rounded-[16px] relative shadow-lg ${leftIconContainer && "cursor-pointer"}`}>
+    <div className={`w-fit h-fit rounded-[16px] relative shadow-md ${leftIconContainer && "cursor-pointer"}`}>
       <div className='w-full h-full flex justify-between px-[16px] py-[8px] gap-4'>
         {leftIconContainer ? (
           <div className='flex flex-col items-center mt-[8px]'>
@@ -35,7 +36,13 @@ const PartialContainer = ({
                   <div className='w-[12px] h-[12px] bg-n-700 rounded-full' />
                 )}
               </div>
-              <div className='w-[24px] h-[24px]'>
+              <div className='w-[24px] h-[24px]'
+              onClick={() => {
+                if (copy) {
+                  navigator.clipboard.writeText(partials?.map((tp, index) => `TP${index + 1}: ${tp}`)
+                  .join(", "))
+                }
+              }}>
                 <Image
                   src={leftIconImgSrc}
                   width={24}
@@ -52,7 +59,12 @@ const PartialContainer = ({
             <h5 className='h5 text-n-500'>{name}</h5>
             <p className='p3r text-n-500'>{nickname}</p>
           </div>
-          {partials && <p className='p3b text-n-900'>{partials}</p>}
+          {partials && <p className='p3b text-n-900'>
+            {partials && partials?.map((tp, index) => `TP${index + 1}: ${tp}`)
+              .join(", ")
+              .slice(0, 20) + (partials?.join(", ").length > 9 ? "..." : "")
+            }
+          </p>}
           {dateNTime && <p className='p3r text-n-300'>{dateNTime}</p>}
         </div>
         <div className='w-[24px] h-[24px] mt-[8px]'

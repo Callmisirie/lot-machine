@@ -86,3 +86,9 @@
 .l3r {
   @apply font-poppins font-normal text-[12px] leading-[150%]
 }
+
+/* Prevent text selection */
+.no-select {
+  user-select: none;
+}
+

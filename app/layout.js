@@ -1,5 +1,5 @@
+import TanStackProvider from "@/components/Providers/TanStackProvider";
 import "./globals.css";
-import NextAuthProvider from "./Providers";
 import localfont from "next/font/local";
 
 const poppins = localfont({
@@ -28,11 +28,11 @@ export default function RootLayout({ children }) {
       <body
         className={`${poppins.variable} ${montserrat.variable} antialiased`}
       >
-        <NextAuthProvider>
-          <div className="font-poppins h-screen w-full bg-custom-opacity-15">
+        <TanStackProvider>
+          <div className="font-poppins h-screen w-full overflow-hidden bg-custom-opacity-15">
             {children}
           </div>
-        </NextAuthProvider>
+        </TanStackProvider>
       </body>
     </html>
   );

@@ -4,19 +4,20 @@ import paths from '@/common/paths'
 import GoogleButton from '@/components/GoogleButton'
 import { lmImage, lmLogo } from '@/public'
 import { google } from '@/public/icons'
-import { useSession } from 'next-auth/react'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 import Image from 'next/image'
 import { redirect } from 'next/navigation';
 import React, { useEffect } from 'react'
 
 const page = () => {
-  const { data: session, status } = useSession();
+  const {isAuthenticated} = useKindeBrowserClient();
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       redirect(paths.home());
     }
-  }, [status, session]);
+  }, [isAuthenticated]);
+
 
   return (
     <main className='h-screen relative'>
@@ -71,7 +72,9 @@ const page = () => {
             <GoogleButton 
               leftIcon 
               leftIconImgSrc={google} 
-              label="Continue with google"/>
+              label="Continue with google"
+              signIn
+              />
           </div>
           <div className='flex items-center gap-4'>
             <div className='w-full bg-n-500 h-[2px] rounded-[32px]'/>
@@ -85,6 +88,7 @@ const page = () => {
               leftIconImgSrc={google} 
               label="Sign up with google"
               buttonColor="bg-n-100"
+              register
               />
           </div>
         </div>
