@@ -22,7 +22,7 @@ const page = () => {
   return (
     <main className='h-screen relative'>
       <div className='flex items-end 
-      w-fit h-fit relative left-8 top-8'>
+      w-fit h-fit relative left-8 top-8 cursor-default'>
         <Image 
           src={lmLogo} 
           width={98} 

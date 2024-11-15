@@ -62,7 +62,9 @@ const CardFrameInnerContainer = ({
   if (machineState === "Instruments") {
     return (
       <ScrollAreaFrame
-      vertical>
+      cardFrame
+      vertical
+      >
         {instruments?.map((instrument, idx) => (
           <div key={idx}
             onClick={() => {

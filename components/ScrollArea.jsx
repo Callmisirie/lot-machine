@@ -1,15 +1,102 @@
-import * as React from "react";
-
+import React, { useRef, useState, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-export function ScrollAreaFrame({children, horizontal, vertical}) {
+export function ScrollAreaFrame({
+  children,
+  horizontal,
+  vertical,
+  cardFrame,
+  partialFrame,
+  mainClass,
+  innerClass,
+  setSubIsWrapped,
+}) {
+  const [isWrapped, setIsWrapped] = useState(false); // Tracks wrapping state
+  const [wrapPoint, setWrapPoint] = useState(null); // Stores the precise screen width when wrapping occurs
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleResize = () => {
+      if (wrapPoint && window.innerWidth > wrapPoint) {
+        console.log("Unwrapping detected at width:", window.innerWidth);
+        setIsWrapped(false);
+        setWrapPoint(null); // Reset the wrap point
+        setSubIsWrapped?.(false);
+      }
+    };
+
+    const observer = new ResizeObserver(() => {
+      const childrenArray = Array.from(container.children);
+
+      if (childrenArray.length > 1) {
+        const firstChildTop = childrenArray[0].offsetTop;
+
+        const hasWrapping = childrenArray.some(
+          (child) => child.offsetTop > firstChildTop
+        );
+
+        console.log("Wrapping detected:", hasWrapping);
+
+        if (hasWrapping) {
+          setIsWrapped(true);
+          setSubIsWrapped?.(true);
+          if (!wrapPoint) {
+            console.log("Setting wrap point at:", window.innerWidth);
+            setWrapPoint(window.innerWidth); // Store the screen width when wrapping occurs
+          }
+        } else if (!hasWrapping && wrapPoint && window.innerWidth > wrapPoint) {
+          setIsWrapped(false);
+          setSubIsWrapped?.(false);
+        }
+      } else {
+        setIsWrapped(false);
+        setSubIsWrapped?.(false);
+      }
+    });
+
+    observer.observe(container);
+
+    // Listen to window resize
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      observer.disconnect(); // Cleanup observer
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [wrapPoint, setSubIsWrapped]);
+
   return (
-    <ScrollArea className={`${vertical && "h-[328px] w-fit"} ${horizontal && "w-[261px] h-full"}`}>
-      <div className={`${vertical && "gap-2 flex flex-col"} ${horizontal && "gap-2 mt-3.5 flex h-fit"}`}>
-        {children}
+    <ScrollArea
+      className={` 
+        ${mainClass}
+        ${cardFrame && vertical && "h-[328px] w-fit"} 
+        ${partialFrame && horizontal && "w-[261px] h-full"}
+      `}
+    >
+      <div
+        ref={containerRef}
+        className={` 
+          ${innerClass}
+          ${cardFrame && vertical && "gap-2 flex flex-col"} 
+          ${partialFrame && horizontal && "gap-2 mt-3.5 flex h-fit"}
+          ${isWrapped ? "flex-col justify-center items-center gap-8 pb-4" : "flex gap-8"}
+        `}
+      >
+        {mainClass
+          ? React.Children.map(children, (child, index) => {
+              // Place the second child first when wrapped
+              if (isWrapped) {
+                if (index === 1) return children[0];
+                if (index === 0) return children[1];
+              }
+              return child;
+            })
+          : children}
       </div>
-      <ScrollBar
-      orientation="horizontal"/>
+      <ScrollBar orientation="horizontal" />
     </ScrollArea>
-  )
+  );
 }

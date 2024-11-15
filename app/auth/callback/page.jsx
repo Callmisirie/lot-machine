@@ -19,7 +19,7 @@ const Page = () => {
 	return (
 		<div className='w-full h-full flex justify-center items-center relative'>
       <div className='flex items-end 
-      w-fit h-fit absolute left-8 top-8'>
+      w-fit h-fit absolute left-8 top-8 cursor-default'>
         <Image 
           src={lmLogo} 
           width={98} 

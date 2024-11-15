@@ -10,7 +10,7 @@ const Navbar = () => {
   return (
     <div className='w-full bg-white'>
       <div className='w-full flex justify-between p-[32px] h-fit bg-custom-opacity-15'>
-        <div className='flex items-end'>
+        <div className='flex items-end cursor-default'>
           <Image 
             src={lmLogo} 
             width={98} 

@@ -21,7 +21,7 @@ const ChartFrameInnerContainer = ({
   setUserCustomTemplate, templateState,
   setTemplateState, selectedPartialTPIndex, 
   setSelectedPartialTPIndex, setComfirmationPopoverOpen,
-  setComfirmationPopoverState, setUserCustomTemplateId   
+  setComfirmationPopoverState, setUserCustomTemplateId
 }) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
@@ -126,7 +126,9 @@ const ChartFrameInnerContainer = ({
           border border-n-300 shadow-md 
           no-select">
             <ScrollAreaFrame 
-            horizontal>
+            partialFrame
+            horizontal
+            >
               {selectedPartialTPs?.map((partialTP, idx) => {
                 return (
                   <div key={idx}
