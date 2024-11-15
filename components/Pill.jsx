@@ -6,10 +6,12 @@ import React from 'react';
 const Pill = ({
   partialTP, rightIconImgSrc, 
   blackPill, active, 
-  action, email, 
-  userCustomTemplateId, serverUpdate, 
-  setServerUpdate, setTemplateState,
-  content, copy
+  action, 
+  userCustomTemplateId,
+  content, copy, 
+  setComfirmationPopoverOpen,
+  setComfirmationPopoverState, 
+  setUserCustomTemplateId 
 }) => {
   return (
     <div className={`flex items-center 
@@ -21,13 +23,11 @@ const Pill = ({
       <p className='p3b text-nowrap'>{content}</p>
       {rightIconImgSrc ? 
         <div className='w-[24px] h-[24px]'
-        onClick={async() => {
+        onClick={() => {
           if (action) {
-            const res = await action(email, userCustomTemplateId)
-            if (res.success) {
-              setServerUpdate(!serverUpdate);
-              setTemplateState("D");
-            } 
+            setComfirmationPopoverState("Custom template");
+            setUserCustomTemplateId(userCustomTemplateId);
+            setComfirmationPopoverOpen(true);
           }
           if (copy) {
             navigator.clipboard.writeText(partialTP)

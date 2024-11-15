@@ -15,10 +15,11 @@ const FormFrame = ({
   chartState, selectInstrument, 
   customTemplate, setCustomTemplate,
   serverUpdate, setServerUpdate,
-  setSelectInstrument
+  setSelectInstrument, partialTPs, 
+  setPartialTPs, setComfirmationPopoverState,
+  setComfirmationPopoverOpen
 }) => {
   const [lotSize, setLotSize] = useState("");
-  const [partialTPs, setPartialTPs] = useState([""]);
   const [finalTP, setFinalTP] = useState("");
   const [instrument, setInstrument] = useState("");
   const [nickname, setNickname] = useState("");
@@ -111,8 +112,11 @@ const FormFrame = ({
         <div className="w-fit">
           <label className="l2r text-n-500 w-full flex justify-between">
             Partial TPs
-            <span className="l3r text-n-700 flex items-center"
-              onClick={() => setPartialTPs([""])}>
+            <span className="l3r text-n-700 flex items-center cursor-pointer"
+              onClick={() => {
+               setComfirmationPopoverState("PartialTPs")
+               setComfirmationPopoverOpen(true)
+              }}>
               <Image 
                 src={resetBlack} 
                 width={24} 
@@ -125,7 +129,7 @@ const FormFrame = ({
             </span>
           </label>
           <div className="w-fit grid grid-cols-2 gap-x-2 gap-y-1">
-            {partialTPs.map((partial, idx) => (
+            {partialTPs?.map((partial, idx) => (
               <Input
                 handleChange={(value) => handlePartialTPChange(value, idx)}
                 key={idx}
@@ -134,7 +138,7 @@ const FormFrame = ({
                 small
               />
             ))}
-            {partialTPs.length < 4 ? (
+            {partialTPs?.length < 4 ? (
               <div
                 className={`${
                   partialTPs.length < 4

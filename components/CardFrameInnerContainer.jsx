@@ -14,7 +14,9 @@ import { ScrollAreaFrame } from "./ScrollArea";
 const CardFrameInnerContainer = ({
   machineState, serverUpdate, 
   setServerUpdate, selectInstrument, 
-  setSelectInstrument
+  setSelectInstrument, setSelectedInstrumentId,
+  setComfirmationPopoverState, setComfirmationPopoverOpen,
+  partialTPs, setPartialTPs
 }) => {
   const [instruments, setInstruments] = useState([]);
   const {isAuthenticated, isLoading, user} = useKindeBrowserClient();
@@ -62,17 +64,19 @@ const CardFrameInnerContainer = ({
       <ScrollAreaFrame
       vertical>
         {instruments?.map((instrument, idx) => (
-          <div className="no-select">
+          <div key={idx}
+            onClick={() => {
+              setSelectedInstrumentId(instrument._id)
+              setComfirmationPopoverState("Instruments");
+               
+            }}
+            className="no-select"
+          >        
             <PartialContainer
-              key={idx}
               name={instrument.instrument}
               nickname={instrument?.nickname}
               rightIconImgSrc={cancelBlack}
-              instrumentId={instrument._id}
-              email={user?.email}
-              machineSideDelete
-              serverUpdate={serverUpdate}
-              setServerUpdate={setServerUpdate}
+              setComfirmationPopoverOpen={setComfirmationPopoverOpen}
             />             
           </div>
         ))}            
@@ -94,6 +98,10 @@ const CardFrameInnerContainer = ({
           serverUpdate={serverUpdate}
           setServerUpdate={setServerUpdate}
           setSelectInstrument={setSelectInstrument}
+          setComfirmationPopoverState={setComfirmationPopoverState}
+          setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+          partialTPs={partialTPs}
+          setPartialTPs={setPartialTPs}
         >
           <div className="pb-4 gap-1 w-full absolute bottom-0">
             <Button 

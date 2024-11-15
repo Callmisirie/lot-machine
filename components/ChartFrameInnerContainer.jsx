@@ -20,7 +20,8 @@ const ChartFrameInnerContainer = ({
   setServerUpdate, userCustomTemplate, 
   setUserCustomTemplate, templateState,
   setTemplateState, selectedPartialTPIndex, 
-  setSelectedPartialTPIndex
+  setSelectedPartialTPIndex, setComfirmationPopoverOpen,
+  setComfirmationPopoverState, setUserCustomTemplateId   
 }) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
@@ -78,12 +79,15 @@ const ChartFrameInnerContainer = ({
             content={userCustomTemplate.customValue + "%"}
             rightIconImgSrc={cancelBlack}
             active
-            action={deleteCustomTemplate}
+            action
             email={user?.email}
             userCustomTemplateId={userCustomTemplate._id}
             serverUpdate={serverUpdate}
             setServerUpdate={setServerUpdate}
             setTemplateState={setTemplateState}
+            setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+            setComfirmationPopoverState={setComfirmationPopoverState}
+            setUserCustomTemplateId={setUserCustomTemplateId}
           />
         </div>
     )
@@ -98,8 +102,8 @@ const ChartFrameInnerContainer = ({
             <div className='w-[290px] h-[160px]'>
               <Image
                 src={curveLine}
-                width={290}
-                height={160}
+                width="auto"
+                height="auto"
                 alt='curve-line icon'
                 priority
               />

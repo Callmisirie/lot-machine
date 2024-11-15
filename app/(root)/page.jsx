@@ -12,6 +12,7 @@ import partialCalc from "@/common/partialCalc";
 import ChartFrameInnerContainer from "@/components/ChartFrameInnerContainer";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "@/components/ScrollArea";
+import ComfirmationPopoverButton from "@/components/ComfirmationPopoverButton";
 
 
 export default function Home() {
@@ -25,6 +26,12 @@ export default function Home() {
   const [selectInstrument, setSelectInstrument] = useState("");
   const [userCustomTemplate, setUserCustomTemplate] = useState("");
   const {isAuthenticated, isLoading, user, idTokenEncoded} = useKindeBrowserClient();
+  const [comfirmationPopoverOpen, setComfirmationPopoverOpen] = useState(false);
+  const [comfirmationPopoverState, setComfirmationPopoverState] = useState("");
+  const [selectedPartialId, setSelectedPartialId] = useState("");
+  const [selectedInstrumentId, setSelectedInstrumentId] = useState("");
+  const [userCustomTemplateId, setUserCustomTemplateId] = useState("")
+  const [partialTPs, setPartialTPs] = useState([""]);
   
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -53,7 +60,21 @@ export default function Home() {
 
   if (isAuthenticated) {
     return (
-      <div className="w-full h-fit flex items-center">
+      <div className="w-full h-full flex items-center relative">
+        {comfirmationPopoverOpen && (
+          <ComfirmationPopoverButton 
+            comfirmationPopoverState={comfirmationPopoverState}
+            setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+            comfirmationPopoverOpen={comfirmationPopoverOpen}
+            serverUpdate={serverUpdate}
+            setServerUpdate={setServerUpdate}
+            selectedInstrumentId={selectedInstrumentId}
+            selectedPartialId={selectedPartialId}
+            setPartialTPs={setPartialTPs}
+            userCustomTemplateId={userCustomTemplateId}
+            setTemplateState={setTemplateState}
+          />
+        )}
         <div className="w-full h-fit flex items-end justify-between">
           <CardFrame staticTitle={"Partials"}>
             <ScrollAreaFrame
@@ -73,12 +94,6 @@ export default function Home() {
                 });
                 return (
                   <div key={idx}
-                    onClick={() => {
-                      setSelectedPartialIndex(idx);
-                      if (selectedPartialIndex !== idx) {
-                        setSelectedPartialTPIndex(0);
-                      } 
-                    }}
                     className="no-select"
                   >
                     <PartialContainer 
@@ -90,14 +105,19 @@ export default function Home() {
                       rightIconImgSrc={deleteIconBlack}
                       leftIconContainer
                       active={selectedPartialIndex === idx ? true : false}
-                      partialId={partial._id}
-                      email={user?.email}
-                      partialSideDelete
-                      partialIdx={idx}
-                      serverUpdate={serverUpdate}
-                      setServerUpdate={setServerUpdate}
+                      setComfirmationPopoverOpen={setComfirmationPopoverOpen}
                       copy
-                    />
+                    >
+                      <div onClick={() => {
+                        setSelectedPartialIndex(idx);
+                        setSelectedPartialId(partial._id)
+                        setComfirmationPopoverState("Partials")
+                        if (selectedPartialIndex !== idx) {
+                          setSelectedPartialTPIndex(0);
+                        }                     
+                      }}
+                      className="absolute top-0 w-full h-full z-10"/>
+                    </PartialContainer>
                   </div>
                 );      
               })}
@@ -130,6 +150,9 @@ export default function Home() {
                 setTemplateState={setTemplateState}
                 selectedPartialTPIndex={selectedPartialTPIndex}
                 setSelectedPartialTPIndex={setSelectedPartialTPIndex}
+                setComfirmationPopoverState={setComfirmationPopoverState}
+                setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+                setUserCustomTemplateId={setUserCustomTemplateId}
               />
 
             </ChartCardFrame>
@@ -146,6 +169,11 @@ export default function Home() {
               setServerUpdate={setServerUpdate}
               selectInstrument={selectInstrument}
               setSelectInstrument={setSelectInstrument}
+              setSelectedInstrumentId={setSelectedInstrumentId}
+              setComfirmationPopoverState={setComfirmationPopoverState}
+              setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+              partialTPs={partialTPs}
+              setPartialTPs={setPartialTPs}
             />
           </CardFrame>        
         </div>

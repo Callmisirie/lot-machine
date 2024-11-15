@@ -1,29 +1,15 @@
 "use client";
 
-import deleteInstrument from '@/actions/deleteInstrument';
-import deletePartial from '@/actions/deletePartial';
 import Image from 'next/image';
 import React from 'react';
 
 const PartialContainer = ({
   leftIconImgSrc, rightIconImgSrc,
   active, name, nickname, partials,
-  dateNTime, leftIconContainer, instrumentId,
-  partialId, email, machineSideDelete, partialSideDelete,
-  serverUpdate, setServerUpdate,
-  copy
+  dateNTime, leftIconContainer,
+  copy, setComfirmationPopoverOpen,
+  children
 }) => {
-  
-  const handleDelete = async () => {   
-    if (machineSideDelete) {
-      await deleteInstrument(email, instrumentId)
-      setServerUpdate(!serverUpdate)      
-    }
-    if (partialSideDelete) {
-      await deletePartial(email, partialId)
-      setServerUpdate(!serverUpdate)      
-    }
-  } 
 
   return (
     <div className={`w-fit h-fit rounded-[16px] relative shadow-md ${leftIconContainer && "cursor-pointer"}`}>
@@ -36,7 +22,7 @@ const PartialContainer = ({
                   <div className='w-[12px] h-[12px] bg-n-700 rounded-full' />
                 )}
               </div>
-              <div className='w-[24px] h-[24px]'
+              <div className='w-[24px] h-[24px] z-20'
               onClick={() => {
                 if (copy) {
                   navigator.clipboard.writeText(partials?.map((tp, index) => `TP${index + 1}: ${tp}`)
@@ -49,6 +35,7 @@ const PartialContainer = ({
                   height={24}
                   alt='left icon'
                   priority
+                  className=''
                 />
               </div>
             </div>
@@ -67,8 +54,8 @@ const PartialContainer = ({
           </p>}
           {dateNTime && <p className='p3r text-n-300'>{dateNTime}</p>}
         </div>
-        <div className='w-[24px] h-[24px] mt-[8px]'
-          onClick={handleDelete}
+        <div className='w-[24px] h-[24px] mt-[8px] z-20 cursor-pointer'
+          onClick={() => setComfirmationPopoverOpen(true)}
         >
           <Image
             src={rightIconImgSrc}
@@ -79,6 +66,7 @@ const PartialContainer = ({
           />
         </div>
       </div>
+      {children}
     </div>
   );
 };

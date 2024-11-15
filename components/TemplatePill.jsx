@@ -52,11 +52,11 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState, userCust
           </div>
         }
         {leftIconImgSrc && !openTemplate && userCustomTemplate ? 
-          <div className='w-[27px] h-[27px]'>
+          <div className='w-[27px] h-[27px] flex items-center justify-center'>
             <Image
               src={leftIconImgSrc}
-              width={27}
-              height={27}
+              width="auto"
+              height="auto"
               alt='left icon'
               priority
             />
