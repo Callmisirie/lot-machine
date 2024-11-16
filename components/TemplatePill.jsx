@@ -37,13 +37,13 @@ const TemplatePill = ({leftIconImgSrc, templateState, setTemplateState, userCust
           w-fit h-fit gap-2 
           rounded-[16px] bg-n-100 shadow-lg 
           ${templateState === "C" && "flex-col-reverse"}`}>
-            <div className='flex items-center justify-center w-[98px] h-[32px] bg-n-900 rounded-[16px] cursor-pointer'
+            <div className='flex items-center justify-center w-[98px] max-md:w-[92px] h-[32px] bg-n-900 rounded-[16px] cursor-pointer'
               onClick={() => handleTempleteChange("D")}
             >
               <p className='p3b text-n-100'
               >Default</p>
             </div>
-            <div className='flex items-center justify-center w-[98px] h-[32px] bg-white rounded-[16px] cursor-pointer'
+            <div className='flex items-center justify-center w-[98px] max-md:w-[92px] h-[32px] bg-white rounded-[16px] cursor-pointer'
               onClick={() => handleTempleteChange("C")}
             >
               <p className='p3b text-n-900'

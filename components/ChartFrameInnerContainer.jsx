@@ -98,8 +98,8 @@ const ChartFrameInnerContainer = ({
     return (
       <div className="flex flex-col items-center justify-between w-full h-full">
         {selectedPartialTPs?.length > 0 ? 
-          <div className="relative mt-[16px]">
-            <div className='w-[290px] h-[160px]'>
+          <div className="relative mt-[16px] max-md:mt-[8px]">
+            <div className='w-[290px] h-[160px] max-md:w-[234px] max-md:h-[94px]'>
               <Image
                 src={curveLine}
                 width="auto"

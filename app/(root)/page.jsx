@@ -51,7 +51,7 @@ export default function Home() {
       const fetchPartials = async () => {
         const res = await fetch(`http://localhost:3000/api/getPartials?email=${user.email}`, { cache: "no-store" });
         
-        if (!res.ok) return notFound();
+        if (!res.ok) return;
         
         const data = await res.json();
         
@@ -106,7 +106,7 @@ export default function Home() {
         )}
         <ScrollAreaFrame
         mainClass={`w-full h-[560px]`} 
-        innerClass="w-full h-fit flex items-center justify-between flex-wrap"
+        innerClass="w-full h-full flex items-start justify-between flex-wrap gap-8 max-md:gap-4"
         setSubIsWrapped={setSubIsWrapped}
         >
           <CardFrame staticTitle={"Partials"}>
@@ -158,10 +158,10 @@ export default function Home() {
               })}
             </ScrollAreaFrame>
           </CardFrame>
-          <div className="flex flex-col items-center gap-10">
+          <div className="flex flex-col items-center gap-10 max-md:gap-4">
             <div className="h-[72px]">
               {user?.given_name && (
-                <h2 className="h2 text-n-900">Hi, {firstName}!</h2>           
+                <h2 className="h2r2 text-n-900">Hi, {firstName}!</h2>           
               )}          
             </div>
             <ChartCardFrame
@@ -172,6 +172,7 @@ export default function Home() {
               templateState={templateState}
               setTemplateState={setTemplateState}
               userCustomTemplate={userCustomTemplate}
+              machineState={machineState}
             >
               <ChartFrameInnerContainer 
                 chartState={chartState}
@@ -211,7 +212,7 @@ export default function Home() {
                       priority
                     />
                   </div>      
-                  : <div className="w-[245px] absolute bottom-0"
+                  : <div className="w-[245px] absolute bottom-0 z-30"
                     onClick={() => setMachinePopoverOpen(true)}>
                     <Button 
                       label={"Machine"}

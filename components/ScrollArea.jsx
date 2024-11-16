@@ -73,7 +73,7 @@ export function ScrollAreaFrame({
       className={` 
         ${mainClass}
         ${cardFrame && vertical && "h-[328px] w-fit"} 
-        ${partialFrame && horizontal && "w-[261px] h-full"}
+        ${partialFrame && horizontal && "w-[261px] h-full max-md:w-[211px]"}
       `}
     >
       <div
@@ -82,7 +82,7 @@ export function ScrollAreaFrame({
           ${innerClass}
           ${cardFrame && vertical && "gap-2 flex flex-col"} 
           ${partialFrame && horizontal && "gap-2 mt-3.5 flex h-fit"}
-          ${isWrapped ? "flex-col justify-center items-center gap-8 pb-4" : "flex gap-8"}
+          ${innerClass && isWrapped ? "flex-col justify-center items-center pb-8" : ""}
         `}
       >
         {mainClass
