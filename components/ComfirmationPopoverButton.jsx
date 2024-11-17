@@ -10,23 +10,46 @@ import deleteCustomTemplate from '@/actions/deleteCustomTemplete'
 
 const ComfirmationPopoverButton = ({
   setComfirmationPopoverOpen, comfirmationPopoverState,
-  selectedInstrumentId, selectedPartialId, 
+  selectedInstrumentId, setSelectedPartialId,
+  selectedPartialId, 
   setServerUpdate, serverUpdate, 
   setPartialTPs, userCustomTemplateId, 
-  setTemplateState
+  setTemplateState, deleteSelectedPartialId,
+  setSelectedPartialIndex, selectedPartialIndex,
+  partials, setSelectedPartialTPIndex
 }) => {
   const {user} = useKindeBrowserClient();
   const email = user?.email;
 
   const handleDelete = async () => {    
     if (comfirmationPopoverState === "Instruments") {
-      await deleteInstrument(email, selectedInstrumentId);
-      setServerUpdate(!serverUpdate);
-      setComfirmationPopoverOpen(false);     
+      const res = await deleteInstrument(email, selectedInstrumentId);
+      if (res.success) {
+        setServerUpdate(!serverUpdate);
+        setComfirmationPopoverOpen(false);     
+      }
     } else if (comfirmationPopoverState === "Partials") {
-      await deletePartial(email, selectedPartialId);
-      setServerUpdate(!serverUpdate);
-      setComfirmationPopoverOpen(false);      
+      const res = await deletePartial(email, deleteSelectedPartialId ? deleteSelectedPartialId : selectedPartialId);
+      
+      if (res.success) {
+        if (selectedPartialId === deleteSelectedPartialId) {
+          await setSelectedPartialIndex(() => {
+            if (selectedPartialIndex === 0) {
+              return 0;
+            } else if (selectedPartialIndex > 0) {
+              return selectedPartialIndex - 1;
+            }
+          })
+          await setSelectedPartialId(() => {
+            const selectedPartial = partials.find((partial, idx) => selectedPartialIndex === idx);
+            return selectedPartial._id;
+          })
+          setSelectedPartialTPIndex(0);
+        }
+        
+        setServerUpdate(!serverUpdate);
+        setComfirmationPopoverOpen(false);      
+      }
     } else if (comfirmationPopoverState === "PartialTPs") {
       setPartialTPs([""]);  
       setComfirmationPopoverOpen(false);   
@@ -36,8 +59,8 @@ const ComfirmationPopoverButton = ({
       if (res.success) {
         setServerUpdate(!serverUpdate);
         setTemplateState("D");
+        setComfirmationPopoverOpen(false);   
       }    
-      setComfirmationPopoverOpen(false);   
     }
   } 
 

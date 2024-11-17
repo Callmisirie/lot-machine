@@ -17,7 +17,8 @@ const FormFrame = ({
   serverUpdate, setServerUpdate,
   setSelectInstrument, partialTPs, 
   setPartialTPs, setComfirmationPopoverState,
-  setComfirmationPopoverOpen
+  setComfirmationPopoverOpen,
+  setMessage, message
 }) => {
   const [lotSize, setLotSize] = useState("");
   const [finalTP, setFinalTP] = useState("");
@@ -28,25 +29,84 @@ const FormFrame = ({
   const handleServerAction = async () => {
     if (machineState === "Machine") {
       if (
-        !selectInstrument||
+        !selectInstrument ||
         !lotSize ||
         partialTPs.some((partial) => partial.trim() === "") ||
         !finalTP
       ) {
         return;
-      }     
-      
+      }
+    
+      // Convert partialTPs to numbers
+      const partialTPsNumbers = partialTPs.map(Number);
+    
+      // Check if partialTPs values are strictly increasing
+      const arePartialTPsIncreasing = partialTPsNumbers.every(
+        (value, index, array) => index === 0 || value > array[index - 1]
+      );
+    
+      if (!arePartialTPsIncreasing) {
+        setMessage({
+          success: false,
+          messageContent: "PartialTPs values should increase",
+        });
+    
+        setTimeout(() => {
+          setMessage({
+            success: false,
+            messageContent: "",
+          });
+        }, 5000);
+    
+        return;
+      }
+    
+      // Check if finalTP is higher than the highest partialTP
+      const highestPartialTP = Math.max(...partialTPsNumbers);
+    
+      if (Number(finalTP) <= highestPartialTP) {
+        setMessage({
+          success: false,
+          messageContent: "FinalTP is less than a PartialTP",
+        });
+    
+        setTimeout(() => {
+          setMessage({
+            success: false,
+            messageContent: "",
+          });
+        }, 5000);
+    
+        return;
+      }
+    
       const res = await createPartial(
-        user?.email, selectInstrument, 
-        Number(lotSize), Number(finalTP),
-        partialTPs.map(Number),
-      )
+        user?.email,
+        selectInstrument,
+        Number(lotSize),
+        Number(finalTP),
+        partialTPsNumbers // Already converted to numbers
+      );
+    
       if (res.success) {
         setSelectInstrument("");
         setLotSize("");
         setFinalTP("");
         setPartialTPs([""]);
       }
+    
+      await setMessage({
+        success: res.success,
+        messageContent: res.message,
+      });
+    
+      setTimeout(() => {
+        setMessage({
+          success: false,
+          messageContent: "",
+        });
+      }, 5000);
+    
       setServerUpdate(!serverUpdate);
     }
     
@@ -59,6 +119,19 @@ const FormFrame = ({
         setInstrument("");
         setNickname("");
       }
+    
+      await setMessage({
+        success: res.success, 
+        messageContent: res.message
+      });
+
+      setTimeout(() => {
+        setMessage({
+          success: false,
+          messageContent: ""
+        })
+      },5000)
+
       setServerUpdate(!serverUpdate);
     }
 

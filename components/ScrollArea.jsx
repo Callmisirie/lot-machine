@@ -21,7 +21,6 @@ export function ScrollAreaFrame({
 
     const handleResize = () => {
       if (wrapPoint && window.innerWidth > wrapPoint) {
-        console.log("Unwrapping detected at width:", window.innerWidth);
         setIsWrapped(false);
         setWrapPoint(null); // Reset the wrap point
         setSubIsWrapped?.(false);
@@ -38,13 +37,10 @@ export function ScrollAreaFrame({
           (child) => child.offsetTop > firstChildTop
         );
 
-        console.log("Wrapping detected:", hasWrapping);
-
         if (hasWrapping) {
           setIsWrapped(true);
           setSubIsWrapped?.(true);
           if (!wrapPoint) {
-            console.log("Setting wrap point at:", window.innerWidth);
             setWrapPoint(window.innerWidth); // Store the screen width when wrapping occurs
           }
         } else if (!hasWrapping && wrapPoint && window.innerWidth > wrapPoint) {

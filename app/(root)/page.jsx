@@ -17,7 +17,6 @@ import Image from "next/image";
 import { boltWhite, cancelWhite } from "@/public/icons/white";
 import Button from "@/components/Button";
 
-
 export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
   const [chartState, setChartState] = useState("Chart");
@@ -33,10 +32,15 @@ export default function Home() {
   const [machinePopoverOpen, setMachinePopoverOpen] = useState(false);
   const [comfirmationPopoverState, setComfirmationPopoverState] = useState("");
   const [selectedPartialId, setSelectedPartialId] = useState("");
+  const [deleteSelectedPartialId, setDeleteSelectedPartialId] = useState("");
   const [selectedInstrumentId, setSelectedInstrumentId] = useState("");
   const [userCustomTemplateId, setUserCustomTemplateId] = useState("")
   const [partialTPs, setPartialTPs] = useState([""]);
   const [subIsWrapped, setSubIsWrapped] = useState(false);
+  const [message, setMessage] = useState({
+    success: false,
+    messageContent: ""
+  });
   
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -52,7 +56,7 @@ export default function Home() {
         const res = await fetch(`http://localhost:3000/api/getPartials?email=${user.email}`, { cache: "no-store" });
         
         if (!res.ok) return;
-        
+
         const data = await res.json();
         
         setPartials(data);
@@ -83,6 +87,8 @@ export default function Home() {
               setComfirmationPopoverOpen={setComfirmationPopoverOpen}
               partialTPs={partialTPs}
               setPartialTPs={setPartialTPs}
+              message={message}
+              setMessage={setMessage}
             />
           </CardFrame>
         )
@@ -99,9 +105,15 @@ export default function Home() {
             setServerUpdate={setServerUpdate}
             selectedInstrumentId={selectedInstrumentId}
             selectedPartialId={selectedPartialId}
+            setSelectedPartialId={setSelectedPartialId}
+            deleteSelectedPartialId={deleteSelectedPartialId}
             setPartialTPs={setPartialTPs}
             userCustomTemplateId={userCustomTemplateId}
             setTemplateState={setTemplateState}
+            setSelectedPartialIndex={setSelectedPartialIndex}
+            selectedPartialIndex={selectedPartialIndex}
+            partials={partials}
+            setSelectedPartialTPIndex={setSelectedPartialTPIndex}
           />
         )}
         <ScrollAreaFrame
@@ -142,11 +154,15 @@ export default function Home() {
                       active={selectedPartialIndex === idx ? true : false}
                       setComfirmationPopoverOpen={setComfirmationPopoverOpen}
                       copy
+                      setDeleteSelectedPartialId={setDeleteSelectedPartialId}
+                      setComfirmationPopoverState={setComfirmationPopoverState}
+                      partialId={partial._id}
                     >
                       <div onClick={() => {
                         setSelectedPartialIndex(idx);
-                        setSelectedPartialId(partial._id)
-                        setComfirmationPopoverState("Partials")
+                        setSelectedPartialId(partial._id);
+                        setDeleteSelectedPartialId("");
+                        setComfirmationPopoverState("Partials");
                         if (selectedPartialIndex !== idx) {
                           setSelectedPartialTPIndex(0);
                         }                     

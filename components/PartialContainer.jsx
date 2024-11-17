@@ -8,7 +8,8 @@ const PartialContainer = ({
   active, name, nickname, partials,
   dateNTime, leftIconContainer,
   copy, setComfirmationPopoverOpen,
-  children
+  children, partialId,
+  setDeleteSelectedPartialId, setComfirmationPopoverState
 }) => {
 
   return (
@@ -55,7 +56,13 @@ const PartialContainer = ({
           {dateNTime && <p className='p3r text-n-300'>{dateNTime}</p>}
         </div>
         <div className='w-[24px] h-[24px] mt-[8px] z-20 cursor-pointer'
-          onClick={() => setComfirmationPopoverOpen(true)}
+          onClick={() => {
+            if (partialId) {
+              setDeleteSelectedPartialId(partialId);
+              setComfirmationPopoverState("Partials");
+            }
+            setComfirmationPopoverOpen(true)  
+          }}
         >
           <Image
             src={rightIconImgSrc}

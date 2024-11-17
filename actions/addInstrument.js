@@ -35,7 +35,7 @@ const addInstrument = async (email, instrument, nickname) => {
     }
   } catch (error) {
     console.log("Error adding instrument: ", error);
-    return { success: false, message: "Error adding instrument", error };
+    return { success: false, message: "Error adding instrument"};
   }
 };
 

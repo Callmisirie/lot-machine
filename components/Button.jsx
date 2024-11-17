@@ -12,7 +12,7 @@ const Button = ({
   whiteButton,
   blackButton,
 }) => {
-  return (
+  return (   
     <button type='sumbit'
     className={`${whiteButton ? "bg-white" 
       : blackButton ? "bg-n-900" 
