@@ -22,7 +22,7 @@ import {
 export function ComboboxInput({userInstruments, selectInstrument, setSelectInstrument}) {
   const [open, setOpen] = React.useState(false)
 
-  const instruments = userInstruments.map((instrument) => {
+  const instruments = userInstruments?.map((instrument) => {
     return ({
       value: instrument.instrument,
       label: instrument.instrument
@@ -54,7 +54,7 @@ export function ComboboxInput({userInstruments, selectInstrument, setSelectInstr
             <CommandList>
               <CommandEmpty>No instrument found.</CommandEmpty>
               <CommandGroup>
-                {instruments.map((instrument) => (
+                {instruments?.map((instrument) => (
                   <CommandItem
                     key={instrument.value}
                     value={instrument.value}

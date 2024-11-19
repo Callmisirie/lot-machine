@@ -9,6 +9,7 @@ import createPartial from "@/actions/createPartial";
 import { cautionAccent } from "@/public/icons/accent";
 import createCustomTemplate from "@/actions/createCustomTemple";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import { useQueryClient } from "@tanstack/react-query";
 
 const FormFrame = ({
   children, machineState, 
@@ -18,13 +19,14 @@ const FormFrame = ({
   setSelectInstrument, partialTPs, 
   setPartialTPs, setComfirmationPopoverState,
   setComfirmationPopoverOpen,
-  setMessage, message
+  setMessage
 }) => {
   const [lotSize, setLotSize] = useState("");
   const [finalTP, setFinalTP] = useState("");
   const [instrument, setInstrument] = useState("");
   const [nickname, setNickname] = useState("");
   const {user} = useKindeBrowserClient();
+  const queryClient = useQueryClient();
 
   const handleServerAction = async () => {
     if (machineState === "Machine") {
@@ -93,6 +95,7 @@ const FormFrame = ({
         setLotSize("");
         setFinalTP("");
         setPartialTPs([""]);
+        queryClient.invalidateQueries("partials"); 
       }
     
       await setMessage({
@@ -118,6 +121,7 @@ const FormFrame = ({
       if (res.success) {
         setInstrument("");
         setNickname("");
+        queryClient.invalidateQueries("instruments"); 
       }
     
       await setMessage({
@@ -142,6 +146,7 @@ const FormFrame = ({
       const res = await createCustomTemplate(user?.email, Number(customTemplate));
       if (res) {
         setCustomTemplate("");
+        queryClient.invalidateQueries("userCustomTemplate"); 
       }
       setServerUpdate(!serverUpdate);
     }

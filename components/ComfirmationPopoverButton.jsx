@@ -7,6 +7,7 @@ import deleteInstrument from '@/actions/deleteInstrument'
 import deletePartial from '@/actions/deletePartial'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import deleteCustomTemplate from '@/actions/deleteCustomTemplete'
+import { useQueryClient } from '@tanstack/react-query'
 
 const ComfirmationPopoverButton = ({
   setComfirmationPopoverOpen, comfirmationPopoverState,
@@ -20,13 +21,15 @@ const ComfirmationPopoverButton = ({
 }) => {
   const {user} = useKindeBrowserClient();
   const email = user?.email;
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {    
     if (comfirmationPopoverState === "Instruments") {
       const res = await deleteInstrument(email, selectedInstrumentId);
       if (res.success) {
+        await queryClient.invalidateQueries("instruments");    
         setServerUpdate(!serverUpdate);
-        setComfirmationPopoverOpen(false);     
+        setComfirmationPopoverOpen(false); 
       }
     } else if (comfirmationPopoverState === "Partials") {
       const res = await deletePartial(email, deleteSelectedPartialId ? deleteSelectedPartialId : selectedPartialId);
@@ -47,19 +50,20 @@ const ComfirmationPopoverButton = ({
           setSelectedPartialTPIndex(0);
         }
         
+        await queryClient.invalidateQueries("partials");     
         setServerUpdate(!serverUpdate);
-        setComfirmationPopoverOpen(false);      
+        setComfirmationPopoverOpen(false); 
       }
     } else if (comfirmationPopoverState === "PartialTPs") {
       setPartialTPs([""]);  
       setComfirmationPopoverOpen(false);   
-    } 
-    else if (comfirmationPopoverState === "Custom template") {
+    } else if (comfirmationPopoverState === "Custom template") {
       const res = await deleteCustomTemplate(email, userCustomTemplateId);
       if (res.success) {
+        await queryClient.invalidateQueries("userCustomTemplate");  
         setServerUpdate(!serverUpdate);
         setTemplateState("D");
-        setComfirmationPopoverOpen(false);   
+        setComfirmationPopoverOpen(false); 
       }    
     }
   } 

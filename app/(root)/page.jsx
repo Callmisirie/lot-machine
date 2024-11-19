@@ -16,18 +16,25 @@ import ComfirmationPopoverButton from "@/components/ComfirmationPopoverButton";
 import Image from "next/image";
 import { boltWhite, cancelWhite } from "@/public/icons/white";
 import Button from "@/components/Button";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+
+const fetchPartials = async (email) => {
+  const res = await fetch(`/api/getPartials?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch partials");
+  return res.json();
+};
 
 export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
   const [chartState, setChartState] = useState("Chart");
-  const [partials, setPartials] = useState([]);
   const [selectedPartialIndex, setSelectedPartialIndex] = useState(0);
   const [selectedPartialTPIndex, setSelectedPartialTPIndex] = useState(0);
   const [templateState, setTemplateState] = useState("D");
   const [serverUpdate, setServerUpdate] = useState(true);
   const [selectInstrument, setSelectInstrument] = useState("");
-  const [userCustomTemplate, setUserCustomTemplate] = useState("");
-  const {isAuthenticated, isLoading, user, idTokenEncoded} = useKindeBrowserClient();
+  const {isAuthenticated, isLoading, user} = useKindeBrowserClient();
   const [comfirmationPopoverOpen, setComfirmationPopoverOpen] = useState(false);
   const [machinePopoverOpen, setMachinePopoverOpen] = useState(false);
   const [comfirmationPopoverState, setComfirmationPopoverState] = useState("");
@@ -42,30 +49,38 @@ export default function Home() {
     messageContent: ""
   });
   
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      redirect(paths.auth());
-    } else if (isAuthenticated) {
-      const lmAt = idTokenEncoded;
-
-      if (!lmAt) {
-        redirect(paths.auth());
-      }
-
-      const fetchPartials = async () => {
-        const res = await fetch(`http://localhost:3000/api/getPartials?email=${user.email}`, { cache: "no-store" });
-        
-        if (!res.ok) return;
-
-        const data = await res.json();
-        
-        setPartials(data);
-      };
-      fetchPartials();
-    } 
-  }, [isLoading, isAuthenticated, serverUpdate]);
+  const {
+    data: partials,
+    isLoading: partialsLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["partials", user?.email],
+    queryFn: () => fetchPartials(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
 
   const firstName =  user?.given_name.charAt(0).toUpperCase() + user?.given_name.slice(1).toLowerCase();
+
+  const queryClient = useQueryClient();
+  const userCustomTemplate = queryClient.getQueryData(["userCustomTemplate", user?.email]);
+  
+  if (isLoading || partialsLoading) {
+    return (
+      <div className="w-full h-full flex justify-center items-center relative">
+        <div className="flex flex-col items-center gap-2">
+          <Loader className="w-10 h-10 animate-spin text-primary" />
+          <h3 className="text-xl font-bold">Loading...</h3>
+          <p>Please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoading && !isAuthenticated) {
+    redirect(paths.auth());
+  }
 
   if (isAuthenticated) {
     const machine = () => {
@@ -187,7 +202,6 @@ export default function Home() {
               partials={partials}
               templateState={templateState}
               setTemplateState={setTemplateState}
-              userCustomTemplate={userCustomTemplate}
               machineState={machineState}
             >
               <ChartFrameInnerContainer 
@@ -196,8 +210,6 @@ export default function Home() {
                 partials={partials}
                 serverUpdate={serverUpdate}
                 setServerUpdate={setServerUpdate}
-                setUserCustomTemplate={setUserCustomTemplate}
-                userCustomTemplate={userCustomTemplate}
                 templateState={templateState}
                 setTemplateState={setTemplateState}
                 selectedPartialTPIndex={selectedPartialTPIndex}

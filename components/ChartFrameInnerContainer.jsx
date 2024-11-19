@@ -13,12 +13,18 @@ import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import { ScrollBar } from "./ui/scroll-area";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const fetchUserCustomTemplate = async (email) => {
+  const res = await fetch(`/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user custom template");
+  return res.json();
+};
 
 const ChartFrameInnerContainer = ({
   chartState, partials, 
   selectedPartialIndex, serverUpdate, 
-  setServerUpdate, userCustomTemplate, 
-  setUserCustomTemplate, templateState,
+  setServerUpdate, templateState,
   setTemplateState, selectedPartialTPIndex, 
   setSelectedPartialTPIndex, setComfirmationPopoverOpen,
   setComfirmationPopoverState, setUserCustomTemplateId
@@ -26,7 +32,19 @@ const ChartFrameInnerContainer = ({
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
   const {isAuthenticated, user} = useKindeBrowserClient();
-  
+
+  const {
+    data: userCustomTemplate,
+    isLoading: userCustomTemplateLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["userCustomTemplate", user?.email],
+    queryFn: () => fetchUserCustomTemplate(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  }); 
+
   useEffect(() => {
     if (isAuthenticated) {
       const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
@@ -42,18 +60,9 @@ const ChartFrameInnerContainer = ({
         
         setSelectedPartialTPs(partialTPs)
       }
-      const fetchUserCustomTemplate = async () => {
-        const res = await fetch(`http://localhost:3000/api/getCustomTemplate?email=${user?.email}`, { cache: "no-store" });
-        
-        if (!res.ok) return notFound();
-        
-        const data = await res.json();
-        setUserCustomTemplate(data);
-      }
-
-      fetchUserCustomTemplate();
     }
-  }, [isAuthenticated, partials, selectedPartialIndex, serverUpdate, templateState]); 
+  }, [isAuthenticated, partials, selectedPartialIndex, serverUpdate, templateState, userCustomTemplateLoading]); 
+
 
   if (chartState === "Template") {
     return (
