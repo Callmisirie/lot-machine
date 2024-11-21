@@ -19,12 +19,14 @@ import Button from "@/components/Button";
 import { useQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import useResizeObserver from "use-resize-observer";
 
 const fetchPartials = async (email) => {
   const res = await fetch(`/api/getPartials?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch partials");
   return res.json();
 };
+
 
 export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
@@ -48,7 +50,7 @@ export default function Home() {
     success: false,
     messageContent: ""
   });
-  
+  const { ref, width, height } = useResizeObserver();  
   const {
     data: partials,
     isLoading: partialsLoading,
@@ -111,6 +113,7 @@ export default function Home() {
     }
     return (
       <div className="w-full h-full flex items-center relative">
+        <div ref={ref}className="w-full h-full absolute" />
         {comfirmationPopoverOpen && (
           <ComfirmationPopoverButton 
             comfirmationPopoverState={comfirmationPopoverState}
@@ -131,128 +134,135 @@ export default function Home() {
             setSelectedPartialTPIndex={setSelectedPartialTPIndex}
           />
         )}
-        <ScrollAreaFrame
-        mainClass={`w-full h-[560px]`} 
-        innerClass="w-full h-full flex items-start justify-between flex-wrap gap-8 max-md:gap-4"
-        setSubIsWrapped={setSubIsWrapped}
+        <div
+          style={{ height: `${height}px` }} // Dynamically set the inline style
+          className="w-full flex items-center justify-center absolute"
         >
-          <CardFrame staticTitle={"Partials"}>
-            <ScrollAreaFrame
-            cardFrame
-            vertical
+          <ScrollAreaFrame
+            // mainClass={`w-full absolute h-[560px]`} 
+            mainClass={`w-full h-full`} 
+            innerClass="w-full h-full flex items-center justify-between flex-wrap gap-8 max-md:gap-4"
+            setSubIsWrapped={setSubIsWrapped}
             >
-              {partials.map((partial, idx) => {
-                const partials = partialCalc(
-                  partial.lotSize, partial.finalTP, 
-                  partial.partialTPs, templateState, 
-                  userCustomTemplate?.customValue
-                )
-                const dateNTime = new Date(partial.createdAt).toLocaleDateString("en-US", {
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric',
-                  // hour: '2-digit', 
-                  // minute: '2-digit'
-                });
-                return (
-                  <div key={idx}
-                    className="no-select"
-                  >
-                    <PartialContainer 
-                      name={partial.instrument}
-                      nickname={partial.nickname}
-                      partials={partials}
-                      dateNTime={dateNTime}
-                      leftIconImgSrc={clipboardBlack}
-                      rightIconImgSrc={deleteIconBlack}
-                      leftIconContainer
-                      active={selectedPartialIndex === idx ? true : false}
-                      setComfirmationPopoverOpen={setComfirmationPopoverOpen}
-                      copy
-                      setDeleteSelectedPartialId={setDeleteSelectedPartialId}
-                      setComfirmationPopoverState={setComfirmationPopoverState}
-                      partialId={partial._id}
-                    >
-                      <div onClick={() => {
-                        setSelectedPartialIndex(idx);
-                        setSelectedPartialId(partial._id);
-                        setDeleteSelectedPartialId("");
-                        setComfirmationPopoverState("Partials");
-                        if (selectedPartialIndex !== idx) {
-                          setSelectedPartialTPIndex(0);
-                        }                     
-                      }}
-                      className="absolute top-0 w-full h-full z-10"/>
-                    </PartialContainer>
-                  </div>
-                );      
-              })}
-            </ScrollAreaFrame>
-          </CardFrame>
-          <div className="flex flex-col items-center gap-10 max-md:gap-4">
-            <div className="h-[72px]">
-              {user?.given_name && (
-                <h2 className="h2r2 text-n-900">Hi, {firstName}!</h2>           
-              )}          
-            </div>
-            <ChartCardFrame
-              chartState={chartState}
-              setChartState={setChartState}
-              selectedPartialIndex={selectedPartialIndex}
-              partials={partials}
-              templateState={templateState}
-              setTemplateState={setTemplateState}
-              machineState={machineState}
-            >
-              <ChartFrameInnerContainer 
-                chartState={chartState}
-                selectedPartialIndex={selectedPartialIndex}
-                partials={partials}
-                serverUpdate={serverUpdate}
-                setServerUpdate={setServerUpdate}
-                templateState={templateState}
-                setTemplateState={setTemplateState}
-                selectedPartialTPIndex={selectedPartialTPIndex}
-                setSelectedPartialTPIndex={setSelectedPartialTPIndex}
-                setComfirmationPopoverState={setComfirmationPopoverState}
-                setComfirmationPopoverOpen={setComfirmationPopoverOpen}
-                setUserCustomTemplateId={setUserCustomTemplateId}
-              />
-            </ChartCardFrame>
-          </div>
-          <div className={`${machinePopoverOpen 
-          ? "absolute w-full h-full flex justify-center items-center backdrop-blur-lg z-20" 
-          : ""}`}
-          >
-            <div className={`w-fit h-fit flex flex-col items-center justify-center gap-8`}>
-              {machine()}    
-                {subIsWrapped 
-                  ? machinePopoverOpen 
-                  ? <div className='w-[48px] h-[48px] 
-                  bg-n-900 cursor-pointer rounded-full
-                  flex justify-center items-center'
-                  onClick={() => setMachinePopoverOpen(false)}>
-                    <Image
-                      src={cancelWhite}
-                      width={24}
-                      height={24}
-                      alt='cancel icon'
-                      priority
-                    />
-                  </div>      
-                  : <div className="w-[245px] absolute bottom-0 z-30"
-                    onClick={() => setMachinePopoverOpen(true)}>
-                    <Button 
-                      label={"Machine"}
-                      rightIcon
-                      rightIconImgSrc={boltWhite}
-                      blackButton
-                    />
-                  </div> 
-                : null}
-            </div>
-          </div>
-        </ScrollAreaFrame>
+              <CardFrame staticTitle={"Partials"}>
+                <ScrollAreaFrame
+                cardFrame
+                vertical
+                >
+                  {partials.map((partial, idx) => {
+                    const partials = partialCalc(
+                      partial.lotSize, partial.finalTP, 
+                      partial.partialTPs, templateState, 
+                      userCustomTemplate?.customValue
+                    )
+                    const dateNTime = new Date(partial.createdAt).toLocaleDateString("en-US", {
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric',
+                      // hour: '2-digit', 
+                      // minute: '2-digit'
+                    });
+                    return (
+                      <div key={idx}
+                        className="no-select"
+                      >
+                        <PartialContainer 
+                          name={partial.instrument}
+                          nickname={partial.nickname}
+                          partials={partials}
+                          dateNTime={dateNTime}
+                          leftIconImgSrc={clipboardBlack}
+                          rightIconImgSrc={deleteIconBlack}
+                          leftIconContainer
+                          active={selectedPartialIndex === idx ? true : false}
+                          setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+                          copy
+                          setDeleteSelectedPartialId={setDeleteSelectedPartialId}
+                          setComfirmationPopoverState={setComfirmationPopoverState}
+                          partialId={partial._id}
+                        >
+                          <div onClick={() => {
+                            setSelectedPartialIndex(idx);
+                            setSelectedPartialId(partial._id);
+                            setDeleteSelectedPartialId("");
+                            setComfirmationPopoverState("Partials");
+                            if (selectedPartialIndex !== idx) {
+                              setSelectedPartialTPIndex(0);
+                            }                     
+                          }}
+                          className="absolute top-0 w-full h-full z-10"/>
+                        </PartialContainer>
+                      </div>
+                    );      
+                  })}
+                </ScrollAreaFrame>
+              </CardFrame>
+              <div className="flex flex-col items-center gap-10 max-md:gap-4">
+                <div className="h-[72px]">
+                  {user?.given_name && (
+                    <h2 className="h2r2 text-n-900">Hi, {firstName}!</h2>           
+                  )}          
+                </div>
+                <ChartCardFrame
+                  chartState={chartState}
+                  setChartState={setChartState}
+                  selectedPartialIndex={selectedPartialIndex}
+                  partials={partials}
+                  templateState={templateState}
+                  setTemplateState={setTemplateState}
+                  machineState={machineState}
+                >
+                  <ChartFrameInnerContainer 
+                    chartState={chartState}
+                    selectedPartialIndex={selectedPartialIndex}
+                    partials={partials}
+                    serverUpdate={serverUpdate}
+                    setServerUpdate={setServerUpdate}
+                    templateState={templateState}
+                    setTemplateState={setTemplateState}
+                    selectedPartialTPIndex={selectedPartialTPIndex}
+                    setSelectedPartialTPIndex={setSelectedPartialTPIndex}
+                    setComfirmationPopoverState={setComfirmationPopoverState}
+                    setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+                    setUserCustomTemplateId={setUserCustomTemplateId}
+                  />
+                </ChartCardFrame>
+              </div>
+              <div className={`${machinePopoverOpen 
+              ? "absolute w-full h-full flex justify-center items-center backdrop-blur-lg z-20" 
+              : ""}`}
+              >
+                <div className={`w-fit h-fit flex flex-col items-center justify-center gap-8`}>
+                  {machine()}    
+                    {subIsWrapped 
+                      ? machinePopoverOpen 
+                      ? <div className='w-[48px] h-[48px] 
+                      bg-n-900 cursor-pointer rounded-full
+                      flex justify-center items-center'
+                      onClick={() => setMachinePopoverOpen(false)}>
+                        <Image
+                          src={cancelWhite}
+                          width={24}
+                          height={24}
+                          alt='cancel icon'
+                          priority
+                        />
+                      </div>      
+                      : <div className="w-[245px] absolute bottom-0 z-30"
+                        onClick={() => setMachinePopoverOpen(true)}>
+                        <Button 
+                          label={"Machine"}
+                          rightIcon
+                          rightIconImgSrc={boltWhite}
+                          blackButton
+                        />
+                      </div> 
+                    : null}
+                </div>
+              </div>
+            </ScrollAreaFrame>          
+        </div>
+
       </div>
     )    
   }

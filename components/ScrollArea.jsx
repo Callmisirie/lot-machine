@@ -10,6 +10,7 @@ export function ScrollAreaFrame({
   mainClass,
   innerClass,
   setSubIsWrapped,
+  dynamicHeight
 }) {
   const [isWrapped, setIsWrapped] = useState(false); // Tracks wrapping state
   const [wrapPoint, setWrapPoint] = useState(null); // Stores the precise screen width when wrapping occurs
