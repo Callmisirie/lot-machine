@@ -37,7 +37,7 @@ const CardFrameInnerContainer = ({
     refetch,
   } = useQuery({
     queryKey: ["instruments", user?.email],
-    queryFn: () => fetchInstruments(user.email),
+    queryFn: async () => await fetchInstruments(user.email),
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });   

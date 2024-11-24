@@ -40,14 +40,14 @@ const ChartFrameInnerContainer = ({
     refetch,
   } = useQuery({
     queryKey: ["userCustomTemplate", user?.email],
-    queryFn: () => fetchUserCustomTemplate(user.email),
+    queryFn: async () => await fetchUserCustomTemplate(user.email),
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   }); 
 
   useEffect(() => {
     if (isAuthenticated) {
-      const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
+      const partial = partials?.find((partial, idx) => selectedPartialIndex === idx );
 
       if (partial) {
         const partialTPs = partialCalc(

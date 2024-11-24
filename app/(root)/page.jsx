@@ -50,7 +50,7 @@ export default function Home() {
     success: false,
     messageContent: ""
   });
-  const { ref, width, height } = useResizeObserver();  
+  const { ref, height } = useResizeObserver();  
   const {
     data: partials,
     isLoading: partialsLoading,
@@ -58,7 +58,7 @@ export default function Home() {
     refetch,
   } = useQuery({
     queryKey: ["partials", user?.email],
-    queryFn: () => fetchPartials(user.email),
+    queryFn: async () => await fetchPartials(user.email),
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
@@ -149,7 +149,7 @@ export default function Home() {
                 cardFrame
                 vertical
                 >
-                  {partials.map((partial, idx) => {
+                  {partials?.map((partial, idx) => {
                     const partials = partialCalc(
                       partial.lotSize, partial.finalTP, 
                       partial.partialTPs, templateState, 

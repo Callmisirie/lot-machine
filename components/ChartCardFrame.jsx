@@ -21,7 +21,7 @@ const ChartCardFrame = ({
   
 
   useEffect(() => {
-    const partial = partials.find((partial, idx) => selectedPartialIndex === idx );
+    const partial = partials?.find((partial, idx) => selectedPartialIndex === idx );
 
     if (partial) {
       setSelectedPartial(partial);
