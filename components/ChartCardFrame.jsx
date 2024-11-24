@@ -5,21 +5,14 @@ import TwoSwitch from './TwoSwitch';
 import TemplatePill from './TemplatePill';
 import { dropArrowBlack } from '@/public/icons/black';
 import { dropArrowWhite } from '@/public/icons/white';
-import { useQueryClient } from '@tanstack/react-query';
-import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 
 const ChartCardFrame = ({
   children, chartState, 
   setChartState, selectedPartialIndex, 
   partials, templateState, 
-  setTemplateState
+  setTemplateState, userCustomTemplate
 }) => {
   const [selectedPartial, setSelectedPartial] = useState();
-  const { user} = useKindeBrowserClient();
-  const queryClient = useQueryClient();
-  const userCustomTemplate = queryClient.getQueryData(["userCustomTemplate", user?.email]);
-  
-
   useEffect(() => {
     const partial = partials?.find((partial, idx) => selectedPartialIndex === idx );
 

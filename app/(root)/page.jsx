@@ -27,6 +27,11 @@ const fetchPartials = async (email) => {
   return res.json();
 };
 
+const fetchUserCustomTemplate = async (email) => {
+  const res = await fetch(`/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user custom template");
+  return res.json();
+};
 
 export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
@@ -63,10 +68,19 @@ export default function Home() {
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
 
+  const {
+    data: userCustomTemplate,
+    isLoading: userCustomTemplateLoading,
+  } = useQuery({
+    queryKey: ["userCustomTemplate", user?.email],
+    queryFn: async () => await fetchUserCustomTemplate(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  }); 
+
   const firstName =  user?.given_name.charAt(0).toUpperCase() + user?.given_name.slice(1).toLowerCase();
 
   const queryClient = useQueryClient();
-  const userCustomTemplate = queryClient.getQueryData(["userCustomTemplate", user?.email]);
   
   if (isLoading || partialsLoading) {
     return (
@@ -112,7 +126,7 @@ export default function Home() {
       } 
     }
     return (
-      <div className="w-full h-full flex items-center relative">
+      <div className="w-full h-full flex items-start relative">
         <div ref={ref}className="w-full h-full absolute" />
         {comfirmationPopoverOpen && (
           <ComfirmationPopoverButton 
@@ -145,6 +159,7 @@ export default function Home() {
             mainClass={`w-full h-full`} 
             innerClass="w-full h-full flex items-center justify-between flex-wrap gap-8 max-md:gap-4"
             setSubIsWrapped={setSubIsWrapped}
+            setMachinePopoverOpen={setMachinePopoverOpen}
             >
               <CardFrame staticTitle={"Partials"}>
                 <ScrollAreaFrame
@@ -213,6 +228,7 @@ export default function Home() {
                   templateState={templateState}
                   setTemplateState={setTemplateState}
                   machineState={machineState}
+                  userCustomTemplate={userCustomTemplate}
                 >
                   <ChartFrameInnerContainer 
                     chartState={chartState}
@@ -227,12 +243,15 @@ export default function Home() {
                     setComfirmationPopoverState={setComfirmationPopoverState}
                     setComfirmationPopoverOpen={setComfirmationPopoverOpen}
                     setUserCustomTemplateId={setUserCustomTemplateId}
+                    userCustomTemplate={userCustomTemplate}
                   />
                 </ChartCardFrame>
               </div>
               <div className={`${machinePopoverOpen 
-              ? "absolute w-full h-full flex justify-center items-center backdrop-blur-lg z-20" 
+              ? "fixed w-full flex justify-center items-center backdrop-blur-lg z-20" 
               : ""}`}
+              style={{ 
+                height: `${subIsWrapped && machinePopoverOpen ? `${height}px` : 'fit-content'}`}}
               >
                 <div className={`w-fit h-fit flex flex-col items-center justify-center gap-8`}>
                   {machine()}    

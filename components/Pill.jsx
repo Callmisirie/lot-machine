@@ -6,16 +6,18 @@ import React from 'react';
 const Pill = ({
   partialTP, rightIconImgSrc, 
   blackPill, active, 
-  action, 
+  action, noCursor,
   userCustomTemplateId,
   content, copy, 
   setComfirmationPopoverOpen,
   setComfirmationPopoverState, 
-  setUserCustomTemplateId 
+  setUserCustomTemplateId
 }) => {
   return (
     <div className={`flex items-center 
-    justify-center w-fit cursor-pointer ${userCustomTemplateId && "shadow-lg"}
+    justify-center w-fit 
+    ${!noCursor ? "cursor-pointer" : "select-none"} 
+    ${userCustomTemplateId && "shadow-lg"}
     h-fit gap-[2px] px-2 py-1 rounded-[16px] 
      ${blackPill ? "bg-n-900 text-white" 
      : active ? "text-n-700 border-n-700 border" 

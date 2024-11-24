@@ -9,17 +9,9 @@ import { clipboardWhite } from "@/public/icons/white";
 import FormFrame from "./FormFrame";
 import DualButton from "./DualButton";
 import { cancelBlack } from "@/public/icons/black";
-import deleteCustomTemplate from "@/actions/deleteCustomTemplete";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import { ScrollBar } from "./ui/scroll-area";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-const fetchUserCustomTemplate = async (email) => {
-  const res = await fetch(`/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user custom template");
-  return res.json();
-};
 
 const ChartFrameInnerContainer = ({
   chartState, partials, 
@@ -27,23 +19,12 @@ const ChartFrameInnerContainer = ({
   setServerUpdate, templateState,
   setTemplateState, selectedPartialTPIndex, 
   setSelectedPartialTPIndex, setComfirmationPopoverOpen,
-  setComfirmationPopoverState, setUserCustomTemplateId
+  setComfirmationPopoverState, setUserCustomTemplateId, 
+  userCustomTemplate
 }) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
   const {isAuthenticated, user} = useKindeBrowserClient();
-
-  const {
-    data: userCustomTemplate,
-    isLoading: userCustomTemplateLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["userCustomTemplate", user?.email],
-    queryFn: async () => await fetchUserCustomTemplate(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  }); 
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,7 +42,7 @@ const ChartFrameInnerContainer = ({
         setSelectedPartialTPs(partialTPs)
       }
     }
-  }, [isAuthenticated, partials, selectedPartialIndex, serverUpdate, templateState, userCustomTemplateLoading]); 
+  }, [isAuthenticated, partials, selectedPartialIndex, serverUpdate, templateState]); 
 
 
   if (chartState === "Template") {

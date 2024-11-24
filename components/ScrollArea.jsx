@@ -11,6 +11,7 @@ export function ScrollAreaFrame({
   mainClass,
   innerClass,
   setSubIsWrapped,
+  setMachinePopoverOpen
 }) {
   const [isWrapped, setIsWrapped] = useState(false); // Tracks wrapping state
   const [wrapPoint, setWrapPoint] = useState(null); // Stores the precise screen width when wrapping occurs
@@ -26,6 +27,7 @@ export function ScrollAreaFrame({
           setIsWrapped(false);
           setWrapPoint(null); // Reset the wrap point
           setSubIsWrapped?.(false);
+          setMachinePopoverOpen(false);
         }
       }
     };
@@ -47,11 +49,11 @@ export function ScrollAreaFrame({
             setWrapPoint(width); // Store the screen width when wrapping occurs
           }
         }
-        handleResize();
       } else {
         setIsWrapped(false);
         setSubIsWrapped?.(false);
       }
+      handleResize();
     }
   }, [width, wrapPoint, setSubIsWrapped]);
 
@@ -71,7 +73,7 @@ export function ScrollAreaFrame({
           ${innerClass}
           ${cardFrame && vertical && "gap-2 flex flex-col"} 
           ${partialFrame && horizontal && "gap-2 mt-3.5 flex h-fit"} 
-          ${innerClass && isWrapped ? "flex-col justify-center items-center pb-8" : ""}`}
+          ${innerClass && isWrapped ? "flex-col justify-center items-center pb-8" : ""} transition-all`}
       >
         {mainClass
           ? React.Children.map(children, (child, index) => {
