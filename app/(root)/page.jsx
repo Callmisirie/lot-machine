@@ -134,10 +134,12 @@ export default function Home() {
             setSelectedPartialTPIndex={setSelectedPartialTPIndex}
           />
         )}
-        <div
-          style={{ height: `${height}px` }} // Dynamically set the inline style
-          className="w-full flex items-center justify-center absolute"
-        >
+          <div
+            style={{ 
+              height: `${subIsWrapped ? `${height - 48}px` : '100%'}` 
+            }} // Dynamically set the inline style
+            className="w-full flex items-center justify-center absolute"
+          >
           <ScrollAreaFrame
             // mainClass={`w-full absolute h-[560px]`} 
             mainClass={`w-full h-full`} 

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import useResizeObserver from "use-resize-observer";
 
 export function ScrollAreaFrame({
   children,
@@ -10,26 +11,27 @@ export function ScrollAreaFrame({
   mainClass,
   innerClass,
   setSubIsWrapped,
-  dynamicHeight
 }) {
   const [isWrapped, setIsWrapped] = useState(false); // Tracks wrapping state
   const [wrapPoint, setWrapPoint] = useState(null); // Stores the precise screen width when wrapping occurs
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // Using the useResizeObserver hook
+  const { ref, width } = useResizeObserver();
 
+  useEffect(() => {
     const handleResize = () => {
-      if (wrapPoint && window.innerWidth > wrapPoint) {
-        setIsWrapped(false);
-        setWrapPoint(null); // Reset the wrap point
-        setSubIsWrapped?.(false);
+      if (wrapPoint && width > wrapPoint) {
+        if (wrapPoint) {
+          setIsWrapped(false);
+          setWrapPoint(null); // Reset the wrap point
+          setSubIsWrapped?.(false);
+        }
       }
     };
 
-    const observer = new ResizeObserver(() => {
-      const childrenArray = Array.from(container.children);
+    if (containerRef.current && width) {
+      const childrenArray = Array.from(containerRef.current.children);
 
       if (childrenArray.length > 1) {
         const firstChildTop = childrenArray[0].offsetTop;
@@ -42,45 +44,34 @@ export function ScrollAreaFrame({
           setIsWrapped(true);
           setSubIsWrapped?.(true);
           if (!wrapPoint) {
-            setWrapPoint(window.innerWidth); // Store the screen width when wrapping occurs
+            setWrapPoint(width); // Store the screen width when wrapping occurs
           }
-        } else if (!hasWrapping && wrapPoint && window.innerWidth > wrapPoint) {
-          setIsWrapped(false);
-          setSubIsWrapped?.(false);
         }
+        handleResize();
       } else {
         setIsWrapped(false);
         setSubIsWrapped?.(false);
       }
-    });
-
-    observer.observe(container);
-
-    // Listen to window resize
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      observer.disconnect(); // Cleanup observer
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [wrapPoint, setSubIsWrapped]);
+    }
+  }, [width, wrapPoint, setSubIsWrapped]);
 
   return (
     <ScrollArea
       className={` 
         ${mainClass}
         ${cardFrame && vertical && "h-[328px] w-fit"} 
-        ${partialFrame && horizontal && "w-[261px] h-full max-md:w-[211px]"}
-      `}
+        ${partialFrame && horizontal && "w-[261px] h-full max-md:w-[211px]"}`}
     >
       <div
-        ref={containerRef}
+        ref={(node) => {
+          containerRef.current = node;
+          ref(node); // Attach the ref to the container
+        }}
         className={` 
           ${innerClass}
           ${cardFrame && vertical && "gap-2 flex flex-col"} 
-          ${partialFrame && horizontal && "gap-2 mt-3.5 flex h-fit"}
-          ${innerClass && isWrapped ? "flex-col justify-center items-center pb-8" : ""}
-        `}
+          ${partialFrame && horizontal && "gap-2 mt-3.5 flex h-fit"} 
+          ${innerClass && isWrapped ? "flex-col justify-center items-center pb-8" : ""}`}
       >
         {mainClass
           ? React.Children.map(children, (child, index) => {
