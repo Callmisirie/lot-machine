@@ -3,6 +3,10 @@ import React from 'react'
 const TabButtons = ({
   rightlabel,
   leftLabel,
+  tabButtonState,
+  setTabButtonState,
+  referral,
+  howItWorks
 }) => {
   return (
     <div className="flex px-2 
@@ -10,18 +14,55 @@ const TabButtons = ({
     justify-center items-center">
       <div
       className={`flex items-center 
-      justify-center bg-white w-full 
+      justify-center w-full 
       h-[48px] cursor-pointer
-      rounded-[16px] shadow-md`}>
-        <p className='text-n-900 l1b'>
+      rounded-[16px] shadow-md 
+      ${referral ?
+      tabButtonState === "Statistic"
+      ? "bg-n-900 text-n-100"
+      : "bg-white text-n-900"
+      : ""}
+      ${howItWorks ?
+      tabButtonState === "Lot machine"
+      ? "bg-n-900 text-n-100"
+      : "bg-white text-n-900"
+      : ""}`}
+      onClick={() => {
+        if (referral) {
+          setTabButtonState("Statistic")
+        }
+        if (howItWorks) {
+          setTabButtonState("Lot machine")
+        }
+      }}>
+        <p className='l1b'>
           {leftLabel}
         </p>
       </div>
       <div
       className={`flex items-center 
-      justify-center bg-n-900
-      w-full h-[48px] rounded-[16px] shadow-md`}>
-        <p className='text-n-100 l1b'>
+      justify-center w-full 
+      h-[48px] cursor-pointer
+      rounded-[16px] shadow-md 
+      ${referral ?
+        tabButtonState === "Withdrawal"
+      ? "bg-n-900 text-n-100"
+      : "bg-white text-n-900"
+      : ""}
+      ${howItWorks ?
+         tabButtonState === "Referral"
+      ? "bg-n-900 text-n-100"
+      : "bg-white text-n-900"
+      : ""}`}
+      onClick={() => {
+        if (referral) {
+          setTabButtonState("Withdrawal")
+        }
+        if (howItWorks) {
+          setTabButtonState("Referral")
+        }
+      }}>
+        <p className='l1b'>
           {rightlabel}
         </p>
       </div>

@@ -8,6 +8,7 @@ import copyrightWhite from "./white-copyright.png";
 import createWhite from "./white-create.png";
 import deleteIconWhite from "./white-delete.png";
 import dropArrowWhite from "./white-drop-arrow.png";
+import backArrowWhite from "./white-back-arrow.png";
 import emailWhite from "./white-email.png";
 import listWhite from "./white-list.png";
 import resetWhite from "./white-reset.png";
@@ -20,7 +21,7 @@ import userWhite from "./white-user.png";
 export {
   addWhite, boltWhite, cancelWhite, cautionWhite,
   chartlineWhite, clipboardWhite, copyrightWhite, 
-  createWhite, deleteIconWhite, dropArrowWhite, emailWhite, 
-  listWhite, resetWhite, settingsWhite, signoutWhite, 
+  createWhite, deleteIconWhite, dropArrowWhite, backArrowWhite, 
+  emailWhite, listWhite, resetWhite, settingsWhite, signoutWhite, 
   templateWhite, twitterWhite, userWhite
 }

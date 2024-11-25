@@ -1,11 +1,14 @@
+"use client"
+
 import CardFrame from '@/components/account/CardFrame'
 import Header from '@/components/account/Header'
 import TabButtons from '@/components/account/TabButtons'
-import React from 'react'
+import React, { useState } from 'react'
 
 const page = () => {
+  const [tabButtonState, setTabButtonState] = useState("Lot machine")
   return (
-    <div className='w-full h-full flex flex-col justify-start items-center gap-[32px]'>
+    <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
       <Header 
       title={"How it works"}
       text={"Simple, transparent and enjoyable"}
@@ -14,6 +17,9 @@ const page = () => {
         <TabButtons 
         leftLabel={"Lot machine"}
         rightlabel={"Referral"}
+        tabButtonState={tabButtonState}
+        setTabButtonState={setTabButtonState}
+        howItWorks
         />
         <CardFrame
         wide
