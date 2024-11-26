@@ -59,8 +59,6 @@ export default function Home() {
   const {
     data: partials,
     isLoading: partialsLoading,
-    isError,
-    refetch,
   } = useQuery({
     queryKey: ["partials", user?.email],
     queryFn: async () => await fetchPartials(user.email),
@@ -79,8 +77,6 @@ export default function Home() {
   }); 
 
   const firstName =  user?.given_name.charAt(0).toUpperCase() + user?.given_name.slice(1).toLowerCase();
-
-  const queryClient = useQueryClient();
   
   if (isLoading || partialsLoading) {
     return (
@@ -98,7 +94,7 @@ export default function Home() {
     redirect(paths.auth());
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && !partialsLoading && partials) {
     const machine = () => {
       if (subIsWrapped && machinePopoverOpen || !subIsWrapped && !machinePopoverOpen) {
         return (
@@ -125,6 +121,7 @@ export default function Home() {
         )
       } 
     }
+    
     return (
       <div className="w-full h-full flex items-start relative">
         <div ref={ref}className="w-full h-full absolute" />

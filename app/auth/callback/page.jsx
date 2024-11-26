@@ -6,15 +6,22 @@ import Image from "next/image";
 import { checkAuthStatus } from "./action";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import paths from "@/common/paths";
 
 const Page = () => {
   const router = useRouter();
-	const { data } = useQuery({
+	const { data, isLoading } = useQuery({
 		queryKey: ["checkAuthStatus"],
 		queryFn: async () => await checkAuthStatus(),
 	});
 
-  if(data?.success) router.push("/");
+  if(data?.success && !isLoading) {
+    router.push(paths.home());
+  }
+
+  if (!data?.success && !isLoading) {
+    router.push("/api/auth/logout")
+  }
 
 	return (
 		<div className='w-full h-full flex justify-center items-center relative'>

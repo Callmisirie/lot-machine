@@ -8,7 +8,7 @@ import Header from '@/components/account/Header'
 import Input from '@/components/account/Input'
 import TabButtons from '@/components/account/TabButtons'
 import { clipboardBlack, dropArrowBlack } from '@/public/icons/black'
-import { backArrowWhite, cancelWhite, dropArrowWhite } from '@/public/icons/white'
+import { backArrowWhite, cancelWhite } from '@/public/icons/white'
 import Image from 'next/image'
 import React, { useState } from 'react'
 
@@ -254,6 +254,7 @@ const page = () => {
                 cursor-pointer'
                 onClick={() => {
                   setIsWithdrawalHistory(false)
+                  setIsWithdrawalDetails(false)
                 }}>
                   <Image
                     src={cancelWhite}
@@ -368,7 +369,7 @@ const page = () => {
                 cursor-pointer'
                 onClick={() => {
                   setIsWithdrawalHistory(false)
-                  setIsWithdrawalHistory(false)
+                  setIsWithdrawalDetails(false)
                 }}>
                   <Image
                     src={cancelWhite}
