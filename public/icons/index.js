@@ -19,11 +19,13 @@ import twitter from "./twitter.png";
 import user from "./user.png";
 import sOut from "./sOut.svg";
 import curveLine from "./curve-line.png";
+import search from "./search.png";
 
 export {
   add, bolt, cancel, caution,
   chartline, clipboard, copyright, 
   create, deleteIcon, dropArrow, email, 
   google, list, reset, settings, signout, 
-  template, twitter, user, sOut, curveLine
+  template, twitter, user, sOut, curveLine, 
+  search
 }

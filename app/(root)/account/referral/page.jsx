@@ -13,23 +13,25 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 
 const page = () => {
-  const [tabButtonState, setTabButtonState] = useState("Statistic")
+  const [tabButtonState, setTabButtonState] = useState("Statistics")
   const [isAddedBank, setIsAddedBank] = useState(true)
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
   const [isWithdrawalDetails, setIsWithdrawalDetails] = useState(false)
 
   const referralContent = () => {
-    if (tabButtonState === "Statistic") {
+    if (tabButtonState === "Statistics") {
       if (!isReferralList) {
         return (
           <div className='w-full h-full 
           flex flex-col justify-between 
           items-center'>
-            <div className='flex w-full h-fit 
-            justify-between items-center 
-            gap-2 border-b border-n-300'>
-              <div className='w-fit flex items-center gap-2'>
+            <div className='flex w-full h-[72px] 
+            items-start justify-start flex-col
+            gap-2 '>
+              <div className='w-fit flex 
+              items-center justify-start gap-4 
+              border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
                 <p className='p2b text-n-500'>$124.00</p>
               </div>
@@ -42,7 +44,7 @@ const page = () => {
             </div>
             <div className='flex w-full h-fit justify-between items-start'>
               <div className='flex flex-col 
-              w-fit gap-2 pr-2 items-start
+              w-fit pr-2 items-start
               border-n-300 border-r'>
                 <h5 className='h5 text-n-700'>Referral</h5>
                 <div className='flex flex-col w-fit h-fit'>
@@ -57,26 +59,24 @@ const page = () => {
                 </div>
               </div>
               <div className='flex flex-col 
-              w-fit h-[132px] gap-2 
-              items-start justify-start'>
+              w-fit h-fit items-start justify-start'>
                 <h6 className='h6 text-n-700'>Nov earning</h6>
                 <h3 className='h3 text-n-500'>$62.00</h3>
               </div>
             </div>
             <div className='flex flex-col w-full h-fit'>
-              <div className='flex flex-col w-full h-fit justify-start'>
-                <p className='p3b text-n-700'>Level 1</p>
-                <div className='flex w-fit h-fit gap-1 items-center'>
-                  <p className='p3r text-n-500'>Split status -</p>
-                  <p className='p2b text-n-500'>Active</p>
-                </div>
-              </div>
               <div className='flex w-fit h-fit 
               justify-start items-center gap-1'>
                 <h2 className='h2 text-n-300'>20%</h2>
-                <h6 className='h6 text-n-500'>
-                  Current referral split
-                </h6>
+                <div className='w-fit h-fit flex items-center gap-1'>
+                  <p className='p2b text-n-500'>
+                    Referral split -
+                  </p>
+                  <p className='p2b text-n-700'>
+                    Active
+                  </p>
+
+                </div>
               </div>
               <div className='flex justify-between items-end'>
                 <div className='flex w-fit h-fit 
@@ -165,10 +165,12 @@ const page = () => {
           <div className='w-full h-full 
           flex flex-col justify-between 
           items-center'>
-            <div className='flex w-full h-fit 
-            justify-between items-center 
-            gap-2 border-b border-n-300'>
-              <div className='w-fit flex items-center gap-2'>
+            <div className='flex w-full h-[72px] 
+            items-start justify-start flex-col
+            gap-2 '>
+              <div className='w-fit flex 
+              items-center justify-start gap-4 
+              border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
                 <p className='p2b text-n-500'>$124.00</p>
               </div>
@@ -208,21 +210,19 @@ const page = () => {
           <div className='w-full h-full 
           flex flex-col justify-between 
           items-center'>
-            <div className='flex w-full h-fit 
-            justify-between items-start 
-            border-b border-n-300'>
-              <div className='w-fit flex flex-col items-start'>
+            <div className='flex w-full h-[95px] 
+            items-start flex-col gap-2'>
+              <div className='w-fit flex flex-col items-start 
+              border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
                 <h2 className='h3 text-n-500'>$124.00</h2>
               </div>
-              <div className='flex w-fit h-[24px] items-center'>
               <p className='p3b text-n-900 cursor-pointer'
               onClick={() => {
                 setIsWithdrawalHistory(true)
               }}>
                 Withdrawal history
               </p>
-              </div>
             </div>
             <div 
             className='cursor-pointer'
@@ -445,20 +445,23 @@ const page = () => {
       title={"Referral"}
       text={"Simple, transparent and enjoyable"}
       />
-      <div className='w-fit h-fit flex flex-col items-center justify-center'>
-        <TabButtons 
-        leftLabel={"Statistic"}
-        rightlabel={"Withdrawal"}
-        tabButtonState={tabButtonState}
-        setTabButtonState={setTabButtonState}
-        referral
-        />
-        <CardFrame
-        wide
-        >
-          {referralContent()}
-        </CardFrame>
-      </div>
+      <CardFrame
+      wide
+      >
+        {tabButtonState === "Statistics" && !isReferralList 
+        || tabButtonState === "Withdrawal" && !isWithdrawalHistory 
+        ||tabButtonState === "Withdrawal" && !isWithdrawalHistory && !isWithdrawalDetails
+        ? (
+          <TabButtons 
+          topLabel={"Statistics"}
+          bottomLabel={"Withdrawal"}
+          tabButtonState={tabButtonState}
+          setTabButtonState={setTabButtonState}
+          referral
+          />
+        ) : null}
+        {referralContent()}
+      </CardFrame>
     </div>
   )
 }
