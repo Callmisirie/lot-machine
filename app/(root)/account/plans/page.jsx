@@ -9,10 +9,12 @@ import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { useQuery } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid';
+import addSubscription from '@/actions/addSubscription'
 
 const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
-const FLUTTERWAVE_SECRET_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_SECRET_KEY;
-const FLUTTERWAVE_ENCRYPTION_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_ENCRYPTION_KEY;
+const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
+
 
 const fetchUserInfo = async (email) => {
   const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
@@ -23,6 +25,7 @@ const fetchUserInfo = async (email) => {
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
   const [paymentDurationState, setPaymentDurationState] = useState("Month");
+  const uniqueId = uuidv4();
 
   const {
     data: userInfo,
@@ -35,13 +38,14 @@ const page = () => {
   });
   
   const config = {
-    public_key: FLUTTERWAVE_PUBLIC_KEY,
-    tx_ref: Date.now(),
+    public_key: TEST_FLUTTERWAVE_PUBLIC_KEY,
+    tx_ref: uniqueId,
     amount: paymentDurationState === "Month" ? 100 : 1000,
     currency: 'NGN',
     customer: {
       email: userInfo?.email,
       name: userInfo?.name,
+      phone_number: '***********',
     },
     customizations: {
       title: 'Lot Machine',
@@ -53,6 +57,12 @@ const page = () => {
   };
 
   const handleFlutterPayment = useFlutterwave(config);
+
+  const handlePayment = async (response) => {
+    if (response?.status === "completed" && response?.charge_response_message === "Approved Successful") {
+      const res = await addSubscription(response);
+    }
+  }
 
   if (userInfoLoading || !userInfo) {
     return (
@@ -95,7 +105,7 @@ const page = () => {
               <div className='w-fit h-fit flex flex-col gap-2 items-start'>
                   <div className='w-fit flex items-center gap-2'>
                     <h3 className='h3 text-n-900'>
-                      $0 
+                      &#8358;0 
                     </h3>
                     <h5 className='h5 text-n-500'>/month</h5>
                   </div>
@@ -136,7 +146,7 @@ const page = () => {
               <div className='w-fit h-fit flex flex-col gap-2 items-start'>
                   <div className='w-fit flex items-center gap-2'>
                     <h3 className='h3 text-n-900'>
-                      {paymentDurationState === "Month" ? "$10" : "$100"} 
+                      &#8358;{paymentDurationState === "Month" ? "20k" : "200k"} 
                     </h3>
                     <h5 className='h5 text-n-500'>/{paymentDurationState}</h5>
                   </div>
@@ -150,8 +160,8 @@ const page = () => {
                     onClick={() => {
                       if (userInfo) {
                         handleFlutterPayment({
-                          callback: (response) => {
-                            console.log(response);
+                          callback: async (response) => {
+                            await handlePayment(response)
                             closePaymentModal()
                           },
                           onClose: () => {},

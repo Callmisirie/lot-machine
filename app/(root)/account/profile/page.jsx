@@ -65,6 +65,7 @@ const page = () => {
               <ValueField 
               label={"Username"}
               value={userInfo?.username}
+              copy
               />
             </div>
             <div className='w-full h-fit 

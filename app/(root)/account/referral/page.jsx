@@ -107,15 +107,15 @@ const page = () => {
                 flex-col items-start'>
                   <h4 className='h4 text-n-900'>Referral link</h4>
                   <p className='p3r text-n-500'>
-                    localhost:3000?referral={userInfo?.referrerId}
+                    lotmachine.com/xxxxxxxxxxxxxxxxxxxx
                   </p>
                 </div>
                 <div 
                 className='cursor-pointer'
                 onClick={() => {
-                  if (userInfo?.referrerId) { // Check the correct property
+                  if (userInfo?.referrerId) {
                     navigator.clipboard.writeText(
-                      `http://localhost:3000/?referral=${userInfo.referrerId}` // Use the correct property
+                      `http://localhost:3000/?referral=${userInfo.referrerId}`
                     );
                   }
                 }}
