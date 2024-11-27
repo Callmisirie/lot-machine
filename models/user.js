@@ -16,12 +16,12 @@ const userSchema = new Schema(
       required: true,
       unique: true, 
     },
-    referrerToken: {
+    referrerId: {
       type: String,
       required: true,
       unique: true,
     },
-    referralToken: {
+    referralId: {
       type: String,
     },
     plan: {

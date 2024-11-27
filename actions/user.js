@@ -2,20 +2,18 @@ import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
 import addInstrument from "./addInstrument";
 import createPartial from "./createPartial";
-import jwt from "jsonwebtoken";
+import { nanoid } from 'nanoid';
 
-const userAuth = async (name, email) => {
+const userAuth = async (name, email, referralId) => {
   "use server";
 
-  const secretKey = process.env.USERNAME_SECRET_KEY
   const generateRandomNumber = () => Math.floor(1000 + Math.random() * 9000);
   
-  const unique = (email) => {
+  const uniqueUsername = (email) => {
     const [localPart] = email.split("@");
     const randomNumber = generateRandomNumber();
     const username = localPart + randomNumber;
-    const token = jwt.sign({ username }, secretKey);
-    return {username, token};
+    return username;
   };
 
   try {
@@ -29,9 +27,18 @@ const userAuth = async (name, email) => {
       const lotSize = 0.92;
       const finalTP = 8;
       const partialTPs = [2, 4.8, 6.3];
-      const {username, token} = unique(email);
+      const uniqueId = nanoid();
+      const username = uniqueUsername(email);
+      const referralExist = await User.findOne({referrerId: referralId});
 
-      await User.create({name, email, plan, username, referrerToken: token });
+      if (referralId !== "none" && referralExist) {
+        await User.create({name, email, plan, username, referrerId: uniqueId, referralId});
+      } 
+
+      if (referralId === "none" || !referralExist) {
+        await User.create({name, email, plan, username, referrerId: uniqueId });
+      }
+
       await addInstrument(email, instrument, nickname);
       await createPartial(email, instrument, lotSize, finalTP, partialTPs);
 

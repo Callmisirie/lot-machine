@@ -78,6 +78,14 @@ export default function Home() {
 
   const firstName =  user?.given_name.charAt(0).toUpperCase() + user?.given_name.slice(1).toLowerCase();
   
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const referral = queryParams.get("referral");
+    if (referral) {
+      localStorage.setItem("referralId", referral);
+    }
+  }, []);
+
   if (isLoading || partialsLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">

@@ -3,16 +3,37 @@
 import AccountPill from '@/components/account/AccountPill'
 import Button from '@/components/account/Button'
 import CardFrame from '@/components/account/CardFrame'
+import DownloadQrCode from '@/components/account/DownloadQrCode'
 import DualButton from '@/components/account/DualButton'
 import Header from '@/components/account/Header'
 import Input from '@/components/account/Input'
 import TabButtons from '@/components/account/TabButtons'
 import { clipboardBlack, dropArrowBlack } from '@/public/icons/black'
 import { backArrowWhite, cancelWhite } from '@/public/icons/white'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+import { useQuery } from '@tanstack/react-query'
+import { Loader } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 
+const fetchUserInfo = async (email) => {
+  const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user info");
+  return res.json();
+};
+
+
 const page = () => {
+  const {isAuthenticated, user} = useKindeBrowserClient();
+  const {
+    data: userInfo,
+    isLoading: userInfoLoading,
+  } = useQuery({
+    queryKey: ["userInfo", user?.email],
+    queryFn: async () => await fetchUserInfo(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
   const [tabButtonState, setTabButtonState] = useState("Statistics")
   const [isAddedBank, setIsAddedBank] = useState(true)
   const [isReferralList, setIsReferralList] = useState(false)
@@ -78,26 +99,43 @@ const page = () => {
 
                 </div>
               </div>
+              {/* <DownloadQrCode 
+              userInfo={userInfo}
+              userInfoLoading={userInfoLoading}/> */}
               <div className='flex justify-between items-end'>
                 <div className='flex w-fit h-fit 
                 flex-col items-start'>
                   <h4 className='h4 text-n-900'>Referral link</h4>
                   <p className='p3r text-n-500'>
-                    lotmachine.com/?xxxxxxxxxxxxxxxxxxx
+                    localhost:3000?referral={userInfo?.referrerId}
                   </p>
                 </div>
-                <Image 
-                src={clipboardBlack} 
-                width={24} 
-                height={24} 
-                alt="clipboard icon" 
-                className="" 
-                priority
-                /> 
+                <div 
+                className='cursor-pointer'
+                onClick={() => {
+                  if (userInfo?.referrerId) { // Check the correct property
+                    navigator.clipboard.writeText(
+                      `http://localhost:3000/?referral=${userInfo.referrerId}` // Use the correct property
+                    );
+                  }
+                }}
+                >
+                  <Image 
+                  src={clipboardBlack} 
+                  width={24} 
+                  height={24} 
+                  alt="clipboard icon" 
+                  className="" 
+                  priority
+                  /> 
+                </div>
               </div>
             </div>
           </div>
         )
+        // return (
+        //   <DownloadQrCode />
+        // )
       }
       if (isReferralList) {
         return (
@@ -440,31 +478,45 @@ const page = () => {
     }
   }
 
-  return (
-    <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
-      <Header 
-      title={"Referral"}
-      text={"Simple, transparent and enjoyable"}
-      />
-      <CardFrame
-      wide
-      >
-        {tabButtonState === "Statistics" && !isReferralList 
-        || tabButtonState === "Withdrawal" && !isWithdrawalHistory 
-        ||tabButtonState === "Withdrawal" && !isWithdrawalHistory && !isWithdrawalDetails
-        ? (
-          <TabButtons 
-          topLabel={"Statistics"}
-          bottomLabel={"Withdrawal"}
-          tabButtonState={tabButtonState}
-          setTabButtonState={setTabButtonState}
-          referral
-          />
-        ) : null}
-        {referralContent()}
-      </CardFrame>
-    </div>
-  )
+  if (userInfoLoading || !userInfo) {
+    return (
+      <div className="w-full h-full flex justify-center items-center relative">
+        <div className="flex flex-col items-center gap-2">
+          <Loader className="w-10 h-10 animate-spin text-primary" />
+          <h3 className="text-xl font-bold">Loading...</h3>
+          <p>Please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userInfoLoading && userInfo) {
+    return (
+      <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
+        <Header 
+        title={"Referral"}
+        text={"Simple, transparent and enjoyable"}
+        />
+        <CardFrame
+        wide
+        >
+          {tabButtonState === "Statistics" && !isReferralList 
+          || tabButtonState === "Withdrawal" && !isWithdrawalHistory 
+          ||tabButtonState === "Withdrawal" && !isWithdrawalHistory && !isWithdrawalDetails
+          ? (
+            <TabButtons 
+            topLabel={"Statistics"}
+            bottomLabel={"Withdrawal"}
+            tabButtonState={tabButtonState}
+            setTabButtonState={setTabButtonState}
+            referral
+            />
+          ) : null}
+          {referralContent()}
+        </CardFrame>
+      </div>
+    )
+  }
 }
 
 export default page

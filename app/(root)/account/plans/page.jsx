@@ -10,9 +10,9 @@ import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { useQuery } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 
-const FLUTTERWAVE_PUBLIC_KEY = process.env.FLUTTERWAVE_PUBLIC_KEY;
-const FLUTTERWAVE_SECRET_KEY = process.env.FLUTTERWAVE_SECRET_KEY;
-const FLUTTERWAVE_ENCRYPTION_KEY = process.env.FLUTTERWAVE_ENCRYPTION_KEY;
+const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
+const FLUTTERWAVE_SECRET_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_SECRET_KEY;
+const FLUTTERWAVE_ENCRYPTION_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_ENCRYPTION_KEY;
 
 const fetchUserInfo = async (email) => {
   const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
@@ -35,7 +35,7 @@ const page = () => {
   });
   
   const config = {
-    public_key: "FLWPUBK-4f4bfc9dcfdfcf0476e6db13f75f25ae-X",
+    public_key: FLUTTERWAVE_PUBLIC_KEY,
     tx_ref: Date.now(),
     amount: paymentDurationState === "Month" ? 100 : 1000,
     currency: 'NGN',

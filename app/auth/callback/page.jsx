@@ -7,20 +7,32 @@ import { checkAuthStatus } from "./action";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import paths from "@/common/paths";
+import { useEffect, useState } from "react";
 
 const Page = () => {
   const router = useRouter();
-	const { data, isLoading } = useQuery({
-		queryKey: ["checkAuthStatus"],
-		queryFn: async () => await checkAuthStatus(),
-	});
+  const [referralId, setReferralId] = useState("isLoading");
+
+  // Safely access localStorage on the client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedReferralId = localStorage.getItem("referralId");
+      setReferralId(storedReferralId || "none");
+    }
+  }, []);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["checkAuthStatus", referralId],
+    queryFn: async () => await checkAuthStatus(referralId)
+  });
 
   if(data?.success && !isLoading) {
+    localStorage.removeItem("referralId");
     router.push(paths.home());
   }
 
-  if (!data?.success && !isLoading) {
-    router.push("/api/auth/logout")
+  if (!data?.success && !isLoading && !data?.isLoading) {
+    router.push("/api/auth/logout");
   }
 
 	return (
