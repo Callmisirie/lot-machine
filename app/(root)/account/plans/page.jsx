@@ -15,7 +15,6 @@ import addSubscription from '@/actions/addSubscription'
 const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
 
-
 const fetchUserInfo = async (email) => {
   const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch user info");
@@ -26,6 +25,19 @@ const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
   const [paymentDurationState, setPaymentDurationState] = useState("Month");
   const uniqueId = uuidv4();
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: "compact",
+    compactDisplay: "short"
+  });
+
+  const checkPaymentDuration = (duration) => {
+    if (duration === "Month") {
+      return 100
+    }
+    if (duration === "Year") {
+      return 1000
+    }
+  }
 
   const {
     data: userInfo,
@@ -38,9 +50,9 @@ const page = () => {
   });
   
   const config = {
-    public_key: TEST_FLUTTERWAVE_PUBLIC_KEY,
+    public_key: FLUTTERWAVE_PUBLIC_KEY,
     tx_ref: uniqueId,
-    amount: paymentDurationState === "Month" ? 100 : 1000,
+    amount: checkPaymentDuration(paymentDurationState),
     currency: 'NGN',
     customer: {
       email: userInfo?.email,
@@ -58,9 +70,9 @@ const page = () => {
 
   const handleFlutterPayment = useFlutterwave(config);
 
-  const handlePayment = async (response) => {
+  const handlePayment = async (response, duration) => {  
     if (response?.status === "completed" && response?.charge_response_message === "Approved Successful") {
-      const res = await addSubscription(response);
+      const res = await addSubscription(response, duration);
     }
   }
 
@@ -146,7 +158,7 @@ const page = () => {
               <div className='w-fit h-fit flex flex-col gap-2 items-start'>
                   <div className='w-fit flex items-center gap-2'>
                     <h3 className='h3 text-n-900'>
-                      &#8358;{paymentDurationState === "Month" ? "20k" : "200k"} 
+                      &#8358;{formatter.format(checkPaymentDuration(paymentDurationState))} 
                     </h3>
                     <h5 className='h5 text-n-500'>/{paymentDurationState}</h5>
                   </div>
@@ -161,7 +173,7 @@ const page = () => {
                       if (userInfo) {
                         handleFlutterPayment({
                           callback: async (response) => {
-                            await handlePayment(response)
+                            await handlePayment(response, paymentDurationState)
                             closePaymentModal()
                           },
                           onClose: () => {},

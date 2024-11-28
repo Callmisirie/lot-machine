@@ -15,6 +15,12 @@ const subscriptionSchema = new Schema(
         period: {
           type: String,
         },
+        tx_ref: {
+          type: String,
+        },
+        payment_type: {
+          type: String,
+        },
         startDate: {
           type: Date,
           default: Date.now, // Automatically sets the current date
