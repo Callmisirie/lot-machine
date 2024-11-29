@@ -10,7 +10,6 @@ import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { useQuery } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid';
-import addSubscription from '@/actions/addSubscription'
 
 const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
@@ -50,7 +49,7 @@ const page = () => {
   });
   
   const config = {
-    public_key: FLUTTERWAVE_PUBLIC_KEY,
+    public_key: TEST_FLUTTERWAVE_PUBLIC_KEY ,
     tx_ref: uniqueId,
     amount: checkPaymentDuration(paymentDurationState),
     currency: 'NGN',
@@ -58,7 +57,8 @@ const page = () => {
       email: userInfo?.email,
       name: userInfo?.name,
       phone_number: '***********',
-    },
+    }, 
+    meta: { duration: paymentDurationState },
     customizations: {
       title: 'Lot Machine',
       description: paymentDurationState === "Month" 
@@ -69,12 +69,6 @@ const page = () => {
   };
 
   const handleFlutterPayment = useFlutterwave(config);
-
-  const handlePayment = async (response, duration) => {  
-    if (response?.status === "completed" && response?.charge_response_message === "Approved Successful") {
-      const res = await addSubscription(response, duration);
-    }
-  }
 
   if (userInfoLoading || !userInfo) {
     return (
@@ -173,7 +167,6 @@ const page = () => {
                       if (userInfo) {
                         handleFlutterPayment({
                           callback: async (response) => {
-                            await handlePayment(response, paymentDurationState)
                             closePaymentModal()
                           },
                           onClose: () => {},
