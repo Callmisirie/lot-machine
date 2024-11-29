@@ -1,4 +1,5 @@
 import addSubscription from "@/actions/addSubscription";
+import { inEarnings } from "@/actions/earnings";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
@@ -13,19 +14,19 @@ export const POST = async (req) => {
     // Parse the payload (req.body is a ReadableStream)
     const rawBody = await req.text();
     const payload = JSON.parse(rawBody);
-
     
     // Verify the webhook signature
     if (signature !== secretHash) {
       console.error("Invalid webhook signature");
       return new NextResponse("Invalid signature", { status: 401 });
     }
-    
+
     // Log the components
     console.log(payload);
 
     if (payload?.status === "successful") {
-      const res = await addSubscription(payload);
+      await addSubscription(payload);
+      await inEarnings(payload);
     }
 
     // Respond with success
