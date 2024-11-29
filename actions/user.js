@@ -29,13 +29,13 @@ const userAuth = async (name, email, referralId) => {
       const partialTPs = [2, 4.8, 6.3];
       const uniqueId = nanoid();
       const username = uniqueUsername(email);
-      const referralExist = await User.findOne({referrerId: referralId});
+      const referralExists = await User.findOne({referrerId: referralId});
 
-      if (referralId !== "none" && referralExist) {
+      if (referralId !== "none" && referralExists) {
         await User.create({name, email, plan, username, referrerId: uniqueId, referralId});
       } 
 
-      if (referralId === "none" || !referralExist) {
+      if (referralId === "none" || !referralExists) {
         await User.create({name, email, plan, username, referrerId: uniqueId });
       }
 

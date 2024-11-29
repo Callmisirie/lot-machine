@@ -2,6 +2,12 @@ import addSubscription from "@/actions/addSubscription";
 import { inEarnings } from "@/actions/earnings";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import Flutterwave from "flutterwave-node-v3";
+
+const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
+const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
+
+const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
 
 export const POST = async (req) => {
   const secretKey = process.env.SECRET_KEY;
@@ -14,19 +20,50 @@ export const POST = async (req) => {
     // Parse the payload (req.body is a ReadableStream)
     const rawBody = await req.text();
     const payload = JSON.parse(rawBody);
-    
+
     // Verify the webhook signature
     if (signature !== secretHash) {
       console.error("Invalid webhook signature");
       return new NextResponse("Invalid signature", { status: 401 });
     }
 
-    // Log the components
-    console.log(payload);
+    console.log("Webhook payload received:", payload);
 
+    const resendHooks = async () => {
+      try {
+        const resendPayload = { "id": payload?.id }; // Use a different variable name
+        const response = await flw.Transaction.resend_hooks(resendPayload);
+        console.log("Resend hooks response:", response);
+      } catch (error) {
+        console.error("Error resending hooks:", error);
+      }
+    };
+    
+    const verify = async () => {
+      try {
+        const verifyPayload = {"id": payload?.id}
+        const response = await flw.Transaction.verify(verifyPayload)
+        return response
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    const existingEvent = await verify();
+    
     if (payload?.status === "successful") {
       await addSubscription(payload);
       await inEarnings(payload);
+
+      if (existingEvent?.data.status === payload.status) {
+        console.log("Duplicate found");
+        return new NextResponse("This status hasn't changed", { status: 200 });
+      } else {
+        console.log("No duplicate found");
+        await addSubscription(payload);
+        await inEarnings(payload);
+
+        // await resendHooks();
+      }
     }
 
     // Respond with success
