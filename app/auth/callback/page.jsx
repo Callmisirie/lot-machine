@@ -3,11 +3,11 @@
 import { lmLogo } from "@/public";
 import { Loader } from "lucide-react";
 import Image from "next/image";
-import { checkAuthStatus } from "./action";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import paths from "@/common/paths";
 import { useEffect, useState } from "react";
+import userAuth from "@/actions/user";
 
 const Page = () => {
   const router = useRouter();
@@ -22,11 +22,12 @@ const Page = () => {
   }, []);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["checkAuthStatus", referralId],
-    queryFn: async () => await checkAuthStatus(referralId)
+    queryKey: ["userAuth", referralId],
+    queryFn: async () => await userAuth(referralId)
   });
-
+  
   if(data?.success && !isLoading) {
+    console.log({adminKey: data?.adminKey});
     localStorage.removeItem("referralId");
     router.push(paths.home());
   }

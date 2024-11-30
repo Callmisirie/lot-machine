@@ -29,7 +29,7 @@ const createPartial = async (email, instrument, lotSize, finalTP, partialTPs) =>
           userId: user._id,
           partials: [{ instrument, nickname, lotSize, finalTP, partialTPs }]
         });
-        console.log("Partial list created: ", userPartials);
+        console.log("Partial list created");
       } else {
         // Add the new instrument to the existing list
         userPartials.partials.push({ instrument, nickname, lotSize, finalTP, partialTPs });

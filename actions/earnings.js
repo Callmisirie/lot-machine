@@ -45,56 +45,46 @@ export const inEarnings = async (response) => {
         userEarnings = await Earning.create({
           userId: referrer._id,
           balance: splitShare(),
-          tx_refs: [
-            {
-              tx_ref: response.txRef
-            }
-          ],
-          earnings: [
-            {
-              year: currentYear,
-              months: [
-                {
-                  month: currentMonth,
-                  in: splitShare(),
-                  out: 0,
-                  withdrawalId: uniqueId
-                },
-              ],
-            },
-          ],
+          tx_refs: [{
+            tx_ref: response.txRef
+          }],
+          earnings: [{
+            year: currentYear,
+            months: [{
+              month: currentMonth,
+              in: splitShare(),
+              out: 0,
+              withdrawalId: uniqueId
+            }]
+          }],
         });
       } else {
         // Update existing Earning document
         userEarnings.balance = userEarnings.balance + splitShare();
+        userEarnings.tx_refs.push({
+          tx_ref: response.txRef
+        });
   
         const yearEntry = userEarnings.earnings.find((entry) => entry.year === currentYear);
         if (!yearEntry) {
           // Add a new year if it doesn't exist
           userEarnings.earnings.push({
             year: currentYear,
-            tx_refs: [
-              {
-                tx_ref: response.txRef
-              }
-            ],
-            months: [
-              {
-                month: currentMonth,
-                in: splitShare(),
-                out: 0,
-                withdrawalId: uniqueId
-              },
-            ],
+            tx_refs: [{
+              tx_ref: response.txRef
+            }],
+            months: [{
+              month: currentMonth,
+              in: splitShare(),
+              out: 0,
+              withdrawalId: uniqueId
+            }],
           });
         } else {
           // Update the existing year
           const monthEntry = yearEntry.months.find((entry) => entry.month === currentMonth);
           if (!monthEntry) {
             // Add a new month if it doesn't exist
-            userEarnings.tx_refs.push({
-              tx_ref: response.txRef
-            });
 
             yearEntry.months.push({
               month: currentMonth,
@@ -104,9 +94,6 @@ export const inEarnings = async (response) => {
             });
           } else {
             // Update the existing month
-            userEarnings.tx_refs.push({
-              tx_ref: response.txRef
-            });
 
             monthEntry.in = monthEntry.in + splitShare();
           }

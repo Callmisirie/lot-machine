@@ -51,30 +51,31 @@ export const POST = async (req) => {
       }
     }
     const existingEvent = await verify();
-    
+
     if (payload?.status === "successful") {
       const storedProcessedEvent = await checkStoredProcessedEvent(payload);
 
+      if (storedProcessedEvent.success) {
+        if (storedProcessedEvent.stored) {
+          console.log("Duplicate found");
+        } else {
+          if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
+            await storeProcessedEvent(payload);
+            await addSubscription(payload);
+            await inEarnings(payload);
+          } else if (payload["event.type"] === "TRANSFER_TRANSACTION") {
+            await storeProcessedEvent(payload);
+            // await outEarnings(payload);
+          } 
+        }
+          
+          // await resendHooks();
+      }
+    } else {
       // if (existingEvent?.data.status === payload.status) {
       //   console.log("Duplicate found");
       //   return new NextResponse("This status hasn't changed", { status: 200 });
-      // } 
-      
-      if (storedProcessedEvent.success) {
-        if (storedProcessedEvent.stored) {
-          console.log("No duplicate found");
-        } else {
-          const addSubscriptionRes = await addSubscription(payload);
-          const inEarningsRes = await inEarnings(payload);
-          
-          if (addSubscriptionRes.success && inEarningsRes.success) {
-            await storeProcessedEvent(payload);
-          }
-        }
-        
-        // await resendHooks();
-      }
-      
+      // }  
     }
 
     // Respond with success

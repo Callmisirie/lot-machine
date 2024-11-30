@@ -20,7 +20,7 @@ const addInstrument = async (email, instrument, nickname) => {
           userId: user._id,
           instruments: [{ instrument, nickname }]
         });
-        console.log("Instrument list created: ", userInstruments);
+        console.log("Instrument list created");
       } else {
         // Add the new instrument to the existing list
         userInstruments.instruments.push({ instrument, nickname });
