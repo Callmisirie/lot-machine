@@ -7,7 +7,7 @@ import { planBenefits } from '.'
 import PaymentDurationPill from '@/components/account/PaymentDurationPill'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,6 +20,15 @@ const fetchUserInfo = async (email) => {
   return res.json();
 };
 
+const fetchSubscriptions = async (email) => {
+  const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch subscriptions");
+  const { success, subscriptions } = await res.json();
+
+  return {success, subscriptions}
+};
+
+
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
   const [paymentDurationState, setPaymentDurationState] = useState("Month");
@@ -28,16 +37,7 @@ const page = () => {
     notation: "compact",
     compactDisplay: "short"
   });
-
-  const checkPaymentDuration = (duration) => {
-    if (duration === "Month") {
-      return 100
-    }
-    if (duration === "Year") {
-      return 1000
-    }
-  }
-
+  const queryClient = useQueryClient();
   const {
     data: userInfo,
     isLoading: userInfoLoading,
@@ -47,11 +47,54 @@ const page = () => {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+
+  const {
+    data: subscriptions,
+    isLoading: subscriptionsLoading,
+    refetch: subscriptionRefetch
+  } = useQuery({
+    queryKey: ["subscriptions", user?.email],
+    queryFn: async () => await fetchSubscriptions(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+
+  const amount = 200;
+  const getAmount = (duration) => {
+    const firstPayment = () => {
+      if (subscriptions?.success) {
+        const numberOfSubscription = subscriptions?.subscriptions?.length;
+        if (!numberOfSubscription) {
+          return true;
+        } else if (numberOfSubscription > 0) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+    
+    if (duration === "Month") {
+      if (userInfo?.referralId) {
+        if (firstPayment()) {
+          return amount * 0.5;
+        } else {
+          return amount;
+        }
+      } else {
+        return amount;
+      }
+    }
+    if (duration === "Year") {
+      return amount * 10;
+    }
+  }
+
   
   const config = {
     public_key: TEST_FLUTTERWAVE_PUBLIC_KEY ,
     tx_ref: uniqueId,
-    amount: checkPaymentDuration(paymentDurationState),
+    amount: getAmount(paymentDurationState),
     currency: 'NGN',
     customer: {
       email: userInfo?.email,
@@ -62,15 +105,15 @@ const page = () => {
     customizations: {
       title: 'Lot Machine',
       description: paymentDurationState === "Month" 
-      ? 'Pro plan monthly subcription' 
-      : 'Pro plan yearly subcription',
+      ? 'Pro plan monthly subscription' 
+      : 'Pro plan yearly subscription',
       logo: 'https://st2.depositphotos.com/4403291/7418/v/450/depositphotos_74189661-stock-illustration-online-shop-log.jpg',
     },
   };
 
   const handleFlutterPayment = useFlutterwave(config);
 
-  if (userInfoLoading || !userInfo) {
+  if (userInfoLoading || !userInfo || subscriptionsLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -82,7 +125,9 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo) {
+  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) { 
+    console.log(subscriptions);
+    
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 
@@ -121,7 +166,7 @@ const page = () => {
                   h-[48px] cursor-default
                   rounded-[16px] border border-n-300`}>
                     <p className='text-n-900 l3b'>
-                      Your current plan
+                      {userInfo.plan === "Free" ? "Your current plan" : "Plan features"}
                     </p>
                   </div>            
               </div>
@@ -152,7 +197,7 @@ const page = () => {
               <div className='w-fit h-fit flex flex-col gap-2 items-start'>
                   <div className='w-fit flex items-center gap-2'>
                     <h3 className='h3 text-n-900'>
-                      &#8358;{formatter.format(checkPaymentDuration(paymentDurationState))} 
+                      &#8358;{formatter.format(getAmount(paymentDurationState))} 
                     </h3>
                     <h5 className='h5 text-n-500'>/{paymentDurationState}</h5>
                   </div>
@@ -167,6 +212,7 @@ const page = () => {
                       if (userInfo) {
                         handleFlutterPayment({
                           callback: async (response) => {
+                            subscriptionRefetch()
                             closePaymentModal()
                           },
                           onClose: () => {},

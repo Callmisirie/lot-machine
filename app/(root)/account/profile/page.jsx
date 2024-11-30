@@ -6,6 +6,7 @@ import ValueField from '@/components/account/ValueField'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
+import { format } from 'date-fns';
 import React from 'react'
 
 const fetchUserInfo = async (email) => {
@@ -13,6 +14,13 @@ const fetchUserInfo = async (email) => {
   if (!res.ok) throw new Error("Failed to fetch user info");
   return res.json();
 };
+
+const fetchSubscriptions = async (email) => {
+  const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch subscriptions");
+  return res.json();
+};
+
 
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
@@ -22,6 +30,16 @@ const page = () => {
   } = useQuery({
     queryKey: ["userInfo", user?.email],
     queryFn: async () => await fetchUserInfo(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+
+  const {
+    data: subscriptions,
+    isLoading: subscriptionsLoading,
+  } = useQuery({
+    queryKey: ["subscriptions", user?.email],
+    queryFn: async () => await fetchSubscriptions(user.email),
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
@@ -39,6 +57,26 @@ const page = () => {
   }
 
   if (!userInfoLoading && userInfo) {
+    
+    const latestSubscription = () => {
+      if (!subscriptionsLoading && subscriptions) {
+        const latest = subscriptions[subscriptions?.length - 1];
+        const subscriptionEndDate = format(new Date(latest?.endDate), 'dd/MM/yyyy');
+        const payment_type = latest?.payment_type
+  
+        return {subscriptionEndDate, payment_type};
+      } else {
+        return "********";
+      }
+    }
+    
+    // const date = new Date(subscriptions.).toLocaleDateString("en-US", {
+    //   year: 'numeric', 
+    //   month: 'short', 
+    //   day: 'numeric',
+    //   // hour: '2-digit', 
+    //   // minute: '2-digit'
+    // });
     return (
       <div className='w-full h-fit 
       flex flex-col justify-center 
@@ -76,16 +114,17 @@ const page = () => {
                   <div className='w-fit h-fit flex gap-1 items-center'>
                     <p className='p1b text-n-700'>Current plan:</p>
                     <p className='p3b text-n-500'>
-                      Pro
+                      {userInfo.plan}
                     </p>
                   </div>
                   <div className='w-fit h-fit flex gap-2 items-center'>
                     <p className='p2b text-n-700'>
-                      Expires: <span className='p3r text-n-500'>21/11/2024</span>
+                      Expires: <span className='p3r text-n-500'>{latestSubscription().subscriptionEndDate}</span>
                     </p>
                   </div>
                 </div>
-                <button className='w-fit p3b text-accent-red-300 cursor-pointer'>
+                <button className={`w-fit p3b text-accent-red-300 cursor-pointer 
+                  ${latestSubscription().payment_type === 'card' ? '' : "invisible"}`}>
                   Cancel subscription
                 </button>
               </div>

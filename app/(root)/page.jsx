@@ -18,7 +18,6 @@ import { boltWhite, cancelWhite } from "@/public/icons/white";
 import Button from "@/components/Button";
 import { useQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import useResizeObserver from "use-resize-observer";
 
 const fetchPartials = async (email) => {
