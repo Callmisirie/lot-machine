@@ -68,8 +68,8 @@ const addSubscription = async (response) => {
       return { success: false, message: "User does not exist" };
     }
   } catch (error) {
-    console.log("Error adding subsription: ", error);
-    return { success: false, message: "Error adding subsription"};
+    console.log("Error adding subscription: ", error);
+    return { success: false, message: "Error adding subscription"};
   }
 };
 

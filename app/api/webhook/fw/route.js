@@ -3,6 +3,8 @@ import { inEarnings } from "@/actions/earnings";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Flutterwave from "flutterwave-node-v3";
+import storeProcessedEvent from "@/actions/StoreProcessedEvent";
+import checkStoredProcessedEvent from "@/actions/checkStoredProcessEvent";
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
@@ -51,19 +53,28 @@ export const POST = async (req) => {
     const existingEvent = await verify();
     
     if (payload?.status === "successful") {
-      await addSubscription(payload);
-      await inEarnings(payload);
+      const storedProcessedEvent = await checkStoredProcessedEvent(payload);
 
-      if (existingEvent?.data.status === payload.status) {
-        console.log("Duplicate found");
-        return new NextResponse("This status hasn't changed", { status: 200 });
-      } else {
-        console.log("No duplicate found");
-        await addSubscription(payload);
-        await inEarnings(payload);
-
+      // if (existingEvent?.data.status === payload.status) {
+      //   console.log("Duplicate found");
+      //   return new NextResponse("This status hasn't changed", { status: 200 });
+      // } 
+      
+      if (storedProcessedEvent.success) {
+        if (storedProcessedEvent.stored) {
+          console.log("No duplicate found");
+        } else {
+          const addSubscriptionRes = await addSubscription(payload);
+          const inEarningsRes = await inEarnings(payload);
+          
+          if (addSubscriptionRes.success && inEarningsRes.success) {
+            await storeProcessedEvent(payload);
+          }
+        }
+        
         // await resendHooks();
       }
+      
     }
 
     // Respond with success
@@ -76,3 +87,7 @@ export const POST = async (req) => {
     );
   }
 };
+
+
+
+

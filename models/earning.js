@@ -11,6 +11,13 @@ const earningSchema = new Schema(
       type: String,
       required: true
     },
+    tx_refs: [
+      {
+        tx_ref: {
+          type: String,
+        },
+      },
+    ],
      earnings: [
       {
         year: {
