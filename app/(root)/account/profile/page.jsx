@@ -18,7 +18,8 @@ const fetchUserInfo = async (email) => {
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch subscriptions");
-  return res.json();
+  const { success, subscriptions } = await res.json();
+  return {success, subscriptions}
 };
 
 
@@ -57,10 +58,9 @@ const page = () => {
   }
 
   if (!userInfoLoading && userInfo) {
-    
     const latestSubscription = () => {
-      if (!subscriptionsLoading && subscriptions) {
-        const latest = subscriptions[subscriptions?.length - 1];
+      if (!subscriptionsLoading && subscriptions.success) {
+        const latest = subscriptions.subscriptions[subscriptions?.subscriptions?.length - 1];
         const subscriptionEndDate = format(new Date(latest?.endDate), 'dd/MM/yyyy');
         const payment_type = latest?.payment_type
   
@@ -69,14 +69,7 @@ const page = () => {
         return "********";
       }
     }
-    
-    // const date = new Date(subscriptions.).toLocaleDateString("en-US", {
-    //   year: 'numeric', 
-    //   month: 'short', 
-    //   day: 'numeric',
-    //   // hour: '2-digit', 
-    //   // minute: '2-digit'
-    // });
+
     return (
       <div className='w-full h-fit 
       flex flex-col justify-center 

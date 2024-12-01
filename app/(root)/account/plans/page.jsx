@@ -7,7 +7,7 @@ import { planBenefits } from '.'
 import PaymentDurationPill from '@/components/account/PaymentDurationPill'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,8 +24,7 @@ const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch subscriptions");
   const { success, subscriptions } = await res.json();
-
-  return {success, subscriptions}
+  return {success, subscriptions};
 };
 
 
@@ -37,7 +36,6 @@ const page = () => {
     notation: "compact",
     compactDisplay: "short"
   });
-  const queryClient = useQueryClient();
   const {
     data: userInfo,
     isLoading: userInfoLoading,
@@ -123,9 +121,7 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) { 
-    console.log(subscriptions);
-    
+  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) {     
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 

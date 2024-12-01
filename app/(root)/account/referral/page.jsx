@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { format } from 'date-fns';
 
 const fetchUserInfo = async (email) => {
   const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
@@ -22,6 +23,19 @@ const fetchUserInfo = async (email) => {
   return res.json();
 };
 
+const fetchUserEarnings = async (email) => {
+  const res = await fetch(`/api/getUserEarnings?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user earnings");
+  const { success, userEarnings } = await res.json();
+  return {success, userEarnings};
+};
+
+const fetchReferralsCount = async (email) => {
+  const res = await fetch(`/api/getReferralsCount?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch referral count");
+  const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals } = await res.json();
+  return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals};
+};
 
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
@@ -34,11 +48,57 @@ const page = () => {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+  const {
+    data: userEarnings,
+    isLoading: userEarningsLoading,
+  } = useQuery({
+    queryKey: ["userEarnings", user?.email],
+    queryFn: async () => await fetchUserEarnings(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+  const {
+    data: referralCount,
+    isLoading: referralCountLoading,
+  } = useQuery({
+    queryKey: ["referralCount", user?.email],
+    queryFn: async () => await fetchReferralsCount(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
   const [tabButtonState, setTabButtonState] = useState("Statistics")
   const [isAddedBank, setIsAddedBank] = useState(true)
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
   const [isWithdrawalDetails, setIsWithdrawalDetails] = useState(false)
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: "compact",
+    compactDisplay: "short"
+  });
+
+  const currentYear = new Date().getFullYear(); // Get current year
+  const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
+
+  const getAbbreviatedMonth = (monthNumber) => {
+    // Create a placeholder date (day and year don't matter for month formatting)
+    const date = new Date(2024, monthNumber - 1); // Subtract 1 since months are 0-based
+    return format(date, 'MMM'); // Returns abbreviated month (e.g., "Nov")
+  };
+
+  const yearEntry = userEarnings?.userEarnings?.earnings?.find((entry) => entry?.year === currentYear);
+  const monthEntry = yearEntry?.months?.find((entry) => entry?.month === currentMonth);
+
+  const referralSplitPercentage = () => {
+    if (referralCount.success) {
+      if (!referralCount?.totalActiveReferrals || referralCount?.totalActiveReferrals >= 0 && referralCount?.totalActiveReferrals < 100) {
+        return 20;
+      } else if (referralCount?.totalActiveReferrals >= 100 && referralCount?.totalActiveReferrals < 1000) {
+        return 30;
+      } else if (referralCount?.totalActiveReferrals >= 1000) {
+        return 40;
+      }
+    }
+  }
 
   const referralContent = () => {
     if (tabButtonState === "Statistics") {
@@ -54,7 +114,11 @@ const page = () => {
               items-center justify-start gap-4 
               border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
-                <p className='p2b text-n-500'>$124.00</p>
+                <p className='p2b text-n-500'>&#8358;
+                  {userEarnings?.userEarnings?.balance 
+                  ? formatter.format(userEarnings?.userEarnings?.balance) 
+                  : 0}
+                </p>
               </div>
               <p className='p3b text-n-900 cursor-pointer'
               onClick={() => {
@@ -67,34 +131,51 @@ const page = () => {
               <div className='flex flex-col 
               w-fit pr-2 items-start
               border-n-300 border-r'>
-                <h5 className='h5 text-n-700'>Referral</h5>
+                <h5 className='h5 text-n-700'>Referrals</h5>
                 <div className='flex flex-col w-fit h-fit'>
                   <div className='flex w-fit h-fit gap-1 items-center'>
                     <h4 className='h4 text-n-500'>Total</h4>
-                    <h3 className='h3 text-n-300'>18</h3>
+                    <h3 className='h3 text-n-300'>
+                      {referralCount?.totalReferrals 
+                      ? formatter.format(referralCount?.totalReferrals)
+                      : 0}
+                    </h3>
                   </div>
                   <div className='flex w-fit h-fit gap-1 items-center'>
                     <h6 className='h6 text-n-500'>Active</h6>
-                    <h5 className='h5 text-n-300'>9</h5>
+                    <h5 className='h5 text-n-300'>
+                      {referralCount?.totalActiveReferrals
+                      ? formatter.format(referralCount?.totalActiveReferrals)
+                      : 0}
+                    </h5>
                   </div>
                 </div>
               </div>
               <div className='flex flex-col 
               w-fit h-fit items-start justify-start'>
-                <h6 className='h6 text-n-700'>Nov earning</h6>
-                <h3 className='h3 text-n-500'>$62.00</h3>
+                <h6 className='h6 text-n-700'>{getAbbreviatedMonth(currentMonth)} earnings</h6>
+                <h3 className='h3 text-n-500'>
+                &#8358;
+                  {monthEntry?.in
+                  ? formatter.format(monthEntry?.in) 
+                  : 0}
+                </h3>
               </div>
             </div>
             <div className='flex flex-col w-full h-fit'>
               <div className='flex w-fit h-fit 
               justify-start items-center gap-1'>
-                <h2 className='h2 text-n-300'>20%</h2>
+                <h2 className='h2 text-n-300'>{referralSplitPercentage()}%</h2>
                 <div className='w-fit h-fit flex items-center gap-1'>
                   <p className='p2b text-n-500'>
                     Referral split -
                   </p>
                   <p className='p2b text-n-700'>
-                    Active
+                    {referralCount?.userPlan === "Pro" 
+                    ? "Active" 
+                    : referralCount?.userPlan === "Master"
+                    ? "Active"
+                    : "Inactive"}
                   </p>
 
                 </div>
@@ -115,7 +196,7 @@ const page = () => {
                 onClick={() => {
                   if (userInfo?.referrerId) {
                     navigator.clipboard.writeText(
-                      `http://localhost:3000/?referral=${userInfo.referrerId}`
+                      `http://localhost:3000/?referral=${userInfo?.referrerId}`
                     );
                   }
                 }}
@@ -167,30 +248,45 @@ const page = () => {
               flex justify-between items-center'>
                 <div className='w-fit h-fit gap-2 flex items-center'>
                   <h4 className='h4 text-n-700'>Total</h4>
-                  <p className='p1b text-n-700'>18</p>
+                  <p className='p1b text-n-700'>
+                    {referralCount?.totalReferrals
+                    ? formatter.format(referralCount?.totalReferrals)
+                    : 0}
+                  </p>
                 </div>
                 <div className='w-fit h-fit gap-2 flex items-center'>
                   <h6 className='h6 text-n-700'>Active</h6>
-                  <p className='p3r text-n-700'>9</p>
+                  <p className='p3r text-n-700'>
+                    {referralCount?.totalActiveReferrals
+                    ? formatter.format(referralCount?.totalActiveReferrals)
+                    : 0}
+                  </p>
                 </div>
               </div>
               <div className='w-full h-full flex flex-col gap-4'>
-                <div className='w-full h-fit flex 
-                justify-between pb-2 items-start 
-                border-b border-n-300'>
-                  <p className='p2r text-n-700'>
-                    kensirie8296
-                  </p>
-                  <p className='p3r text-accent-green-300'>Active</p>
-                </div>
-                <div className='w-full h-fit flex 
-                justify-between pb-2 items-start 
-                border-b border-n-300'>
-                  <p className='p2r text-n-700'>
-                    lohymn9286
-                  </p>
-                  <p className='p3r text-n-500'>Inactive</p>
-                </div>
+                {referralCount?.referredUsers?.map((referredUser) => {
+                  return (
+                    <div className='w-full h-fit flex 
+                    justify-between pb-2 items-start 
+                    border-b border-n-300'>
+                      <p className='p2r text-n-700'>
+                        {referredUser.username}
+                      </p>
+                      <p className={`p3r  
+                        ${referredUser?.plan === "Pro" 
+                        ? "text-accent-green-300" 
+                        : referredUser?.plan === "Master"
+                        ? "text-accent-green-300"
+                        : "text-accent-red-300"}`}>
+                        {referredUser?.plan === "Pro" 
+                        ? "Active"
+                        : referredUser?.plan === "Master"
+                        ? "Active"
+                        : "Inactive"}
+                      </p>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -210,7 +306,11 @@ const page = () => {
               items-center justify-start gap-4 
               border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
-                <p className='p2b text-n-500'>$124.00</p>
+                <p className='p2b text-n-500'>&#8358;
+                  {userEarnings?.userEarnings?.balance 
+                  ? formatter.format(userEarnings?.userEarnings?.balance)
+                  : 0}
+                </p>
               </div>
               <p className='p3b text-n-900 cursor-pointer'
               onClick={() => {
@@ -253,7 +353,11 @@ const page = () => {
               <div className='w-fit flex flex-col items-start 
               border-b border-n-300'>
                 <h6 className='h6 text-n-700'>Balance</h6>
-                <h2 className='h3 text-n-500'>$124.00</h2>
+                <h2 className='h3 text-n-500'>&#8358;
+                  {userEarnings?.userEarnings?.balance 
+                  ? formatter.format(userEarnings?.userEarnings?.balance)
+                  : 0}
+                </h2>
               </div>
               <p className='p3b text-n-900 cursor-pointer'
               onClick={() => {
@@ -478,7 +582,7 @@ const page = () => {
     }
   }
 
-  if (userInfoLoading || !userInfo) {
+  if (userInfoLoading || !userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success  ) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -490,7 +594,9 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo) {
+  if (!userInfoLoading && userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success ) {
+    console.log(referralCount);
+    
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 

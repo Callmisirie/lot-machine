@@ -8,7 +8,7 @@ const earningSchema = new Schema(
       ref: "User", // Reference the User model for better querying
     },
     balance: {
-      type: String,
+      type: Number,
       required: true
     },
     tx_refs: [
