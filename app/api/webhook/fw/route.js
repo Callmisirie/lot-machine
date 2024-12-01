@@ -4,7 +4,6 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Flutterwave from "flutterwave-node-v3";
 import storeProcessedEvent from "@/actions/StoreProcessedEvent";
-import checkStoredProcessedEvent from "@/actions/checkStoredProcessEvent";
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
@@ -53,18 +52,16 @@ export const POST = async (req) => {
     const existingEvent = await verify();
 
     if (payload?.status === "successful") {
-      const storedProcessedEvent = await checkStoredProcessedEvent(payload);
+      const storedProcessedEvent = await storeProcessedEvent(payload);
 
       if (storedProcessedEvent.success) {
         if (storedProcessedEvent.stored) {
           console.log("Duplicate found");
         } else {
           if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
-            await storeProcessedEvent(payload);
             await addSubscription(payload);
             await inEarnings(payload);
           } else if (payload["event.type"] === "TRANSFER_TRANSACTION") {
-            await storeProcessedEvent(payload);
             // await outEarnings(payload);
           } 
         }
@@ -74,7 +71,6 @@ export const POST = async (req) => {
     } else {
       // if (existingEvent?.data.status === payload.status) {
       //   console.log("Duplicate found");
-      //   return new NextResponse("This status hasn't changed", { status: 200 });
       // }  
     }
 

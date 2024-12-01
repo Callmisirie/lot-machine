@@ -89,8 +89,6 @@ const page = () => {
       return amount * 10;
     }
   }
-
-  
   const config = {
     public_key: TEST_FLUTTERWAVE_PUBLIC_KEY ,
     tx_ref: uniqueId,
@@ -212,7 +210,22 @@ const page = () => {
                       if (userInfo) {
                         handleFlutterPayment({
                           callback: async (response) => {
-                            subscriptionRefetch()
+                            let count = 0;
+                            let intervalTime = 10
+                            const interval = setInterval(() => {
+                              subscriptionRefetch()
+                              console.log("Refeching subscriptions");
+                              count += 1;
+                              if (count === 1) {
+                                intervalTime = 20; // Change interval to 20 seconds after first iteration
+                              } else if (count === 2) {
+                                intervalTime = 30; // Change interval to 30 seconds after second iteration
+                              }
+                              if (count === 3) {
+                                clearInterval(interval); // Stop the interval after 5 executions
+                                console.log("Stopped fetching after 5 iterations");
+                              }
+                            }, 1000 * intervalTime);
                             closePaymentModal()
                           },
                           onClose: () => {},
