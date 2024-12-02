@@ -44,8 +44,8 @@ const page = () => {
 
   if (userInfo) {
     const latestSubscription = () => {
-      if (!subscriptionsLoading && subscriptions.success) {
-        const latest = subscriptions.subscriptions[subscriptions?.subscriptions?.length - 1];
+      if (!subscriptionsLoading && subscriptions.success && subscriptions.subscriptions) {
+        const latest = subscriptions?.subscriptions[subscriptions?.subscriptions?.length - 1];
         const subscriptionEndDate = format(new Date(latest?.endDate), 'dd/MM/yyyy');
         const payment_type = latest?.payment_type
   
@@ -97,12 +97,12 @@ const page = () => {
                   </div>
                   <div className='w-fit h-fit flex gap-2 items-center'>
                     <p className='p2b text-n-700'>
-                      Expires: <span className='p3r text-n-500'>{latestSubscription().subscriptionEndDate}</span>
+                      Expires: <span className='p3r text-n-500'>{latestSubscription?.().subscriptionEndDate}</span>
                     </p>
                   </div>
                 </div>
                 <button className={`w-fit p3b text-accent-red-300 cursor-pointer 
-                  ${latestSubscription().payment_type === 'card' ? '' : "invisible"}`}>
+                  ${latestSubscription?.().payment_type === 'card' ? '' : "invisible"}`}>
                   Cancel subscription
                 </button>
               </div>

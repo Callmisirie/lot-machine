@@ -3,7 +3,7 @@
 import { connectMongoDB } from '@/lib/mongodb';
 import User from '@/models/user';
 
-const getReferrals = async ({email}) => {
+const getReferrals = async (email) => {
   await connectMongoDB();
   const user = await User.findOne({ email });
   const referrerId = user.referrerId;

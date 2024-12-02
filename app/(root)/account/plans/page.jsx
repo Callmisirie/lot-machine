@@ -189,12 +189,12 @@ const page = () => {
                   <button
                   className={`flex items-center 
                   justify-center  w-[146px] h-[48px] rounded-[16px]
-                  ${userInfo 
+                  ${userInfo && userInfo.plan !== "Pro"
                     ? "cursor-pointer bg-n-900" 
                     : "cursor-not-allowed bg-n-700"}`}>
                     <p className='text-n-100 l3b'
                     onClick={() => {
-                      if (userInfo) {
+                      if (userInfo && userInfo.plan !== "Pro") {
                         handleFlutterPayment({
                           callback: async (response) => {
                             let count = 0;
@@ -219,7 +219,7 @@ const page = () => {
                         });
                       }
                     }}>
-                      Upgrade to pro
+                      {userInfo.plan === "Pro" ? "Your current plan" : "Upgrade to pro"}
                     </p>
                   </button>            
               </div>
