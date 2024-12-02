@@ -4,16 +4,10 @@ import CardFrame from '@/components/account/CardFrame'
 import Header from '@/components/account/Header'
 import ValueField from '@/components/account/ValueField'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
 import { format } from 'date-fns';
 import React from 'react'
-
-const fetchUserInfo = async (email) => {
-  const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user info");
-  return res.json();
-};
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -22,19 +16,9 @@ const fetchSubscriptions = async (email) => {
   return {success, subscriptions}
 };
 
-
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
-  const {
-    data: userInfo,
-    isLoading: userInfoLoading,
-  } = useQuery({
-    queryKey: ["userInfo", user?.email],
-    queryFn: async () => await fetchUserInfo(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
-
+  const queryClient = useQueryClient();
   const {
     data: subscriptions,
     isLoading: subscriptionsLoading,
@@ -44,8 +28,9 @@ const page = () => {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
 
-  if (userInfoLoading || !userInfo) {
+  if (!userInfo) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -57,7 +42,7 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo) {
+  if (userInfo) {
     const latestSubscription = () => {
       if (!subscriptionsLoading && subscriptions.success) {
         const latest = subscriptions.subscriptions[subscriptions?.subscriptions?.length - 1];

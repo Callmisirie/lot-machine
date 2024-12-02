@@ -7,18 +7,13 @@ import { planBenefits } from '.'
 import PaymentDurationPill from '@/components/account/PaymentDurationPill'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from "next/navigation";
 
 const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
-
-const fetchUserInfo = async (email) => {
-  const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user info");
-  return res.json();
-};
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -27,25 +22,12 @@ const fetchSubscriptions = async (email) => {
   return {success, subscriptions};
 };
 
-
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
+  const queryClient = useQueryClient();
   const [paymentDurationState, setPaymentDurationState] = useState("Month");
   const uniqueId = uuidv4();
-  const formatter = new Intl.NumberFormat('en-US', {
-    notation: "compact",
-    compactDisplay: "short"
-  });
-  const {
-    data: userInfo,
-    isLoading: userInfoLoading,
-  } = useQuery({
-    queryKey: ["userInfo", user?.email],
-    queryFn: async () => await fetchUserInfo(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
-
+  const router = useRouter();
   const {
     data: subscriptions,
     isLoading: subscriptionsLoading,
@@ -55,6 +37,11 @@ const page = () => {
     queryFn: async () => await fetchSubscriptions(user.email),
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: "compact",
+    compactDisplay: "short"
   });
 
   const amount = 200;
@@ -109,7 +96,11 @@ const page = () => {
 
   const handleFlutterPayment = useFlutterwave(config);
 
-  if (userInfoLoading || !userInfo || subscriptionsLoading) {
+  if (userInfo && userInfo.plan === "Master") {
+    router.push("/account/profile");
+  }  
+
+  if (!userInfo || subscriptionsLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -121,7 +112,7 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) {     
+  if (userInfo && !subscriptionsLoading && subscriptions.success && userInfo.plan !== "Master") {  
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 

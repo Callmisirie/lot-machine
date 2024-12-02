@@ -11,17 +11,12 @@ import TabButtons from '@/components/account/TabButtons'
 import { clipboardBlack, dropArrowBlack } from '@/public/icons/black'
 import { backArrowWhite, cancelWhite } from '@/public/icons/white'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { format } from 'date-fns';
-
-const fetchUserInfo = async (email) => {
-  const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user info");
-  return res.json();
-};
+import { useRouter } from "next/navigation";
 
 const fetchUserEarnings = async (email) => {
   const res = await fetch(`/api/getUserEarnings?email=${email}`, { cache: "no-store" });
@@ -39,15 +34,8 @@ const fetchReferralsCount = async (email) => {
 
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
-  const {
-    data: userInfo,
-    isLoading: userInfoLoading,
-  } = useQuery({
-    queryKey: ["userInfo", user?.email],
-    queryFn: async () => await fetchUserInfo(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     data: userEarnings,
     isLoading: userEarningsLoading,
@@ -66,6 +54,7 @@ const page = () => {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   const [tabButtonState, setTabButtonState] = useState("Statistics")
   const [isAddedBank, setIsAddedBank] = useState(true)
   const [isReferralList, setIsReferralList] = useState(false)
@@ -173,8 +162,6 @@ const page = () => {
                   <p className='p2b text-n-700'>
                     {referralCount?.userPlan === "Pro" 
                     ? "Active" 
-                    : referralCount?.userPlan === "Master"
-                    ? "Active"
                     : "Inactive"}
                   </p>
 
@@ -275,12 +262,8 @@ const page = () => {
                       <p className={`p3r  
                         ${referredUser?.plan === "Pro" 
                         ? "text-accent-green-300" 
-                        : referredUser?.plan === "Master"
-                        ? "text-accent-green-300"
                         : "text-accent-red-300"}`}>
                         {referredUser?.plan === "Pro" 
-                        ? "Active"
-                        : referredUser?.plan === "Master"
                         ? "Active"
                         : "Inactive"}
                       </p>
@@ -582,7 +565,11 @@ const page = () => {
     }
   }
 
-  if (userInfoLoading || !userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success  ) {
+  if (userInfo && userInfo.plan === "Master") {
+    router.push("/account/profile");
+  }  
+
+  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success  ) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -594,9 +581,7 @@ const page = () => {
     );
   }
 
-  if (!userInfoLoading && userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success ) {
-    console.log(referralCount);
-    
+  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master") {  
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 

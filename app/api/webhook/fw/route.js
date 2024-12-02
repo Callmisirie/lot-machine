@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Flutterwave from "flutterwave-node-v3";
 import storeProcessedEvent from "@/actions/StoreProcessedEvent";
+import processSuccessfulWebhook from "@/actions/processSuccessfulWebhook";
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
@@ -53,21 +54,7 @@ export const POST = async (req) => {
 
     if (payload?.status === "successful") {
       const storedProcessedEvent = await storeProcessedEvent(payload);
-
-      if (storedProcessedEvent.success) {
-        if (storedProcessedEvent.stored) {
-          console.log("Duplicate found");
-        } else {
-          if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
-            await addSubscription(payload);
-            await inEarnings(payload);
-          } else if (payload["event.type"] === "TRANSFER_TRANSACTION") {
-            // await outEarnings(payload);
-          } 
-        }
-          
-          // await resendHooks();
-      }
+      await processSuccessfulWebhook(storedProcessedEvent, payload)
     } else {
       // if (existingEvent?.data.status === payload.status) {
       //   console.log("Duplicate found");
