@@ -95,7 +95,6 @@ export const inEarnings = async (response) => {
 };
 
 export const outEarnings = async (response) => {
-  const uniqueId = uuidv4();
   try {
     await connectMongoDB();
 
@@ -124,7 +123,7 @@ export const outEarnings = async (response) => {
               month: currentMonth,
               in: 0,
               out: response.amount,
-              withdrawalId: uniqueId
+              withdrawalId: response.txRef
             }],
           }); 
         } else {
@@ -134,7 +133,7 @@ export const outEarnings = async (response) => {
               month: currentMonth,
               in: 0,
               out: response.amount,
-              withdrawalId: uniqueId
+              withdrawalId: response.txRef
             });
           } else {
             monthEntry.out = response.amount;       

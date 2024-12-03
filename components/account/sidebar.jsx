@@ -26,7 +26,7 @@ const Sidebar = () => {
 
     if (userInfo ) {
       return (
-        <div className="w-full h-fit flex flex-col gap-[58px] py-[32px]">
+        <div className={`w-full h-fit flex flex-col gap-[58px] py-[32px]`}>
         <Link href={"/account/profile"}>
           <h4 className={`h4 ${pathname === "/account/profile" ? "text-n-700" : "text-n-500"}`}>
             Profile
@@ -58,8 +58,10 @@ const Sidebar = () => {
 
   return (
     <div
-      className="h-full w-[300px] bg-white rounded-tr-[32px]
-    border border-n-300 border-r-[1px] border-t-[1px] px-[32px]"
+    className="h-full w-[300px] 
+    bg-white rounded-tr-[32px]
+    border border-n-300 border-r-[1px] 
+    border-t-[1px] px-[32px]"
     >
      {sidebarContent()}
     </div>
