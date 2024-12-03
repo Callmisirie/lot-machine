@@ -14,15 +14,21 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { userBlack } from "@/public/icons/black";
 import Link from "next/link";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+function getInitials(name) {
+  if (!name) return "";
+  const parts = name.split(" "); 
+  const initials = parts.map(part => part[0]?.toUpperCase() || ""); 
+  return initials.join(" ");
+}
 
 export function ProfilePopover() {
   const { user } = useKindeBrowserClient();
-  const initName =
-    user?.given_name.charAt(0).toUpperCase() +
-    user?.family_name.charAt(0).toUpperCase();
-
+  const queryClient = useQueryClient();
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const initName = getInitials(userInfo?.name);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const handleLinkClick = () => {
     setIsPopoverOpen(false); // Close the popover when a link is clicked
   };
@@ -34,8 +40,9 @@ export function ProfilePopover() {
       </PopoverTrigger>
       <PopoverContent>
         <div className="flex flex-col items-center justify-center gap-4">
-          <Pill blackPill content={"Free"} />
+          <Pill blackPill content={userInfo?.plan ? userInfo.plan : "N/A"} noCursor/>
           <div className="flex flex-col items-center justify-center gap-8">
+            {userInfo && (
             <Link href="/account/profile" onClick={handleLinkClick}>
               <Button variant="customGhost" className="l3r text-n-700">
                 Account
@@ -48,7 +55,7 @@ export function ProfilePopover() {
                   priority
                 />
               </Button>
-            </Link>
+            </Link>)}
             <Link
               rel="noreferrer noopener"
               href="/api/auth/logout"

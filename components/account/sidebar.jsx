@@ -1,32 +1,19 @@
 "use client";
 
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const fetchUserInfo = async (email) => {
-  const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user info");
-  return res.json();
-};
-
 const Sidebar = () => {
-  const {isAuthenticated, user} = useKindeBrowserClient();
   const pathname = usePathname(); // Get the current pathname
-  const {
-    data: userInfo,
-    isLoading: userInfoLoading,
-  } = useQuery({
-    queryKey: ["userInfo", user?.email],
-    queryFn: async () => await fetchUserInfo(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
+  const {user} = useKindeBrowserClient();
+  const queryClient = useQueryClient();
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
 
   const sidebarContent = () => {
-    if (userInfoLoading || !userInfo) {
+    if (!userInfo) {
       return (
         <div className="w-full h-full flex justify-center items-center relative">
           <div className="flex flex-col items-center gap-2">
@@ -37,7 +24,7 @@ const Sidebar = () => {
       );
     } 
 
-    if (!userInfoLoading && userInfo ) {
+    if (userInfo ) {
       return (
         <div className="w-full h-fit flex flex-col gap-[58px] py-[32px]">
         <Link href={"/account/profile"}>

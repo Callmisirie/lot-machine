@@ -4,8 +4,13 @@ import Image from 'next/image';
 import { lmLogo } from '@/public';
 import { ProfilePopover } from './ProfilePopover';
 import Link from 'next/link';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Navbar = () => {
+  const {user} = useKindeBrowserClient();
+  const queryClient = useQueryClient();
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   return (
     <div className='w-full bg-white'>
       <div className='w-full flex justify-between p-[32px] h-fit bg-custom-opacity-15'>
@@ -24,10 +29,22 @@ const Navbar = () => {
               <h3 className='h3r text-n-700'>Lot machine</h3>     
           </div>
         </Link>
-        <ProfilePopover />
+        <div className='w-fit h-fit flex items-center'>
+          {userInfo && userInfo.plan === "Free" 
+          ? <Link href={"/account/plans"}
+            className='relative -right-2'>
+              <div className='flex justify-center 
+              items-center w-[146px] h-[48px] p-4
+              rounded-tl-[16px] rounded-bl-[16px]
+              bg-n-900 shadow-md'>
+                  <p className='l3b text-n-100'>Get pro plan</p>     
+              </div>
+            </Link>
+          : null}
+          <ProfilePopover />
+        </div>
       </div>      
     </div>
-
   )
 }
 

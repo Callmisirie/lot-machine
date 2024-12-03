@@ -63,7 +63,7 @@ export const inEarnings = async (response) => {
       return { success: false, message: "Admin user does not exist" };
     }
 
-    if (referrer && referrer.userId !== adminUser.userId) {
+    if (referrer && referrer.plan === "Pro" && referrer.userId !== adminUser.userId) {
       if (!referralCount.success) {
         console.log("Couldn't get total active referral list");
         return {success: false, message: "Couldn't get total active referral list"}

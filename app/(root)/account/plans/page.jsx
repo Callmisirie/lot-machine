@@ -199,9 +199,9 @@ const page = () => {
                           callback: async (response) => {
                             let count = 0;
                             let intervalTime = 10
-                            const interval = setInterval(() => {
+                            const interval = setInterval(async() => {
+                              await queryClient.invalidateQueries("userInfo");
                               subscriptionRefetch()
-                              console.log("Refeching subscriptions");
                               count += 1;
                               if (count === 1) {
                                 intervalTime = 20; // Change interval to 20 seconds after first iteration
@@ -210,7 +210,6 @@ const page = () => {
                               }
                               if (count === 3) {
                                 clearInterval(interval); // Stop the interval after 5 executions
-                                console.log("Stopped fetching after 5 iterations");
                               }
                             }, 1000 * intervalTime);
                             closePaymentModal()
