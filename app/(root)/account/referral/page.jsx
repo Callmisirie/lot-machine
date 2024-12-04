@@ -42,6 +42,22 @@ const fetchGetBanks = async (country) => {
   return { status, data };
 };
 
+const beneficiary = async (beneficiaryDetails) => {
+  try {
+    const res = await fetch(`/api/beneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to add or fetch beneficiary");
+
+    const response = await res.json();
+    return { status: response.status, data: response.data };
+  } catch (error) {
+    console.error("Error in beneficiary function:", error);
+    throw error;
+  }
+};
+
+
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
   const router = useRouter();
@@ -120,6 +136,7 @@ const page = () => {
           const {status, data} = await fetchGetBanks(selectedCountry);
           if (status === "success") {
             setSelectedBank("");
+            setAccountNumber("");
             setCountryBanks(data);
             console.log("Fetched Banks:", data);
           }
@@ -137,11 +154,34 @@ const page = () => {
     setAccountNumber("");
   }
   
-  const handleAddBankAction = () => {
+  const handleAddBankAction = async () => {
     if (!selectedBank || !accountNumber) return;
-    const selectedBankCode = countryBanks.find((bank) => bank.name === selectedBank).code;
-    console.log({selectedBankCode, accountNumber});
-  }
+  
+    try {
+      // Get bank code for selected bank
+      const selectedBankCode = countryBanks.find((bank) => bank.name === selectedBank)?.code;
+  
+      // Call the beneficiary API
+      const beneficiaryDetails = JSON.stringify({
+        accountNumber,
+        accountBank: selectedBankCode,
+        beneficiaryName: userInfo?.name,
+        isFetchAction: false, // Set to true for fetch action
+      });
+  
+      const response = await beneficiary(beneficiaryDetails);
+      console.log("Beneficiary API response:", response);
+  
+      if (response.status === "success") {
+        alert("Bank account added successfully!");
+      } else {
+        alert("Failed to add bank account. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error in handleAddBankAction:", error);
+      alert("An error occurred while adding the bank account.");
+    }
+  };
   
 
   const referralContent = () => {
