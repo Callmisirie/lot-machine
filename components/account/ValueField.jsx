@@ -8,8 +8,8 @@ const ValueField = ({
 }) => {
   const splitValue = () => {
     let split = value
-    if (split?.length > 16) {  
-      split = split?.slice(0, 16)
+    if (split?.length > 12) {  
+      split = split?.slice(0, 12)
       split = split + "..."
       return split
     }

@@ -14,9 +14,12 @@ import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { format } from 'date-fns';
 import { useRouter } from "next/navigation";
+import { SelectFrame } from '@/components/account/SelectFrame'
+import { ComboboxInput } from '@/components/account/Combobox'
+
 
 const fetchUserEarnings = async (email) => {
   const res = await fetch(`/api/getUserEarnings?email=${email}`, { cache: "no-store" });
@@ -30,6 +33,13 @@ const fetchReferralsCount = async (email) => {
   if (!res.ok) throw new Error("Failed to fetch referral count");
   const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals } = await res.json();
   return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals};
+};
+
+const fetchGetBanks = async (country) => {
+  const res = await fetch(`/api/getBanks?country=${country}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch banks");
+  const { status, data } = await res.json();
+  return { status, data };
 };
 
 const page = () => {
@@ -60,10 +70,14 @@ const page = () => {
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
   const [isWithdrawalDetails, setIsWithdrawalDetails] = useState(false)
+  const [selectedBank, setSelectedBank] = useState("")
   const formatter = new Intl.NumberFormat('en-US', {
     notation: "compact",
     compactDisplay: "short"
   });
+  const [countryBanks, setCountryBanks] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
 
   const currentYear = new Date().getFullYear(); // Get current year
   const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
@@ -88,6 +102,47 @@ const page = () => {
       }
     }
   }
+
+  const countryDetails = {
+    placeholder: "Select a country",
+    values:
+    [
+      {value: "NG"},
+      {value: "GH"}
+    ]
+  }
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const fetchBanks = async () => {
+        try {
+          console.log("Selected Country:", selectedCountry);
+          const {status, data} = await fetchGetBanks(selectedCountry);
+          if (status === "success") {
+            setSelectedBank("");
+            setCountryBanks(data);
+            console.log("Fetched Banks:", data);
+          }
+        } catch (error) {
+          console.error("Error fetching banks:", error);
+        }
+      };
+  
+      fetchBanks(); // Call the asynchronous function
+    }
+  }, [selectedCountry]);
+
+  const handleCancelAction = () => {
+    setSelectedBank("");
+    setAccountNumber("");
+  }
+  
+  const handleAddBankAction = () => {
+    if (!selectedBank || !accountNumber) return;
+    const selectedBankCode = countryBanks.find((bank) => bank.name === selectedBank).code;
+    console.log({selectedBankCode, accountNumber});
+  }
+  
 
   const referralContent = () => {
     if (tabButtonState === "Statistics") {
@@ -303,25 +358,29 @@ const page = () => {
               </p>
             </div>
             <div className='flex flex-col gap-2 w-fit h-fit'>
-              <Input 
-              label={"Country"}
-              value={"NG"}
+              <SelectFrame 
+               label={"Country"}
+               details={countryDetails}
+               selectedCountry={selectedCountry}
+               setSelectedCountry={setSelectedCountry}
               />
-              <Input 
-              label={"Bank"}
-              value={"Opay"}
+              <ComboboxInput 
+                countryBanks={countryBanks}
+                selectedBank={selectedBank}
+                setSelectedBank={setSelectedBank}
               />
               <Input 
               label={"Account number"}
               type={"number"}
+              name={"Account number"}
+              value={accountNumber}
+              handleChange={setAccountNumber}
               />
             </div>
-            <div 
-            className='w-full'
-            onClick={() => {
-              setIsAddedBank(true)
-            }}>
-              <DualButton />
+            <div className='w-full'>
+              <DualButton 
+              addBankAction={handleAddBankAction}
+              cancelAction={handleCancelAction}/>
             </div>
           </div>
         )

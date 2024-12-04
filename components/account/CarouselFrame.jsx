@@ -88,7 +88,7 @@ export function CarouselFrame({
   const handleFlutterPayment = useFlutterwave(config);
 
   return (
-    <Carousel className="w-[300px]">
+    <Carousel className="w-[301px]">
       <CarouselContent>
         <CarouselItem >
           <CardFrame>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const DualButton = () => {
+const DualButton = ({cancelAction, addBankAction}) => {
   return (
     <div className="flex gap-4 
     w-full h-fit justify-center 
@@ -9,7 +9,8 @@ const DualButton = () => {
       className={`flex items-center 
       justify-center bg-white w-full 
       h-[48px] cursor-pointer
-      rounded-[16px] shadow-md`}>
+      rounded-[16px] shadow-md`}
+      onClick={cancelAction}>
         <p className='text-n-900 l3b'>
           Cancel
         </p>
@@ -18,7 +19,8 @@ const DualButton = () => {
       className={`flex items-center 
       justify-center bg-n-900
       w-full h-[48px] cursor-pointer 
-      rounded-[16px] shadow-md`}>
+      rounded-[16px] shadow-md`} 
+      onClick={addBankAction}>
         <p className='text-n-100 l3b'>
           Add bank
         </p>
