@@ -4,7 +4,6 @@ import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
 import Earning from "@/models/earning";
 import Flutterwave from "flutterwave-node-v3";
-import { v4 as uuidv4 } from 'uuid';
 import crypto from "crypto";
 import processInEarnings from "./processInEarnings";
 import getReferrals from "@/common/getReferrals";
@@ -34,7 +33,6 @@ const referralSplitPercentage = (referrer, totalActiveReferrals) => {
 }
 
 export const inEarnings = async (response) => {
-  const uniqueId = uuidv4();
   try {
     await connectMongoDB();
 
@@ -72,19 +70,19 @@ export const inEarnings = async (response) => {
       await processInEarnings(
         response, referrer, 
         referrerEarnings, splitShare(referralPercentage), 
-        uniqueId, user
+        user
       );
       const res = await processInEarnings(
         response, adminUser, 
         adminUserEarnings, splitShare(adminPercentage), 
-        uniqueId, user
+        user
       );
       return res;
     } else {
       const res = await processInEarnings(
         response, adminUser, 
         adminUserEarnings, splitShare(adminPercentage), 
-        uniqueId, user
+        user
       );
       return res;
     } 
@@ -104,42 +102,21 @@ export const outEarnings = async (response) => {
       return { success: false, message: "User does not exist" };
     }
 
-    let userEarnings = await Earning.findOne({ userId: user._id });
+    let earnings = await Earning.findOne({ userId: user._id });
 
     const currentYear = new Date().getFullYear(); // Get current year
     const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
     
-    if (userEarnings) {
-      if (userEarnings.balance === response.balance) {
-        userEarnings.balance = 0;
-        userEarnings.tx_refs.push({
+    if (earnings) {
+      if (earnings.balance === response.balance && response.balance > 0) {
+        earnings.balance = 0;
+        earnings.out.push({
+          year: currentYear,
+          month: currentMonth,
+          amount: response.balance,
           tx_ref: response.txRef
         });
-        const yearEntry = userEarnings.earnings.find((entry) => entry.year === currentYear);
-        if (!yearEntry) {
-          userEarnings.earnings.push({
-            year: currentYear,
-            months: [{
-              month: currentMonth,
-              in: 0,
-              out: response.amount,
-              withdrawalId: response.txRef
-            }],
-          }); 
-        } else {
-          const monthEntry = yearEntry.months.find((entry) => entry.month === currentMonth);
-          if (!monthEntry) {
-            yearEntry.months.push({
-              month: currentMonth,
-              in: 0,
-              out: response.amount,
-              withdrawalId: response.txRef
-            });
-          } else {
-            monthEntry.out = response.amount;       
-          }
-        }
-        await userEarnings.save();
+        await earnings.save();
         console.log("Out earnings updated successfully");
         return { success: true, message: "Out earnings updated successfully"};
       } else {
@@ -147,8 +124,8 @@ export const outEarnings = async (response) => {
         return { success: false, message: "User earnings balance and withdrawal amount does not match" };
       }
     } else {
-      console.log("Withdrawal feature available after first payment");
-      return { success: false, message: "Feature not availabe until first payment" };
+      console.log("Withdrawal feature available after receiving first referral split");
+      return { success: false, message: "Feature not availabe until receiving first referral split" };
     }
   } catch (error) {
     console.log("Error updating out earnings: ", error);

@@ -11,36 +11,34 @@ const earningSchema = new Schema(
       type: Number,
       required: true
     },
-    tx_refs: [
-      {
-        tx_ref: {
-          type: String,
-        },
+    in: [{
+      year: {
+        type: Number
       },
-    ],
-     earnings: [
-      {
-        year: {
-          type: Number
-        },
-        months: [
-          { 
-            month: {
-              type: Number
-            },
-            in: {
-              type: Number
-            },
-            out: {
-              type: Number
-            },
-            withdrawalId: {
-              type: String
-            }
-          }
-        ]
+      month: {
+        type: Number
       },
-    ],
+      amount: {
+        type: Number
+      },
+      tx_ref: {
+        type: String
+      },
+    }],
+    out: [{
+      year: {
+        type: Number
+      },
+      month: {
+        type: Number
+      },
+      amount: {
+        type: Number
+      },
+      tx_ref: {
+        type: String
+      },
+    }]
   },
   { timestamps: true }
 );
