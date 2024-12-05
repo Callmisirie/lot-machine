@@ -19,6 +19,8 @@ import { format } from 'date-fns';
 import { useRouter } from "next/navigation";
 import { SelectFrame } from '@/components/account/SelectFrame'
 import { ComboboxInput } from '@/components/account/Combobox'
+import useResizeObserver from "use-resize-observer";
+import { ScrollAreaFrame } from '@/components/account/ScrollArea'
 
 
 const fetchUserEarnings = async (email) => {
@@ -70,6 +72,16 @@ const deleteBeneficiary = async (beneficiaryDetails) => {
   if (!res.ok) throw new Error("Failed to delete user beneficiary");
   const { success, data } = await res.json();
   return {success, data};
+};
+
+
+const makeWithdrawal = async (beneficiaryDetails) => {
+  const res = await fetch(`/api/makeWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to make withdrawal");
+  const response = await res.json();
+  return { status: response.status, data: response.data };
 };
 
 const page = () => {
@@ -127,6 +139,7 @@ const page = () => {
   const [countryBanks, setCountryBanks] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const { ref, height } = useResizeObserver();  
 
   const currentYear = new Date().getFullYear(); // Get current year
   const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
@@ -203,12 +216,31 @@ const page = () => {
       
       const {status} = await addBeneficiary(beneficiaryDetails);
       if (status === "success") {
+        console.log("Add benneficially successfull");
+        
         setSelectedBank("");
         setAccountNumber("");
         await queryClient.invalidateQueries("beneficiary");
       }
-    };
+  };
   
+  const handleMakeWithdrawal = async () => {
+    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary) return;
+
+    const beneficiaryDetails = JSON.stringify({
+      email: userInfo?.email,
+      beneficiaryId: userBeneficiaryId?.beneficiaryId,
+      account_number: userBeneficiary?.beneficiary?.account_number, 
+      account_bank: userBeneficiary?.beneficiary?.bank_code
+    });
+    
+    const {status} = await makeWithdrawal(beneficiaryDetails);
+    if (status === "success") {
+      console.log("Withdrawal was successfull");
+      
+      await queryClient.invalidateQueries("userEarnings");
+    }
+  };
 
   const referralContent = () => {
     if (tabButtonState === "Statistics") {
@@ -322,9 +354,6 @@ const page = () => {
             </div>
           </div>
         )
-        // return (
-        //   <DownloadQrCode />
-        // )
       }
       if (isReferralList) {
         return (
@@ -371,7 +400,9 @@ const page = () => {
                   </p>
                 </div>
               </div>
-              <div className='w-full h-full flex flex-col gap-4'>
+              <ScrollAreaFrame
+                mainClass={`w-full h-[259px]`}
+                innerClass={`w-full h-full flex flex-col gap-4`}>
                 {referralCount?.referredUsers?.map((referredUser) => {
                   return (
                     <div className='w-full h-fit flex 
@@ -390,8 +421,8 @@ const page = () => {
                       </p>
                     </div>
                   )
-                })}
-              </div>
+                })}       
+              </ScrollAreaFrame>
             </div>
           </div>
         )
@@ -408,292 +439,276 @@ const page = () => {
             </div>
           </div>
         );
-      }
-      if (!userBeneficiary?.success && !isWithdrawalHistory) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-between 
-          items-center'>
-            <div className='flex w-full h-[72px] 
-            items-start justify-start flex-col
-            gap-2 '>
-              <div className='w-fit flex 
-              items-center justify-start gap-4 
-              border-b border-n-300'>
-                <h6 className='h6 text-n-700'>Balance</h6>
-                <p className='p2b text-n-500'>&#8358;
-                  {userEarnings?.userEarnings?.balance 
-                  ? formatter.format(userEarnings?.userEarnings?.balance)
-                  : 0}
-                </p>
-              </div>
-              <p className='p3b text-n-900 cursor-pointer'
-              onClick={() => {
-                setIsWithdrawalHistory(true)
-              }}>
-                Withdrawal history
-              </p>
-            </div>
-            <div className='flex flex-col gap-2 w-fit h-fit'>
-              <SelectFrame 
-               label={"Country"}
-               details={countryDetails}
-               selectedCountry={selectedCountry}
-               setSelectedCountry={setSelectedCountry}
-              />
-              <ComboboxInput 
-                countryBanks={countryBanks}
-                selectedBank={selectedBank}
-                setSelectedBank={setSelectedBank}
-              />
-              <Input 
-              label={"Account number"}
-              type={"number"}
-              name={"Account number"}
-              value={accountNumber}
-              handleChange={setAccountNumber}
-              />
-            </div>
-            <div className='w-full'>
-              <DualButton 
-              addBankAction={handleAddBankAction}
-              cancelAction={handleCancelAction}/>
-            </div>
-          </div>
-        )
-      }
-      if (userBeneficiary?.success && !isWithdrawalHistory) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-between 
-          items-center'>
-            <div className='flex w-full h-[95px] 
-            items-start flex-col gap-2'>
-              <div className='w-fit flex flex-col items-start 
-              border-b border-n-300'>
-                <h6 className='h6 text-n-700'>Balance</h6>
-                <h2 className='h3 text-n-500'>&#8358;
-                  {userEarnings?.userEarnings?.balance 
-                  ? formatter.format(userEarnings?.userEarnings?.balance)
-                  : 0}
-                </h2>
-              </div>
-              <p className='p3b text-n-900 cursor-pointer'
-              onClick={() => {
-                setIsWithdrawalHistory(true)
-              }}>
-                Withdrawal history
-              </p>
-            </div>
-            <AccountPill 
-            bankName={userBeneficiary?.beneficiary?.bank_name}
-            accountNumber={userBeneficiary?.beneficiary?.account_number}
-            deleteBeneficiary={deleteBeneficiary}
-            beneficiaryId={userBeneficiaryId?.beneficiaryId}
-            email={userInfo?.email}
-            />
-            <Button 
-            label={"Withdraw"}
-            />
-          </div>
-        )
-      }
-      if (isWithdrawalHistory && !isWithdrawalDetails) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-start gap-2 
-          items-center'>
-            <div  className='flex flex-col w-full h-fit items-center'>
-              <h6 className='h6 text-n-700 w-fit'>Withdrawal history</h6>
-              <div className='w-full flex justify-end'>
-                <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalHistory(false)
-                  setIsWithdrawalDetails(false)
-                }}>
-                  <Image
-                    src={cancelWhite}
-                    width={24}
-                    height={24}
-                    alt='delete icon'
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-            <div className='w-full h-full gap-[32px] flex flex-col'>
-              <div className='w-full h-fit 
-              flex flex-col items-start'>
-                <div className='w-fit h-fit flex items-center'>
-                  <h4 className='h4 text-n-700'>2024</h4>
-                  <Image
-                    src={dropArrowBlack}
-                    width={24}
-                    height={24}
-                    alt='drop arrow icon'
-                    priority
-                  />
-                </div>
-                <div className='w-fit h-fit gap-[32px] flex'>
-                  <div className='w-fit h-fit gap-2 flex items-center'>
-                    <p className='p3r text-n-500'>in:</p>
-                    <p className='p2r text-n-700'>$142.00</p>
-                  </div>
-                  <div className='w-fit h-fit gap-2 flex items-center'>
-                    <p className='p3r text-n-500'>out:</p>
-                    <p className='p2r text-n-700'>$62.00</p>
-                  </div>
-                </div>
-              </div>
-              <div className='w-full h-full flex flex-col gap-4'>
-                <div className='w-full h-fit flex flex-col
-                justify-between pb-2 items-start gap-2
-                border-b border-n-300 cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalDetails(true)
-                }}>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p2r text-n-700 w-fit'>
-                      Withdrawal
-                    </p>
-                    <p className='p2b text-n-700 w-fit'>
-                      -$34.00
-                    </p>
-                  </div>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p3r text-n-500 w-fit'>
-                      Jul 1, 22:40:14
-                    </p>
-                    <p className='p3r text-accent-green-300 w-fit'>
-                      Successful
-                    </p>
-                  </div>
-                </div>
-                <div className='w-full h-fit flex flex-col
-                justify-between pb-2 items-start gap-2
+      } else {
+        if (!userBeneficiary?.success && !isWithdrawalHistory) {
+          return (
+            <div className='w-full h-full 
+            flex flex-col justify-between 
+            items-center'>
+              <div className='flex w-full h-[72px] 
+              items-start justify-start flex-col
+              gap-2 '>
+                <div className='w-fit flex 
+                items-center justify-start gap-4 
                 border-b border-n-300'>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p2r text-n-700 w-fit'>
-                      Withdrawal
-                    </p>
-                    <p className='p2b text-n-700 w-fit'>
-                      -$30.00
-                    </p>
-                  </div>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p3r text-n-500 w-fit'>
-                      Sep 1, 13:44:54
-                    </p>
-                    <p className='p3r text-accent-green-300 w-fit'>
-                      Successful
-                    </p>
-                  </div>
+                  <h6 className='h6 text-n-700'>Balance</h6>
+                  <p className='p2b text-n-500'>&#8358;
+                    {userEarnings?.userEarnings?.balance 
+                    ? formatter.format(userEarnings?.userEarnings?.balance)
+                    : 0}
+                  </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        )
-      }
-      if (isWithdrawalDetails) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-start gap-2 
-          items-center'>
-            <div  className='flex flex-col w-full h-fit items-center'>
-              <h6 className='h6 text-n-700 w-fit'>Withdrawal details</h6>
-              <div className='w-full flex justify-between'>
-              <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
+                <p className='p3b text-n-900 cursor-pointer'
                 onClick={() => {
                   setIsWithdrawalHistory(true)
-                  setIsWithdrawalDetails(false)
                 }}>
-                  <Image
-                    src={backArrowWhite}
-                    width={24}
-                    height={24}
-                    alt='back icon'
-                    priority
-                  />
-                </div>
-                <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalHistory(false)
-                  setIsWithdrawalDetails(false)
-                }}>
-                  <Image
-                    src={cancelWhite}
-                    width={24}
-                    height={24}
-                    alt='delete icon'
-                    priority
-                  />
-                </div>
+                  Withdrawal history
+                </p>
+              </div>
+              <div className='flex flex-col gap-2 w-fit h-fit'>
+                <SelectFrame 
+                 label={"Country"}
+                 details={countryDetails}
+                 selectedCountry={selectedCountry}
+                 setSelectedCountry={setSelectedCountry}
+                />
+                <ComboboxInput 
+                  countryBanks={countryBanks}
+                  selectedBank={selectedBank}
+                  setSelectedBank={setSelectedBank}
+                />
+                <Input 
+                label={"Account number"}
+                type={"number"}
+                name={"Account number"}
+                value={accountNumber}
+                handleChange={setAccountNumber}
+                />
+              </div>
+              <div className='w-full'>
+                <DualButton 
+                addBankAction={handleAddBankAction}
+                cancelAction={handleCancelAction}/>
               </div>
             </div>
-            <div className='w-full h-fit gap-[32px] flex flex-col'>
-                <div className='w-full h-fit flex flex-col gap-2 items-center justify-center'>
-                  <p className='p1b text-n-700'>Withdrawal</p>
-                  <h5 className='h5 text-n-700'>-$34.00</h5>
-                  <p className='p3r text-accent-green-300'>Successful</p>
+          )
+        }
+        if (userBeneficiary?.success && !isWithdrawalHistory) {
+          return (
+            <div className='w-full h-full 
+            flex flex-col justify-between 
+            items-center'>
+              <div className='flex w-full h-[95px] 
+              items-start flex-col gap-2'>
+                <div className='w-fit flex flex-col items-start 
+                border-b border-n-300'>
+                  <h6 className='h6 text-n-700'>Balance</h6>
+                  <h2 className='h3 text-n-500'>&#8358;
+                    {userEarnings?.userEarnings?.balance 
+                    ? formatter.format(userEarnings?.userEarnings?.balance)
+                    : 0}
+                  </h2>
                 </div>
-                <div className='flex flex-col gap-4 items-start'>
-                  <div className='w-full h-fit pb-2'>
-                    <p className='p2b text-n-700'>Withdrawal details</p>
+                <p className='p3b text-n-900 cursor-pointer'
+                onClick={() => {
+                  setIsWithdrawalHistory(true)
+                }}>
+                  Withdrawal history
+                </p>
+              </div>
+              <AccountPill 
+              bankName={userBeneficiary?.beneficiary?.bank_name}
+              accountNumber={userBeneficiary?.beneficiary?.account_number}
+              deleteBeneficiary={deleteBeneficiary}
+              beneficiaryId={userBeneficiaryId?.beneficiaryId}
+              email={userInfo?.email}
+              />
+              <Button 
+              makeWithdrawalAction={handleMakeWithdrawal}
+              label={"Withdraw"}
+              />
+            </div>
+          )
+        }
+        if (isWithdrawalHistory && !isWithdrawalDetails) {
+          return (
+            <div className='w-full h-full 
+            flex flex-col justify-start gap-2 
+            items-center'>
+              <div  className='flex flex-col w-full h-fit items-center'>
+                <h6 className='h6 text-n-700 w-fit'>Withdrawal history</h6>
+                <div className='w-full flex justify-end'>
+                  <div className='w-[27px] h-[27px] 
+                  rounded-full flex items-center 
+                  justify-center bg-n-900
+                  cursor-pointer'
+                  onClick={() => {
+                    setIsWithdrawalHistory(false)
+                    setIsWithdrawalDetails(false)
+                  }}>
+                    <Image
+                      src={cancelWhite}
+                      width={24}
+                      height={24}
+                      alt='delete icon'
+                      priority
+                    />
                   </div>
-                  <div className='w-full h-fit flex flex-col gap-2'>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Recipient details</p>
-                      <p  className='p3r text-n-700'>
-                        Opay | 8108166172
+                </div>
+              </div>
+              <div className='w-full h-full gap-[32px] flex flex-col'>
+                <div className='w-full h-fit 
+                flex flex-col items-start'>
+                  <div className='w-fit h-fit flex items-center'>
+                    <h4 className='h4 text-n-700'>2024</h4>
+                    <Image
+                      src={dropArrowBlack}
+                      width={24}
+                      height={24}
+                      alt='drop arrow icon'
+                      priority
+                    />
+                  </div>
+                  <div className='w-fit h-fit gap-[32px] flex'>
+                    <div className='w-fit h-fit gap-2 flex items-center'>
+                      <p className='p3r text-n-500'>in:</p>
+                      <p className='p2r text-n-700'>$142.00</p>
+                    </div>
+                    <div className='w-fit h-fit gap-2 flex items-center'>
+                      <p className='p3r text-n-500'>out:</p>
+                      <p className='p2r text-n-700'>$62.00</p>
+                    </div>
+                  </div>
+                </div>
+                <ScrollAreaFrame
+                mainClass={`w-full h-[242px]`}
+                innerClass={`w-full h-full flex flex-col gap-4`}>
+                  <div className='w-full h-fit flex flex-col
+                  justify-between pb-2 items-start gap-2
+                  border-b border-n-300 cursor-pointer'
+                  onClick={() => {
+                    setIsWithdrawalDetails(true)
+                  }}>
+                    <div className='w-full h-fit items-center flex justify-between'>
+                      <p className='p2r text-n-700 w-fit'>
+                        Withdrawal
+                      </p>
+                      <p className='p2b text-n-700 w-fit'>
+                        -$34.00
                       </p>
                     </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction type</p>
-                      <p  className='p3r text-n-700'>
-                        Bank account
-                      </p>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Amount paid</p>
-                      <p  className='p3r text-n-700'>
-                        $34.00
-                      </p>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction ref</p>
-                      <div className='flex items-center gap-1'>
-                        <p  className='p3r text-n-700'>
-                          swdfw289489w00
-                        </p>
-                        <Image
-                          src={clipboardBlack}
-                          width={14}
-                          height={14}
-                          alt='clipboard icon'
-                          priority
-                        />
-                      </div>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction date</p>
-                      <p  className='p3r text-n-700'>
+                    <div className='w-full h-fit items-center flex justify-between'>
+                      <p className='p3r text-n-500 w-fit'>
                         Jul 1, 22:40:14
                       </p>
+                      <p className='p3r text-accent-green-300 w-fit'>
+                        Successful
+                      </p>
                     </div>
+                  </div>                  
+                </ScrollAreaFrame>
+              </div>
+            </div>
+          )
+        }
+        if (isWithdrawalDetails) {
+          return (
+            <div className='w-full h-full 
+            flex flex-col justify-start gap-2 
+            items-center'>
+              <div  className='flex flex-col w-full h-fit items-center'>
+                <h6 className='h6 text-n-700 w-fit'>Withdrawal details</h6>
+                <div className='w-full flex justify-between'>
+                <div className='w-[27px] h-[27px] 
+                  rounded-full flex items-center 
+                  justify-center bg-n-900
+                  cursor-pointer'
+                  onClick={() => {
+                    setIsWithdrawalHistory(true)
+                    setIsWithdrawalDetails(false)
+                  }}>
+                    <Image
+                      src={backArrowWhite}
+                      width={24}
+                      height={24}
+                      alt='back icon'
+                      priority
+                    />
+                  </div>
+                  <div className='w-[27px] h-[27px] 
+                  rounded-full flex items-center 
+                  justify-center bg-n-900
+                  cursor-pointer'
+                  onClick={() => {
+                    setIsWithdrawalHistory(false)
+                    setIsWithdrawalDetails(false)
+                  }}>
+                    <Image
+                      src={cancelWhite}
+                      width={24}
+                      height={24}
+                      alt='delete icon'
+                      priority
+                    />
                   </div>
                 </div>
+              </div>
+              <div className='w-full h-fit gap-[32px] flex flex-col'>
+                  <div className='w-full h-fit flex flex-col gap-2 items-center justify-center'>
+                    <p className='p1b text-n-700'>Withdrawal</p>
+                    <h5 className='h5 text-n-700'>-$34.00</h5>
+                    <p className='p3r text-accent-green-300'>Successful</p>
+                  </div>
+                  <div className='flex flex-col gap-4 items-start'>
+                    <div className='w-full h-fit pb-2'>
+                      <p className='p2b text-n-700'>Withdrawal details</p>
+                    </div>
+                    <div className='w-full h-fit flex flex-col gap-2'>
+                      <div className='w-full h-fit flex justify-between items-center'>
+                        <p className='p3r text-n-500'>Recipient details</p>
+                        <p  className='p3r text-n-700'>
+                          Opay | 8108166172
+                        </p>
+                      </div>
+                      <div className='w-full h-fit flex justify-between items-center'>
+                        <p className='p3r text-n-500'>Transaction type</p>
+                        <p  className='p3r text-n-700'>
+                          Bank account
+                        </p>
+                      </div>
+                      <div className='w-full h-fit flex justify-between items-center'>
+                        <p className='p3r text-n-500'>Amount paid</p>
+                        <p  className='p3r text-n-700'>
+                          $34.00
+                        </p>
+                      </div>
+                      <div className='w-full h-fit flex justify-between items-center'>
+                        <p className='p3r text-n-500'>Transaction ref</p>
+                        <div className='flex items-center gap-1'>
+                          <p  className='p3r text-n-700'>
+                            swdfw289489w00
+                          </p>
+                          <Image
+                            src={clipboardBlack}
+                            width={14}
+                            height={14}
+                            alt='clipboard icon'
+                            priority
+                          />
+                        </div>
+                      </div>
+                      <div className='w-full h-fit flex justify-between items-center'>
+                        <p className='p3r text-n-500'>Transaction date</p>
+                        <p  className='p3r text-n-700'>
+                          Jul 1, 22:40:14
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+              </div>
             </div>
-          </div>
-        )
+          )
+        }
       }
     }
   }
@@ -716,11 +731,14 @@ const page = () => {
 
   if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master" && !userBeneficiaryIdLoading) { 
     return (
-      <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
-        <Header 
-        title={"Referral"}
-        text={"Simple, transparent and enjoyable"}
-        />
+      <div className='w-full h-full flex flex-col justify-center items-center gap-[32px]'
+      ref={ref}>
+        {height > 560 && (
+          <Header 
+          title={"Referral"}
+          text={"Simple, transparent and enjoyable"}
+          />
+        )}
         <CardFrame
         wide
         >

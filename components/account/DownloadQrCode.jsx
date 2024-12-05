@@ -85,7 +85,7 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
             </div>
               <div className='flex flex-col items-end justify-end'>
                 <p className='p3b text-n-500 w-[150px] h-[30px]'>
-                  Scan Qr code for 50% off on first payment.
+                  Scan Qr code for 50% off on first monthly plan payment.
                 </p>     
                 <Image 
                   src={qrCodeSrc} 

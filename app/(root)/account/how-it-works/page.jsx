@@ -6,9 +6,11 @@ import TabButtons from '@/components/account/TabButtons'
 import { search } from '@/public/icons'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import useResizeObserver from "use-resize-observer";
 
 const page = () => {
   const [tabButtonState, setTabButtonState] = useState("Lot machine")
+  const { ref, height } = useResizeObserver();
 
   const howItWorksContent = () => {
     if (tabButtonState === "Lot machine") {
@@ -89,11 +91,14 @@ const page = () => {
     }
   }
   return (
-    <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
-      <Header 
-      title={"How it works"}
-      text={"Simple, transparent and enjoyable"}
-      />
+    <div className='w-full h-full flex flex-col justify-center items-center gap-[32px]'
+    ref={ref}>
+      {height > 560 && (
+        <Header 
+        title={"How it works"}
+        text={"Simple, transparent and enjoyable"}
+        />
+      )}
       <CardFrame
       wide
       >

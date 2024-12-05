@@ -92,11 +92,11 @@ export const inEarnings = async (response) => {
   }
 };
 
-export const outEarnings = async (response) => {
+export const outEarnings = async (email, response) => {
   try {
     await connectMongoDB();
 
-    const user = await User.findOne({ email: response.customer.email });
+    const user = await User.findOne({ email });
     if (!user) {
       console.log("User does not exist");
       return { success: false, message: "User does not exist" };
@@ -108,21 +108,16 @@ export const outEarnings = async (response) => {
     const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
     
     if (earnings) {
-      if (earnings.balance === response.balance && response.balance > 0) {
-        earnings.balance = 0;
-        earnings.out.push({
-          year: currentYear,
-          month: currentMonth,
-          amount: response.balance,
-          tx_ref: response.txRef
-        });
-        await earnings.save();
-        console.log("Out earnings updated successfully");
-        return { success: true, message: "Out earnings updated successfully"};
-      } else {
-        console.log("User earnings balance and withdrawal amount does not match"); 
-        return { success: false, message: "User earnings balance and withdrawal amount does not match" };
-      }
+      earnings.balance = earnings.balance - response.amount;
+      earnings.out.push({
+        year: currentYear,
+        month: currentMonth,
+        amount: response.amount,
+        tx_ref: response.reference
+      });
+      await earnings.save();
+      console.log("Out earnings updated successfully");
+      return { success: true, message: "Out earnings updated successfully"};
     } else {
       console.log("Withdrawal feature available after receiving first referral split");
       return { success: false, message: "Feature not availabe until receiving first referral split" };

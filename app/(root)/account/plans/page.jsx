@@ -7,6 +7,7 @@ import { CarouselFrame } from '@/components/account/CarouselFrame'
 import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+import useResizeObserver from "use-resize-observer";
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -30,6 +31,7 @@ const page = () => {
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const { ref, height } = useResizeObserver(); 
 
   if (userInfo && userInfo.plan === "Master") {
     router.push("/account/profile");
@@ -49,11 +51,14 @@ const page = () => {
 
   if (userInfo && !subscriptionsLoading && subscriptions.success && userInfo.plan !== "Master") {  
     return (
-      <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
-        <Header 
-        title={"Plans"}
-        text={"Simple, transparent and enjoyable"}
-        />
+      <div className='w-full h-full flex flex-col justify-center items-center gap-[32px]'
+      ref={ref}>
+        {height > 560 && (
+          <Header 
+          title={"Plans"}
+          text={"Simple, transparent and enjoyable"}
+          />
+        )}
         <div className='w-fit h-fit flex flex-wrap gap-[32px] items-center justify-center'>
           <CarouselFrame subscriptionRefetch={subscriptionRefetch}/>
         </div>

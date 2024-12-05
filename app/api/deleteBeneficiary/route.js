@@ -14,9 +14,6 @@ export const GET = async (request) => {
   const beneficiaryDetails = JSON.parse(request.nextUrl.searchParams.get("beneficiaryDetails"));
   const { email, beneficiaryId } = beneficiaryDetails;
   
-  console.log({email, beneficiaryId});
-  
-
   const user = await User.findOne({ email });
   if (!user) {
     console.log("User does not exist");
@@ -25,7 +22,7 @@ export const GET = async (request) => {
 
   const userBeneficiary = await Beneficiary.findOne({ userId: user._id });
   if (userBeneficiary) {
-    await Beneficiary.deleteOne({ userId: user._id });;
+    await Beneficiary.deleteOne({ userId: user._id });
   }
 
   try {

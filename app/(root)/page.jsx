@@ -159,7 +159,6 @@ export default function Home() {
             className="w-full flex items-center justify-center absolute"
           >
           <ScrollAreaFrame
-            // mainClass={`w-full absolute h-[560px]`} 
             mainClass={`w-full h-full`} 
             innerClass="w-full h-full flex items-center justify-between flex-wrap gap-8 max-md:gap-4"
             setSubIsWrapped={setSubIsWrapped}

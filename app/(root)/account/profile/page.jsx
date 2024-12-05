@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
 import { format } from 'date-fns';
 import React from 'react'
+import useResizeObserver from "use-resize-observer";
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -29,6 +30,7 @@ const page = () => {
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const { ref, height } = useResizeObserver();  
 
   if (!userInfo) {
     return (
@@ -56,13 +58,16 @@ const page = () => {
     }
 
     return (
-      <div className='w-full h-fit 
+      <div className='w-full h-full 
       flex flex-col justify-center 
-      items-center gap-[32px]'>
-        <Header 
-        title={"Profile"}
-        text={"Simple, transparent and enjoyable"}
-        />
+      items-center gap-[32px]'
+      ref={ref}>
+        {height > 560 && (
+          <Header 
+          title={"Profile"}
+          text={"Simple, transparent and enjoyable"}
+          />
+        )}
         <CardFrame>
           <div className='w-full h-full 
           flex flex-col justify-between 

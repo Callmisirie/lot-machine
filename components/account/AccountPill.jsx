@@ -25,14 +25,16 @@ const AccountPill = ({
       </div>
         <div className='w-[24px] h-[24px] cursor-pointer'
         onClick={async() => { 
-          const beneficiaryDetails = JSON.stringify({
-            email,
-            beneficiaryId
-          })
-          const {success, data} = await deleteBeneficiary(beneficiaryDetails)
-                 
-          if (success) {
-            await queryClient.invalidateQueries("beneficiary");
+          if (beneficiaryId) {
+            const beneficiaryDetails = JSON.stringify({
+              email,
+              beneficiaryId
+            });
+            const {success} = await deleteBeneficiary(beneficiaryDetails);
+                   
+            if (success) {
+              await queryClient.invalidateQueries("beneficiary");
+            }
           }
         }}>
           <Image
