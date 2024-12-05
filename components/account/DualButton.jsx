@@ -20,7 +20,9 @@ const DualButton = ({cancelAction, addBankAction}) => {
       justify-center bg-n-900
       w-full h-[48px] cursor-pointer 
       rounded-[16px] shadow-md`} 
-      onClick={addBankAction}>
+      onClick={async () => {
+       await addBankAction();
+      }}>
         <p className='text-n-100 l3b'>
           Add bank
         </p>

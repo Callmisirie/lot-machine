@@ -18,20 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { splitValue } from "@/common/splitValue"
 
 export function ComboboxInput({countryBanks, selectedBank, setSelectedBank}) {
   const [open, setOpen] = React.useState(false)
-
-  const splitValue = (value) => {
-    let split = value
-    if (split?.length > 12) {  
-      split = split?.slice(0, 12)
-      split = split + "..."
-      return split
-    }
-    return split
-  }
-
   const banks = countryBanks?.map((bank) => {
     return ({
       value: bank.name,

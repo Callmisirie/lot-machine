@@ -1,20 +1,12 @@
+import { splitValue } from "@/common/splitValue";
 import { clipboardBlack } from "@/public/icons/black";
 import Image from "next/image";
 
 const ValueField = ({ 
   label, 
   value,
-  copy
+  copy, 
 }) => {
-  const splitValue = () => {
-    let split = value
-    if (split?.length > 12) {  
-      split = split?.slice(0, 12)
-      split = split + "..."
-      return split
-    }
-    return split
-  }
   return (
     <div className="flex flex-col w-fit">
       <div className="flex w-full justify-start">
@@ -30,7 +22,7 @@ const ValueField = ({
           <div className="w-[24px] h-[24px]"/>
         )}
         <p className="l2r text-n-500">
-          {splitValue()}
+          {splitValue(value)}
         </p>
         {copy && (
           <div className="cursor-pointer"

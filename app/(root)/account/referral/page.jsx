@@ -42,21 +42,35 @@ const fetchGetBanks = async (country) => {
   return { status, data };
 };
 
-const beneficiary = async (beneficiaryDetails) => {
-  try {
-    const res = await fetch(`/api/beneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to add or fetch beneficiary");
-
-    const response = await res.json();
-    return { status: response.status, data: response.data };
-  } catch (error) {
-    console.error("Error in beneficiary function:", error);
-    throw error;
-  }
+const addBeneficiary = async (beneficiaryDetails) => {
+  const res = await fetch(`/api/addBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to add beneficiary");
+  const response = await res.json();
+  return { status: response.status, data: response.data };
 };
 
+const fetchBeneficiaryId = async (email) => {
+  const res = await fetch(`/api/getBeneficiaryId?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch beneficiaryId");
+  const { success, beneficiaryId } = await res.json();
+  return { success, beneficiaryId }
+};
+
+const fetchBeneficiary = async (beneficiaryId) => {
+  const res = await fetch(`/api/getBeneficiary?beneficiaryId=${beneficiaryId}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user beneficiary");
+  const { success, beneficiary } = await res.json();  
+  return {success, beneficiary};
+};
+
+const deleteBeneficiary = async (beneficiaryDetails) => {
+  const res = await fetch(`/api/deleteBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to delete user beneficiary");
+  const { success, data } = await res.json();
+  return {success, data};
+};
 
 const page = () => {
   const {isAuthenticated, user} = useKindeBrowserClient();
@@ -80,9 +94,29 @@ const page = () => {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+  const {
+    data: userBeneficiaryId,
+    isLoading: userBeneficiaryIdLoading,
+  } = useQuery({
+    queryKey: ["beneficiaryId", user?.email],
+    queryFn: async () => await fetchBeneficiaryId(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+
+  const {
+    data: userBeneficiary,
+    isLoading: userBeneficiaryLoading,
+    refetch: userBeneficiaryRefetch
+  } = useQuery({
+    queryKey: ["beneficiary", user?.email],
+    queryFn: async () => await fetchBeneficiary(userBeneficiaryId?.beneficiaryId),
+    enabled: !userBeneficiaryIdLoading && !!userBeneficiaryId?.beneficiaryId,
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+  
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   const [tabButtonState, setTabButtonState] = useState("Statistics")
-  const [isAddedBank, setIsAddedBank] = useState(true)
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
   const [isWithdrawalDetails, setIsWithdrawalDetails] = useState(false)
@@ -128,6 +162,7 @@ const page = () => {
     ]
   }
 
+
   useEffect(() => {
     if (selectedCountry) {
       const fetchBanks = async () => {
@@ -155,33 +190,23 @@ const page = () => {
   }
   
   const handleAddBankAction = async () => {
-    if (!selectedBank || !accountNumber) return;
-  
-    try {
-      // Get bank code for selected bank
+    if (!selectedBank || !accountNumber || !userInfo) return;
+
       const selectedBankCode = countryBanks.find((bank) => bank.name === selectedBank)?.code;
-  
-      // Call the beneficiary API
       const beneficiaryDetails = JSON.stringify({
+        email: userInfo?.email,
         accountNumber,
         accountBank: selectedBankCode,
-        beneficiaryName: userInfo?.name,
-        isFetchAction: false, // Set to true for fetch action
+        beneficiaryName: userInfo?.name
       });
-  
-      const response = await beneficiary(beneficiaryDetails);
-      console.log("Beneficiary API response:", response);
-  
-      if (response.status === "success") {
-        alert("Bank account added successfully!");
-      } else {
-        alert("Failed to add bank account. Please try again.");
+      
+      const {status} = await addBeneficiary(beneficiaryDetails);
+      if (status === "success") {
+        setSelectedBank("");
+        setAccountNumber("");
+        await queryClient.invalidateQueries("beneficiary");
       }
-    } catch (error) {
-      console.error("Error in handleAddBankAction:", error);
-      alert("An error occurred while adding the bank account.");
-    }
-  };
+    };
   
 
   const referralContent = () => {
@@ -371,304 +396,312 @@ const page = () => {
         )
       }
     }
-    if (tabButtonState === "Withdrawal") {
-      if (!isAddedBank && !isWithdrawalHistory) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-between 
-          items-center'>
-            <div className='flex w-full h-[72px] 
-            items-start justify-start flex-col
-            gap-2 '>
-              <div className='w-fit flex 
-              items-center justify-start gap-4 
-              border-b border-n-300'>
-                <h6 className='h6 text-n-700'>Balance</h6>
-                <p className='p2b text-n-500'>&#8358;
-                  {userEarnings?.userEarnings?.balance 
-                  ? formatter.format(userEarnings?.userEarnings?.balance)
-                  : 0}
-                </p>
-              </div>
-              <p className='p3b text-n-900 cursor-pointer'
-              onClick={() => {
-                setIsWithdrawalHistory(true)
-              }}>
-                Withdrawal history
-              </p>
-            </div>
-            <div className='flex flex-col gap-2 w-fit h-fit'>
-              <SelectFrame 
-               label={"Country"}
-               details={countryDetails}
-               selectedCountry={selectedCountry}
-               setSelectedCountry={setSelectedCountry}
-              />
-              <ComboboxInput 
-                countryBanks={countryBanks}
-                selectedBank={selectedBank}
-                setSelectedBank={setSelectedBank}
-              />
-              <Input 
-              label={"Account number"}
-              type={"number"}
-              name={"Account number"}
-              value={accountNumber}
-              handleChange={setAccountNumber}
-              />
-            </div>
-            <div className='w-full'>
-              <DualButton 
-              addBankAction={handleAddBankAction}
-              cancelAction={handleCancelAction}/>
-            </div>
-          </div>
-        )
-      }
-      if (isAddedBank && !isWithdrawalHistory) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-between 
-          items-center'>
-            <div className='flex w-full h-[95px] 
-            items-start flex-col gap-2'>
-              <div className='w-fit flex flex-col items-start 
-              border-b border-n-300'>
-                <h6 className='h6 text-n-700'>Balance</h6>
-                <h2 className='h3 text-n-500'>&#8358;
-                  {userEarnings?.userEarnings?.balance 
-                  ? formatter.format(userEarnings?.userEarnings?.balance)
-                  : 0}
-                </h2>
-              </div>
-              <p className='p3b text-n-900 cursor-pointer'
-              onClick={() => {
-                setIsWithdrawalHistory(true)
-              }}>
-                Withdrawal history
-              </p>
-            </div>
-            <div 
-            className='cursor-pointer'
-            onClick={() => {
-              setIsAddedBank(false)
-            }}>
-              <AccountPill 
-              bankName={"Opay"}
-              accountNumber={"8108166172"}
-              />
-            </div>
-            <Button 
-            label={"Withdraw"}
-            />
-          </div>
-        )
-      }
-      if (isWithdrawalHistory && !isWithdrawalDetails) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-start gap-2 
-          items-center'>
-            <div  className='flex flex-col w-full h-fit items-center'>
-              <h6 className='h6 text-n-700 w-fit'>Withdrawal history</h6>
-              <div className='w-full flex justify-end'>
-                <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalHistory(false)
-                  setIsWithdrawalDetails(false)
-                }}>
-                  <Image
-                    src={cancelWhite}
-                    width={24}
-                    height={24}
-                    alt='delete icon'
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-            <div className='w-full h-full gap-[32px] flex flex-col'>
-              <div className='w-full h-fit 
-              flex flex-col items-start'>
-                <div className='w-fit h-fit flex items-center'>
-                  <h4 className='h4 text-n-700'>2024</h4>
-                  <Image
-                    src={dropArrowBlack}
-                    width={24}
-                    height={24}
-                    alt='drop arrow icon'
-                    priority
-                  />
-                </div>
-                <div className='w-fit h-fit gap-[32px] flex'>
-                  <div className='w-fit h-fit gap-2 flex items-center'>
-                    <p className='p3r text-n-500'>in:</p>
-                    <p className='p2r text-n-700'>$142.00</p>
-                  </div>
-                  <div className='w-fit h-fit gap-2 flex items-center'>
-                    <p className='p3r text-n-500'>out:</p>
-                    <p className='p2r text-n-700'>$62.00</p>
-                  </div>
-                </div>
-              </div>
-              <div className='w-full h-full flex flex-col gap-4'>
-                <div className='w-full h-fit flex flex-col
-                justify-between pb-2 items-start gap-2
-                border-b border-n-300 cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalDetails(true)
-                }}>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p2r text-n-700 w-fit'>
-                      Withdrawal
-                    </p>
-                    <p className='p2b text-n-700 w-fit'>
-                      -$34.00
-                    </p>
-                  </div>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p3r text-n-500 w-fit'>
-                      Jul 1, 22:40:14
-                    </p>
-                    <p className='p3r text-accent-green-300 w-fit'>
-                      Successful
-                    </p>
-                  </div>
-                </div>
-                <div className='w-full h-fit flex flex-col
-                justify-between pb-2 items-start gap-2
-                border-b border-n-300'>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p2r text-n-700 w-fit'>
-                      Withdrawal
-                    </p>
-                    <p className='p2b text-n-700 w-fit'>
-                      -$30.00
-                    </p>
-                  </div>
-                  <div className='w-full h-fit items-center flex justify-between'>
-                    <p className='p3r text-n-500 w-fit'>
-                      Sep 1, 13:44:54
-                    </p>
-                    <p className='p3r text-accent-green-300 w-fit'>
-                      Successful
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-      }
-      if (isWithdrawalDetails) {
-        return (
-          <div className='w-full h-full 
-          flex flex-col justify-start gap-2 
-          items-center'>
-            <div  className='flex flex-col w-full h-fit items-center'>
-              <h6 className='h6 text-n-700 w-fit'>Withdrawal details</h6>
-              <div className='w-full flex justify-between'>
-              <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalHistory(true)
-                  setIsWithdrawalDetails(false)
-                }}>
-                  <Image
-                    src={backArrowWhite}
-                    width={24}
-                    height={24}
-                    alt='back icon'
-                    priority
-                  />
-                </div>
-                <div className='w-[27px] h-[27px] 
-                rounded-full flex items-center 
-                justify-center bg-n-900
-                cursor-pointer'
-                onClick={() => {
-                  setIsWithdrawalHistory(false)
-                  setIsWithdrawalDetails(false)
-                }}>
-                  <Image
-                    src={cancelWhite}
-                    width={24}
-                    height={24}
-                    alt='delete icon'
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-            <div className='w-full h-fit gap-[32px] flex flex-col'>
-                <div className='w-full h-fit flex flex-col gap-2 items-center justify-center'>
-                  <p className='p1b text-n-700'>Withdrawal</p>
-                  <h5 className='h5 text-n-700'>-$34.00</h5>
-                  <p className='p3r text-accent-green-300'>Successful</p>
-                </div>
-                <div className='flex flex-col gap-4 items-start'>
-                  <div className='w-full h-fit pb-2'>
-                    <p className='p2b text-n-700'>Withdrawal details</p>
-                  </div>
-                  <div className='w-full h-fit flex flex-col gap-2'>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Recipient details</p>
-                      <p  className='p3r text-n-700'>
-                        Opay | 8108166172
-                      </p>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction type</p>
-                      <p  className='p3r text-n-700'>
-                        Bank account
-                      </p>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Amount paid</p>
-                      <p  className='p3r text-n-700'>
-                        $34.00
-                      </p>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction ref</p>
-                      <div className='flex items-center gap-1'>
-                        <p  className='p3r text-n-700'>
-                          swdfw289489w00
-                        </p>
-                        <Image
-                          src={clipboardBlack}
-                          width={14}
-                          height={14}
-                          alt='clipboard icon'
-                          priority
-                        />
-                      </div>
-                    </div>
-                    <div className='w-full h-fit flex justify-between items-center'>
-                      <p className='p3r text-n-500'>Transaction date</p>
-                      <p  className='p3r text-n-700'>
-                        Jul 1, 22:40:14
-                      </p>
-                    </div>
-                  </div>
-                </div>
-            </div>
-          </div>
-        )
-      }
-    }
+    // if (tabButtonState === "Withdrawal") {
+    //   if (userBeneficiaryLoading) {
+    //     return (
+    //       <div className="w-full h-full flex justify-center items-center relative">
+    //         <div className="flex flex-col items-center gap-2">
+    //           <Loader className="w-10 h-10 animate-spin text-primary" />
+    //           <h3 className="text-xl font-bold">Loading...</h3>
+    //           <p>Please wait...</p>
+    //         </div>
+    //       </div>
+    //     );
+    //   }
+    //   if (!userBeneficiary?.success && !isWithdrawalHistory) {
+    //     return (
+    //       <div className='w-full h-full 
+    //       flex flex-col justify-between 
+    //       items-center'>
+    //         <div className='flex w-full h-[72px] 
+    //         items-start justify-start flex-col
+    //         gap-2 '>
+    //           <div className='w-fit flex 
+    //           items-center justify-start gap-4 
+    //           border-b border-n-300'>
+    //             <h6 className='h6 text-n-700'>Balance</h6>
+    //             <p className='p2b text-n-500'>&#8358;
+    //               {userEarnings?.userEarnings?.balance 
+    //               ? formatter.format(userEarnings?.userEarnings?.balance)
+    //               : 0}
+    //             </p>
+    //           </div>
+    //           <p className='p3b text-n-900 cursor-pointer'
+    //           onClick={() => {
+    //             setIsWithdrawalHistory(true)
+    //           }}>
+    //             Withdrawal history
+    //           </p>
+    //         </div>
+    //         <div className='flex flex-col gap-2 w-fit h-fit'>
+    //           <SelectFrame 
+    //            label={"Country"}
+    //            details={countryDetails}
+    //            selectedCountry={selectedCountry}
+    //            setSelectedCountry={setSelectedCountry}
+    //           />
+    //           <ComboboxInput 
+    //             countryBanks={countryBanks}
+    //             selectedBank={selectedBank}
+    //             setSelectedBank={setSelectedBank}
+    //           />
+    //           <Input 
+    //           label={"Account number"}
+    //           type={"number"}
+    //           name={"Account number"}
+    //           value={accountNumber}
+    //           handleChange={setAccountNumber}
+    //           />
+    //         </div>
+    //         <div className='w-full'>
+    //           <DualButton 
+    //           addBankAction={handleAddBankAction}
+    //           cancelAction={handleCancelAction}/>
+    //         </div>
+    //       </div>
+    //     )
+    //   }
+    //   if (userBeneficiary?.success && !isWithdrawalHistory) {
+    //     return (
+    //       <div className='w-full h-full 
+    //       flex flex-col justify-between 
+    //       items-center'>
+    //         <div className='flex w-full h-[95px] 
+    //         items-start flex-col gap-2'>
+    //           <div className='w-fit flex flex-col items-start 
+    //           border-b border-n-300'>
+    //             <h6 className='h6 text-n-700'>Balance</h6>
+    //             <h2 className='h3 text-n-500'>&#8358;
+    //               {userEarnings?.userEarnings?.balance 
+    //               ? formatter.format(userEarnings?.userEarnings?.balance)
+    //               : 0}
+    //             </h2>
+    //           </div>
+    //           <p className='p3b text-n-900 cursor-pointer'
+    //           onClick={() => {
+    //             setIsWithdrawalHistory(true)
+    //           }}>
+    //             Withdrawal history
+    //           </p>
+    //         </div>
+    //         <AccountPill 
+    //         bankName={userBeneficiary?.beneficiary?.bank_name}
+    //         accountNumber={userBeneficiary?.beneficiary?.account_number}
+    //         deleteBeneficiary={deleteBeneficiary}
+    //         beneficiaryId={userBeneficiaryId?.beneficiaryId}
+    //         email={userInfo?.email}
+    //         />
+    //         <Button 
+    //         label={"Withdraw"}
+    //         />
+    //       </div>
+    //     )
+    //   }
+    //   if (isWithdrawalHistory && !isWithdrawalDetails) {
+    //     return (
+    //       <div className='w-full h-full 
+    //       flex flex-col justify-start gap-2 
+    //       items-center'>
+    //         <div  className='flex flex-col w-full h-fit items-center'>
+    //           <h6 className='h6 text-n-700 w-fit'>Withdrawal history</h6>
+    //           <div className='w-full flex justify-end'>
+    //             <div className='w-[27px] h-[27px] 
+    //             rounded-full flex items-center 
+    //             justify-center bg-n-900
+    //             cursor-pointer'
+    //             onClick={() => {
+    //               setIsWithdrawalHistory(false)
+    //               setIsWithdrawalDetails(false)
+    //             }}>
+    //               <Image
+    //                 src={cancelWhite}
+    //                 width={24}
+    //                 height={24}
+    //                 alt='delete icon'
+    //                 priority
+    //               />
+    //             </div>
+    //           </div>
+    //         </div>
+    //         <div className='w-full h-full gap-[32px] flex flex-col'>
+    //           <div className='w-full h-fit 
+    //           flex flex-col items-start'>
+    //             <div className='w-fit h-fit flex items-center'>
+    //               <h4 className='h4 text-n-700'>2024</h4>
+    //               <Image
+    //                 src={dropArrowBlack}
+    //                 width={24}
+    //                 height={24}
+    //                 alt='drop arrow icon'
+    //                 priority
+    //               />
+    //             </div>
+    //             <div className='w-fit h-fit gap-[32px] flex'>
+    //               <div className='w-fit h-fit gap-2 flex items-center'>
+    //                 <p className='p3r text-n-500'>in:</p>
+    //                 <p className='p2r text-n-700'>$142.00</p>
+    //               </div>
+    //               <div className='w-fit h-fit gap-2 flex items-center'>
+    //                 <p className='p3r text-n-500'>out:</p>
+    //                 <p className='p2r text-n-700'>$62.00</p>
+    //               </div>
+    //             </div>
+    //           </div>
+    //           <div className='w-full h-full flex flex-col gap-4'>
+    //             <div className='w-full h-fit flex flex-col
+    //             justify-between pb-2 items-start gap-2
+    //             border-b border-n-300 cursor-pointer'
+    //             onClick={() => {
+    //               setIsWithdrawalDetails(true)
+    //             }}>
+    //               <div className='w-full h-fit items-center flex justify-between'>
+    //                 <p className='p2r text-n-700 w-fit'>
+    //                   Withdrawal
+    //                 </p>
+    //                 <p className='p2b text-n-700 w-fit'>
+    //                   -$34.00
+    //                 </p>
+    //               </div>
+    //               <div className='w-full h-fit items-center flex justify-between'>
+    //                 <p className='p3r text-n-500 w-fit'>
+    //                   Jul 1, 22:40:14
+    //                 </p>
+    //                 <p className='p3r text-accent-green-300 w-fit'>
+    //                   Successful
+    //                 </p>
+    //               </div>
+    //             </div>
+    //             <div className='w-full h-fit flex flex-col
+    //             justify-between pb-2 items-start gap-2
+    //             border-b border-n-300'>
+    //               <div className='w-full h-fit items-center flex justify-between'>
+    //                 <p className='p2r text-n-700 w-fit'>
+    //                   Withdrawal
+    //                 </p>
+    //                 <p className='p2b text-n-700 w-fit'>
+    //                   -$30.00
+    //                 </p>
+    //               </div>
+    //               <div className='w-full h-fit items-center flex justify-between'>
+    //                 <p className='p3r text-n-500 w-fit'>
+    //                   Sep 1, 13:44:54
+    //                 </p>
+    //                 <p className='p3r text-accent-green-300 w-fit'>
+    //                   Successful
+    //                 </p>
+    //               </div>
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+    //     )
+    //   }
+    //   if (isWithdrawalDetails) {
+    //     return (
+    //       <div className='w-full h-full 
+    //       flex flex-col justify-start gap-2 
+    //       items-center'>
+    //         <div  className='flex flex-col w-full h-fit items-center'>
+    //           <h6 className='h6 text-n-700 w-fit'>Withdrawal details</h6>
+    //           <div className='w-full flex justify-between'>
+    //           <div className='w-[27px] h-[27px] 
+    //             rounded-full flex items-center 
+    //             justify-center bg-n-900
+    //             cursor-pointer'
+    //             onClick={() => {
+    //               setIsWithdrawalHistory(true)
+    //               setIsWithdrawalDetails(false)
+    //             }}>
+    //               <Image
+    //                 src={backArrowWhite}
+    //                 width={24}
+    //                 height={24}
+    //                 alt='back icon'
+    //                 priority
+    //               />
+    //             </div>
+    //             <div className='w-[27px] h-[27px] 
+    //             rounded-full flex items-center 
+    //             justify-center bg-n-900
+    //             cursor-pointer'
+    //             onClick={() => {
+    //               setIsWithdrawalHistory(false)
+    //               setIsWithdrawalDetails(false)
+    //             }}>
+    //               <Image
+    //                 src={cancelWhite}
+    //                 width={24}
+    //                 height={24}
+    //                 alt='delete icon'
+    //                 priority
+    //               />
+    //             </div>
+    //           </div>
+    //         </div>
+    //         <div className='w-full h-fit gap-[32px] flex flex-col'>
+    //             <div className='w-full h-fit flex flex-col gap-2 items-center justify-center'>
+    //               <p className='p1b text-n-700'>Withdrawal</p>
+    //               <h5 className='h5 text-n-700'>-$34.00</h5>
+    //               <p className='p3r text-accent-green-300'>Successful</p>
+    //             </div>
+    //             <div className='flex flex-col gap-4 items-start'>
+    //               <div className='w-full h-fit pb-2'>
+    //                 <p className='p2b text-n-700'>Withdrawal details</p>
+    //               </div>
+    //               <div className='w-full h-fit flex flex-col gap-2'>
+    //                 <div className='w-full h-fit flex justify-between items-center'>
+    //                   <p className='p3r text-n-500'>Recipient details</p>
+    //                   <p  className='p3r text-n-700'>
+    //                     Opay | 8108166172
+    //                   </p>
+    //                 </div>
+    //                 <div className='w-full h-fit flex justify-between items-center'>
+    //                   <p className='p3r text-n-500'>Transaction type</p>
+    //                   <p  className='p3r text-n-700'>
+    //                     Bank account
+    //                   </p>
+    //                 </div>
+    //                 <div className='w-full h-fit flex justify-between items-center'>
+    //                   <p className='p3r text-n-500'>Amount paid</p>
+    //                   <p  className='p3r text-n-700'>
+    //                     $34.00
+    //                   </p>
+    //                 </div>
+    //                 <div className='w-full h-fit flex justify-between items-center'>
+    //                   <p className='p3r text-n-500'>Transaction ref</p>
+    //                   <div className='flex items-center gap-1'>
+    //                     <p  className='p3r text-n-700'>
+    //                       swdfw289489w00
+    //                     </p>
+    //                     <Image
+    //                       src={clipboardBlack}
+    //                       width={14}
+    //                       height={14}
+    //                       alt='clipboard icon'
+    //                       priority
+    //                     />
+    //                   </div>
+    //                 </div>
+    //                 <div className='w-full h-fit flex justify-between items-center'>
+    //                   <p className='p3r text-n-500'>Transaction date</p>
+    //                   <p  className='p3r text-n-700'>
+    //                     Jul 1, 22:40:14
+    //                   </p>
+    //                 </div>
+    //               </div>
+    //             </div>
+    //         </div>
+    //       </div>
+    //     )
+    //   }
+    // }
   }
 
   if (userInfo && userInfo.plan === "Master") {
     router.push("/account/profile");
   }  
 
-  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success  ) {
+  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryIdLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -680,7 +713,7 @@ const page = () => {
     );
   }
 
-  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master") {  
+  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master" && !userBeneficiaryIdLoading) {  
     return (
       <div className='w-full h-fit flex flex-col justify-center items-center gap-[32px]'>
         <Header 
