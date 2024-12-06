@@ -21,6 +21,7 @@ import { SelectFrame } from '@/components/account/SelectFrame'
 import { ComboboxInput } from '@/components/account/Combobox'
 import useResizeObserver from "use-resize-observer";
 import { ScrollAreaFrame } from '@/components/account/ScrollArea'
+import { Skeleton } from '@/components/ui/skeleton'
 
 
 const fetchUserEarnings = async (email) => {
@@ -216,19 +217,19 @@ const page = () => {
       
       const {status} = await addBeneficiary(beneficiaryDetails);
       if (status === "success") {
-        console.log("Add benneficially successfull");
-        
         setSelectedBank("");
         setAccountNumber("");
+        await queryClient.invalidateQueries("beneficiaryId");
         await queryClient.invalidateQueries("beneficiary");
       }
   };
   
   const handleMakeWithdrawal = async () => {
-    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary) return;
+    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary ||!selectedCountry) return;
 
     const beneficiaryDetails = JSON.stringify({
       email: userInfo?.email,
+      currency: selectedCountry === "NG" ? "NGN" : "GHS",
       beneficiaryId: userBeneficiaryId?.beneficiaryId,
       account_number: userBeneficiary?.beneficiary?.account_number, 
       account_bank: userBeneficiary?.beneficiary?.bank_code
@@ -719,12 +720,24 @@ const page = () => {
 
   if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryIdLoading) {
     return (
-      <div className="w-full h-full flex justify-center items-center relative">
-        <div className="flex flex-col items-center gap-2">
-          <Loader className="w-10 h-10 animate-spin text-primary" />
-          <h3 className="text-xl font-bold">Loading...</h3>
-          <p>Please wait...</p>
+      <div className='w-full h-full 
+      flex flex-col justify-center 
+      items-center gap-[32px]'
+      ref={ref}>
+        <div className='w-fit h-fit 
+        flex flex-col 
+        justify-center items-center 
+        gap-[20px]'>
+          <Skeleton
+          className="w-[153px] h-[52px]
+          bg-n-100 rounded-[8px] relative" />
+          <Skeleton
+          className="w-[278px] h-[20px]
+          bg-n-100 rounded-[4px] " />
         </div>
+        <Skeleton
+        className="w-[325px] h-[420px]
+        bg-n-100 rounded-[32px]" />
       </div>
     );
   }

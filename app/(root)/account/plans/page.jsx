@@ -1,13 +1,15 @@
 "use client"
 
 import Header from '@/components/account/Header'
-import React from 'react'
-import { Loader } from 'lucide-react'
+import React, { useEffect } from 'react'
 import { CarouselFrame } from '@/components/account/CarouselFrame'
 import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import useResizeObserver from "use-resize-observer";
+import { Skeleton } from '@/components/ui/skeleton';
+import Pusher from 'pusher-js';
+
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -32,19 +34,52 @@ const page = () => {
   });
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   const { ref, height } = useResizeObserver(); 
+  
+  const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 
+  useEffect(() => {
+    // Initialize Pusher
+    const pusher = new Pusher(pusherKey, {
+      cluster: 'mt1',
+      encrypted: true,
+    });
+
+    // Subscribe to the channel and bind to the event
+    const channel = pusher.subscribe('my-channel');
+    channel.bind('my-event', (data) => {
+      console.log('Received data:', data);
+    });
+
+    return () => {
+      pusher.unsubscribe('my-channel');
+    };
+  }, []);
+  
+  
   if (userInfo && userInfo.plan === "Master") {
     router.push("/account/profile");
   }  
 
   if (!userInfo || subscriptionsLoading) {
     return (
-      <div className="w-full h-full flex justify-center items-center relative">
-        <div className="flex flex-col items-center gap-2">
-          <Loader className="w-10 h-10 animate-spin text-primary" />
-          <h3 className="text-xl font-bold">Loading...</h3>
-          <p>Please wait...</p>
+      <div className='w-full h-full 
+      flex flex-col justify-center 
+      items-center gap-[32px]'
+      ref={ref}>
+        <div className='w-fit h-fit 
+        flex flex-col 
+        justify-center items-center 
+        gap-[20px]'>
+          <Skeleton
+          className="w-[153px] h-[52px]
+          bg-n-100 rounded-[8px] relative" />
+          <Skeleton
+          className="w-[278px] h-[20px]
+          bg-n-100 rounded-[4px] " />
         </div>
+        <Skeleton
+        className="w-[300px] h-[420px]
+        bg-n-100 rounded-[32px]" />
       </div>
     );
   }

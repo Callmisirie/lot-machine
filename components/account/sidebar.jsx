@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Skeleton } from "../ui/skeleton";
 
 const Sidebar = () => {
   const pathname = usePathname(); // Get the current pathname
@@ -15,12 +16,14 @@ const Sidebar = () => {
   const sidebarContent = () => {
     if (!userInfo) {
       return (
-        <div className="w-full h-full flex justify-center items-center relative">
-          <div className="flex flex-col items-center gap-2">
-            <Loader className="w-10 h-10 animate-spin text-primary" />
-            <h3 className="text-xl font-bold">Loading...</h3>
-          </div>
-        </div>
+        <div className={`w-full h-full 
+        flex flex-col justify-start 
+        items-start gap-[58px] py-[32px]`}>
+          {Array.from({length: 4}).map((_, index) => (
+            <Skeleton key={index}
+            className="w-full h-[36px] rounded-[8px] bg-n-100" />
+          ))}
+      </div>
       );
     } 
 

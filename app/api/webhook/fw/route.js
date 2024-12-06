@@ -1,15 +1,23 @@
-import addSubscription from "@/actions/addSubscription";
-import { inEarnings } from "@/actions/earnings";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Flutterwave from "flutterwave-node-v3";
 import storeProcessedEvent from "@/actions/StoreProcessedEvent";
 import processSuccessfulWebhook from "@/actions/processSuccessfulWebhook";
+import Pusher from 'pusher';
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
+
+// Initialize Pusher with your credentials
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID, 
+  key: process.env.PUSHER_KEY, 
+  secret: process.env.PUSHER_SECRET, 
+  cluster: "mt1",
+  useTLS: true,
+});
 
 export const POST = async (req) => {
   const secretKey = process.env.SECRET_KEY;
@@ -44,21 +52,27 @@ export const POST = async (req) => {
     const verify = async () => {
       try {
         const verifyPayload = {"id": payload?.id}
-        const response = await flw.Transaction.verify(verifyPayload)
-        return response
+        const response = await flw.Transaction.verify(verifyPayload);
+        return response;
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
+    };
+
     const existingEvent = await verify();
 
     if (payload?.status === "successful") {
       const storedProcessedEvent = await storeProcessedEvent(payload);
-      await processSuccessfulWebhook(storedProcessedEvent, payload)
+      await processSuccessfulWebhook(storedProcessedEvent, payload);
+      
+      // Pass payload to the frontend via Pusher
+      pusher.trigger('my-channel', 'my-event', {
+        message: 'Webhook processed successfully',
+        data: payload,  // Send the payload to the frontend
+      });
+
     } else {
-      // if (existingEvent?.data.status === payload.status) {
-      //   console.log("Duplicate found");
-      // }  
+      console.log("Webhook status is not successful.");
     }
 
     // Respond with success
@@ -71,7 +85,3 @@ export const POST = async (req) => {
     );
   }
 };
-
-
-
-

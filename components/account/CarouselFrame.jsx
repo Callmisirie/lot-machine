@@ -94,45 +94,6 @@ export function CarouselFrame({
           <CardFrame>
             <div className='w-full h-full 
             flex flex-col justify-between 
-            items-start'>
-              <div className='flex flex-col w-full h-fit items-start'>
-                <h3 className='h3 text-n-700'>Free</h3>
-                <div className='flex flex-col gap-2 w-fit h-fit'>
-                  {planBenefits.free.map((benefit, idx) => {
-                    return (
-                      <p 
-                      key={idx}
-                      className='p3b text-n-500'>
-                        {benefit}
-                      </p>  
-                    ) 
-                  })}
-                </div>
-              </div>
-              <div className='w-fit h-fit flex flex-col gap-2 items-start'>
-                  <div className='w-fit flex items-center gap-2'>
-                    <h3 className='h3 text-n-900'>
-                      &#8358;0 
-                    </h3>
-                    <h5 className='h5 text-n-500'>/month</h5>
-                  </div>
-                  <div
-                  className={`flex items-center 
-                  justify-center bg-white w-[146px] 
-                  h-[48px] cursor-default
-                  rounded-[16px] border border-n-300`}>
-                    <p className='text-n-900 l3b'>
-                      {userInfo?.plan === "Free" ? "Your current plan" : "Plan features"}
-                    </p>
-                  </div>            
-              </div>
-            </div>
-          </CardFrame>
-        </CarouselItem>
-        <CarouselItem >
-          <CardFrame>
-            <div className='w-full h-full 
-            flex flex-col justify-between 
             items-start relative'>
               <PaymentDurationPill 
               paymentDurationState={paymentDurationState}
@@ -197,6 +158,45 @@ export function CarouselFrame({
               </div>
             </div>
           </CardFrame>          
+        </CarouselItem>       
+        <CarouselItem >
+          <CardFrame>
+            <div className='w-full h-full 
+            flex flex-col justify-between 
+            items-start'>
+              <div className='flex flex-col w-full h-fit items-start'>
+                <h3 className='h3 text-n-700'>Free</h3>
+                <div className='flex flex-col gap-2 w-fit h-fit'>
+                  {planBenefits.free.map((benefit, idx) => {
+                    return (
+                      <p 
+                      key={idx}
+                      className='p3b text-n-500'>
+                        {benefit}
+                      </p>  
+                    ) 
+                  })}
+                </div>
+              </div>
+              <div className='w-fit h-fit flex flex-col gap-2 items-start'>
+                  <div className='w-fit flex items-center gap-2'>
+                    <h3 className='h3 text-n-900'>
+                      &#8358;0 
+                    </h3>
+                    <h5 className='h5 text-n-500'>/month</h5>
+                  </div>
+                  <div
+                  className={`flex items-center 
+                  justify-center bg-white w-[146px] 
+                  h-[48px] cursor-default
+                  rounded-[16px] border border-n-300`}>
+                    <p className='text-n-900 l3b'>
+                      {userInfo?.plan === "Free" ? "Your current plan" : "Plan features"}
+                    </p>
+                  </div>            
+              </div>
+            </div>
+          </CardFrame>
         </CarouselItem>
       </CarouselContent>
       <CarouselPrevious />

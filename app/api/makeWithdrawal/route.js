@@ -19,7 +19,7 @@ export const GET = async (request) => {
     await connectMongoDB();
     // Parse the query parameters
     const beneficiaryDetails = JSON.parse(request.nextUrl.searchParams.get("beneficiaryDetails"));
-    const { email, beneficiaryId, account_number, account_bank } = beneficiaryDetails;
+    const { email, currency, beneficiaryId, account_number, account_bank } = beneficiaryDetails;
     
     const user = await User.findOne({ email });
     if (!user) {
@@ -43,13 +43,12 @@ export const GET = async (request) => {
       console.log("Beneficiary id doesn't match");
       return;
     }
-    
-    // Create beneficiary action
+
     const payload = {
       account_bank,
       account_number,
       amount: userEarning.balance,
-      currency: "NGN",
+      currency,
       reference: uniqueId, 
       debit_currency: "NGN"
     };
