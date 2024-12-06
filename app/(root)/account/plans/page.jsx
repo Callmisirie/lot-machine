@@ -46,8 +46,12 @@ const page = () => {
 
     // Subscribe to the channel and bind to the event
     const channel = pusher.subscribe('my-channel');
-    channel.bind('my-event', (data) => {
+    channel.bind('my-event', async (data) => {
       console.log('Received data:', data);
+      if (data.data.status === "successful") {
+        await queryClient.invalidateQueries("userInfo");
+        await queryClient.invalidateQueries("subscriptions");
+      }
     });
 
     return () => {
@@ -95,7 +99,7 @@ const page = () => {
           />
         )}
         <div className='w-fit h-fit flex flex-wrap gap-[32px] items-center justify-center'>
-          <CarouselFrame subscriptionRefetch={subscriptionRefetch}/>
+          <CarouselFrame />
         </div>
       </div>
     )

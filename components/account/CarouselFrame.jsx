@@ -21,9 +21,7 @@ const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
 
 
-export function CarouselFrame({
-  subscriptionRefetch,
-}) {
+export function CarouselFrame() {
   const {user} = useKindeBrowserClient();
   const queryClient = useQueryClient();
   const [paymentDurationState, setPaymentDurationState] = useState("Month");
@@ -131,21 +129,7 @@ export function CarouselFrame({
                       if (userInfo && userInfo?.plan !== "Pro") {
                         handleFlutterPayment({
                           callback: async (response) => {
-                            let count = 0;
-                            let intervalTime = 10
-                            const interval = setInterval(async() => {
-                              await queryClient.invalidateQueries("userInfo");
-                              subscriptionRefetch()
-                              count += 1;
-                              if (count === 1) {
-                                intervalTime = 20; // Change interval to 20 seconds after first iteration
-                              } else if (count === 2) {
-                                intervalTime = 30; // Change interval to 30 seconds after second iteration
-                              }
-                              if (count === 3) {
-                                clearInterval(interval); // Stop the interval after 5 executions
-                              }
-                            }, 1000 * intervalTime);
+
                             closePaymentModal()
                           },
                           onClose: () => {},
