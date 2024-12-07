@@ -1,7 +1,7 @@
 "use client"
 
 import { splitValue } from '@/common/splitValue';
-import { cancelBlack } from '@/public/icons/black';
+import { cancelBlack, deleteIconBlack } from '@/public/icons/black';
 import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import React from 'react'
@@ -33,12 +33,13 @@ const AccountPill = ({
             const {success} = await deleteBeneficiary(beneficiaryDetails);
                    
             if (success) {
+              await queryClient.invalidateQueries("beneficiaryId");
               await queryClient.invalidateQueries("beneficiary");
             }
           }
         }}>
           <Image
-            src={cancelBlack}
+            src={deleteIconBlack}
             width={24}
             height={24}
             alt='delete icon'

@@ -82,7 +82,7 @@ const makeWithdrawal = async (beneficiaryDetails) => {
   });
   if (!res.ok) throw new Error("Failed to make withdrawal");
   const response = await res.json();
-  return { status: response.status, data: response.data };
+  return { status: response.status, message: response.message, data: response.data };
 };
 
 const page = () => {
@@ -225,22 +225,21 @@ const page = () => {
   };
   
   const handleMakeWithdrawal = async () => {
-    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary ||!selectedCountry) return;
+    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary) return;
 
     const beneficiaryDetails = JSON.stringify({
       email: userInfo?.email,
-      currency: selectedCountry === "NG" ? "NGN" : "GHS",
+      currency: "NGN",
       beneficiaryId: userBeneficiaryId?.beneficiaryId,
       account_number: userBeneficiary?.beneficiary?.account_number, 
       account_bank: userBeneficiary?.beneficiary?.bank_code
     });
     
-    const {status} = await makeWithdrawal(beneficiaryDetails);
+    const {status, message} = await makeWithdrawal(beneficiaryDetails);
     if (status === "success") {
-      console.log("Withdrawal was successfull");
-      
       await queryClient.invalidateQueries("userEarnings");
     }
+    console.log(message);
   };
 
   const referralContent = () => {
@@ -724,17 +723,19 @@ const page = () => {
       flex flex-col justify-center 
       items-center gap-[32px]'
       ref={ref}>
-        <div className='w-fit h-fit 
-        flex flex-col 
-        justify-center items-center 
-        gap-[20px]'>
-          <Skeleton
-          className="w-[153px] h-[52px]
-          bg-n-100 rounded-[8px] relative" />
-          <Skeleton
-          className="w-[278px] h-[20px]
-          bg-n-100 rounded-[4px] " />
-        </div>
+        {height > 560 && (
+          <div className='w-fit h-fit 
+          flex flex-col 
+          justify-center items-center 
+          gap-[20px]'>
+            <Skeleton
+            className="w-[153px] h-[52px]
+            bg-n-100 rounded-[8px] relative" />
+            <Skeleton
+            className="w-[278px] h-[20px]
+            bg-n-100 rounded-[4px] " />
+          </div>
+        )}
         <Skeleton
         className="w-[325px] h-[420px]
         bg-n-100 rounded-[32px]" />

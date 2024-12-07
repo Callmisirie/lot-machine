@@ -1,12 +1,10 @@
-import storeBeneficiaryId from "@/actions/storeBeneficiaryId";
-import Flutterwave from "flutterwave-node-v3";
 import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/models/user";
 import Beneficiary from "@/models/beneficiary";
 import axios from "axios";
 
-const FLUTTERWAVE_SECRET_KEY = process.env.FLUTTERWAVE_SECRET_KEY;
+const FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 export const GET = async (request) => {
   await connectMongoDB();

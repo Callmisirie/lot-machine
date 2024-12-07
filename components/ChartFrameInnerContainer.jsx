@@ -8,7 +8,7 @@ import Image from "next/image";
 import { clipboardWhite } from "@/public/icons/white";
 import FormFrame from "./FormFrame";
 import DualButton from "./DualButton";
-import { cancelBlack } from "@/public/icons/black";
+import { cancelBlack, deleteIconBlack } from "@/public/icons/black";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import { ScrollBar } from "./ui/scroll-area";
@@ -67,7 +67,7 @@ const ChartFrameInnerContainer = ({
       : <div className="flex h-full w-full items-center justify-center relative bottom-[28px]">
           <Pill 
             content={userCustomTemplate.customValue + "%"}
-            rightIconImgSrc={cancelBlack}
+            rightIconImgSrc={deleteIconBlack}
             active
             action
             email={user?.email}

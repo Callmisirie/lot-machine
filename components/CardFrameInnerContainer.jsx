@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import PartialContainer from './PartialContainer';
 import FormFrame from './FormFrame';
 import Button from './Button';
-import { cancelBlack } from '@/public/icons/black';
-import { notFound } from "next/navigation";
+import { deleteIconBlack } from '@/public/icons/black';
 import { ComboboxInput } from "./Combobox";
 import { createWhite } from "@/public/icons/white";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
@@ -100,7 +99,7 @@ const CardFrameInnerContainer = ({
             <PartialContainer
               name={instrument.instrument}
               nickname={instrument?.nickname}
-              rightIconImgSrc={cancelBlack}
+              rightIconImgSrc={deleteIconBlack}
               setComfirmationPopoverOpen={setComfirmationPopoverOpen}
             />             
           </div>

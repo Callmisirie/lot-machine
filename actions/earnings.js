@@ -41,6 +41,13 @@ export const inEarnings = async (response) => {
     const referrerId = user?.referralId;
     const referrer = await User.findOne({referrerId});
     let referrerEarnings = await Earning.findOne({ userId: referrer._id });
+
+    
+    if (!adminUser) {
+      console.log("Admin user does not exist");
+      return { success: false, message: "Admin user does not exist" };
+    }
+    
     let adminUserEarnings = await Earning.findOne({ userId: adminUser._id });
     
     const referralCount = await getReferrals(response.customer.email);
@@ -54,11 +61,6 @@ export const inEarnings = async (response) => {
     if (!user) {
       console.log("User does not exist");
       return { success: false, message: "User does not exist" };
-    }
-
-    if (!adminUser) {
-      console.log("Admin user does not exist");
-      return { success: false, message: "Admin user does not exist" };
     }
 
     if (referrer && referrer.plan === "Pro" && referrer.userId !== adminUser.userId) {
@@ -119,8 +121,8 @@ export const outEarnings = async (email, response) => {
       console.log("Out earnings updated successfully");
       return { success: true, message: "Out earnings updated successfully"};
     } else {
-      console.log("Withdrawal feature available after receiving first referral split");
-      return { success: false, message: "Feature not availabe until receiving first referral split" };
+      console.log("User earnings does not exist");
+      return { success: false, message: "User earnings does not exist" };
     }
   } catch (error) {
     console.log("Error updating out earnings: ", error);
