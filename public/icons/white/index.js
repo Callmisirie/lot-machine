@@ -1,3 +1,4 @@
+import homeWhite from "./white-home.png";
 import addWhite from "./white-add.png";
 import boltWhite from "./white-bolt.png";
 import cancelWhite from "./white-cancel.png";
@@ -20,7 +21,7 @@ import twitterWhite from "./white-twitter.png";
 import userWhite from "./white-user.png";
 
 export {
-  addWhite, boltWhite, cancelWhite, cautionWhite,
+  homeWhite, addWhite, boltWhite, cancelWhite, cautionWhite,
   chartlineWhite, clipboardWhite, copyrightWhite, 
   createWhite, deleteIconWhite, dropArrowWhite, backArrowWhite, 
   emailWhite, listWhite, resetWhite, settingsWhite, signoutWhite, 

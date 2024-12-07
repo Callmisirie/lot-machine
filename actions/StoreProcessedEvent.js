@@ -5,8 +5,6 @@ import User from "@/models/user";
 import StoredProcessedEvent from "@/models/storedProcessedEvent";
 
 const storeProcessedEvent = async (response) => {
-  console.log(response);
-  
   try {    
     await connectMongoDB();
     const user = await User.findOne({ email: response.customer.email });

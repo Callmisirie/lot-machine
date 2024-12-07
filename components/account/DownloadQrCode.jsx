@@ -7,7 +7,7 @@ import Image from "next/image";
 import { lmImage, lmLogo } from "@/public";
 
 
-const DownloadQrCode = ({userInfo, userInfoLoading}) => {
+const DownloadQrCode = ({userInfo}) => {
   const cardRef = useRef(null);
   const [qrCodeSrc, setQrCodeSrc] = useState("");;
   
@@ -15,7 +15,7 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
   
   // Generate a QR code as a data URL
   useEffect(() => {   
-    if (userInfo && !userInfoLoading) {
+    if (userInfo) {
       QRCode.toDataURL(url, (err, src) => {
         if (err) {
           console.error('Error generating QR Code', err);
@@ -25,7 +25,7 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
         }
       });
     }
-  }, [userInfoLoading, userInfo])
+  }, [userInfo])
 
 
   const handleDownload = async () => {
@@ -43,7 +43,7 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
   };
 
 
-  if (userInfo && !userInfoLoading && qrCodeSrc) {
+  if (userInfo && qrCodeSrc) {
     return (
       <div className="w-fit h-fit">     
         <div ref={cardRef} 
@@ -83,9 +83,9 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
               </div>
               <p className='p1b text-n-900'>lotmachine.com</p>
             </div>
-              <div className='flex flex-col items-end justify-end'>
-                <p className='p3b text-n-500 w-[150px] h-[30px]'>
-                  Scan Qr code for 50% off on first monthly plan payment.
+              <div className='flex flex-col items-end justify-end gap-1'>
+                <p className='p3b text-n-500 w-[150px] h-fit'>
+                  Scan QR for <span className="p2b"> 50% </span>off first monthly payment.
                 </p>     
                 <Image 
                   src={qrCodeSrc} 
@@ -93,6 +93,7 @@ const DownloadQrCode = ({userInfo, userInfoLoading}) => {
                   height={150} 
                   alt='QR code'
                   priority
+                  className="border-2 rounded-[8px] border-n-900"
                   />
               </div>
             </div>

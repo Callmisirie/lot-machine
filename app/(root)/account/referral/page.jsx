@@ -9,7 +9,7 @@ import Header from '@/components/account/Header'
 import Input from '@/components/account/Input'
 import TabButtons from '@/components/account/TabButtons'
 import { clipboardBlack, dropArrowBlack } from '@/public/icons/black'
-import { backArrowWhite, cancelWhite } from '@/public/icons/white'
+import { backArrowWhite, cancelWhite, homeWhite } from '@/public/icons/white'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
@@ -23,6 +23,7 @@ import useResizeObserver from "use-resize-observer";
 import { ScrollAreaFrame } from '@/components/account/ScrollArea'
 import { Skeleton } from '@/components/ui/skeleton'
 import Pusher from 'pusher-js'
+import Link from 'next/link'
 
 
 const fetchUserEarnings = async (email) => {
@@ -346,8 +347,7 @@ const page = () => {
                 </div>
               </div>
               {/* <DownloadQrCode 
-              userInfo={userInfo}
-              userInfoLoading={userInfoLoading}/> */}
+              userInfo={userInfo}/> */}
               <div className='flex justify-between items-end'>
                 <div className='flex w-fit h-fit 
                 flex-col items-start'>
@@ -770,8 +770,23 @@ const page = () => {
 
   if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master" && !userBeneficiaryIdLoading) { 
     return (
-      <div className='w-full h-full flex flex-col justify-center items-center gap-[32px]'
+      <div className='w-full h-full flex flex-col justify-center items-center gap-[32px] relative'
       ref={ref}>
+        <div className='w-[48px] h-[48px] 
+        bg-n-900 cursor-pointer rounded-full
+        flex justify-center items-center absolute 
+        left-8 top-8 max-md:left-4 max-md:top-2 
+        transition-all duration-300'>
+          <Link href={"/"}>
+            <Image
+              src={homeWhite}
+              width={24}
+              height={24}
+              alt='cancel icon'
+              priority
+            />
+          </Link>
+        </div> 
         {height > 560 && (
           <Header 
           title={"Referral"}

@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start-cron": "node cron.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -41,6 +42,7 @@
     "nanoid": "^5.0.9",
     "next": "14.2.14",
     "next-auth": "^4.24.10",
+    "node-cron": "^3.0.3",
     "pusher": "^5.2.0",
     "pusher-js": "^8.4.0-rc2",
     "qrcode": "^1.5.4",

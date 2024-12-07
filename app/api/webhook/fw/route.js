@@ -57,37 +57,46 @@ export const POST = async (req) => {
       console.error("Invalid webhook signature");
       return new NextResponse("Invalid signature", { status: 401 });
     }
-
+    
     console.log("Webhook payload received:", payload);
 
-    if (payload?.status === "successful") {
-      const storedProcessedEvent = await storeProcessedEvent(payload);
-      if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
-        console.log("Duplicate found");
-      } else {
-        if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
-          await addSubscription(payload);
-          await inEarnings(payload);
+    const existingEvent = await verify(payload.id);
 
-          // Trigger Pusher for Bank/Card Transactions
-          pusher.trigger('card-bank-channel', 'transaction-event', {
-            message: 'Bank or Card transaction processed successfully',
+    console.log("existing event:", existingEvent);
+
+    if (existingEvent.data.id === payload.id) {
+      if (payload?.status === "successful") {
+        const storedProcessedEvent = await storeProcessedEvent(payload);
+        if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
+          console.log("Duplicate found");
+        } else {
+          if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
+            await addSubscription(payload);
+            await inEarnings(payload);
+  
+            // Trigger Pusher for Bank/Card Transactions
+            pusher.trigger('card-bank-channel', 'transaction-event', {
+              message: 'Bank or Card transaction processed successfully',
+              data: payload, // Send the payload to the frontend
+            });
+          }
+        }
+      } else if (payload?.transfer?.status === "SUCCESSFUL") {
+        if (payload["event.type"] === "Transfer") {
+          console.log("Transfer webhook was logged");
+
+          // Trigger Pusher for Transfers
+          pusher.trigger('transfer-channel', 'transfer-event', {
+            message: 'Transfer processed successfully',
             data: payload, // Send the payload to the frontend
           });
-        }
+        } 
+      } else {
+        console.log("Webhook status is not successful.");
       }
-    } else if (payload?.transfer?.status === "SUCCESSFUL") {
-      if (payload["event.type"] === "Transfer") {
-        console.log("Transfer webhook was logged");
-
-        // Trigger Pusher for Transfers
-        pusher.trigger('transfer-channel', 'transfer-event', {
-          message: 'Transfer processed successfully',
-          data: payload, // Send the payload to the frontend
-        });
-      } 
     } else {
-      console.log("Webhook status is not successful.");
+      console.log("This webhook does not valid");
+      return new NextResponse("This webhook does not valid", { status: 401 });
     }
 
     // Respond with success

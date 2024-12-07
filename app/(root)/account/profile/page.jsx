@@ -10,6 +10,9 @@ import { format } from 'date-fns';
 import React from 'react'
 import useResizeObserver from "use-resize-observer";
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
+import Image from 'next/image';
+import { homeWhite } from '@/public/icons/white';
 
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
@@ -75,8 +78,23 @@ const page = () => {
     return (
       <div className='w-full h-full 
       flex flex-col justify-center 
-      items-center gap-[32px]'
+      items-center gap-[32px] relative'
       ref={ref}>
+        <div className='w-[48px] h-[48px] 
+        bg-n-900 cursor-pointer rounded-full
+        flex justify-center items-center absolute 
+        left-8 top-8 max-md:left-4 max-md:top-2 
+        transition-all duration-300'>
+          <Link href={"/"}>
+            <Image
+              src={homeWhite}
+              width={24}
+              height={24}
+              alt='cancel icon'
+              priority
+            />
+          </Link>
+        </div>   
         {height > 560 && (
           <Header 
           title={"Profile"}
