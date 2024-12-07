@@ -68,17 +68,23 @@ export const POST = async (req) => {
         if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
           await addSubscription(payload);
           await inEarnings(payload);
+
+          // Trigger Pusher for Bank/Card Transactions
+          pusher.trigger('card-bank-channel', 'transaction-event', {
+            message: 'Bank or Card transaction processed successfully',
+            data: payload, // Send the payload to the frontend
+          });
         }
       }
-    
-      // Pass payload to the frontend via Pusher
-      pusher.trigger('my-channel', 'my-event', {
-        message: 'Webhook processed successfully',
-        data: payload,  // Send the payload to the frontend
-      });
     } else if (payload?.transfer?.status === "SUCCESSFUL") {
       if (payload["event.type"] === "Transfer") {
         console.log("Transfer webhook was logged");
+
+        // Trigger Pusher for Transfers
+        pusher.trigger('transfer-channel', 'transfer-event', {
+          message: 'Transfer processed successfully',
+          data: payload, // Send the payload to the frontend
+        });
       } 
     } else {
       console.log("Webhook status is not successful.");

@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/carousel"
 import { planBenefits } from "@/app/(root)/account/plans"
 import CardFrame from "./CardFrame"
+import { inEarnings } from '@/actions/earnings';
+import storeProcessedEvent from '@/actions/StoreProcessedEvent';
+import addSubscription from '@/actions/addSubscription';
 
 const FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.NEXT_PUBLIC_TEST_FLUTTERWAVE_PUBLIC_KEY;
@@ -85,6 +88,26 @@ export function CarouselFrame() {
 
   const handleFlutterPayment = useFlutterwave(config);
 
+  const handlePayment = async (response) => {
+        if (response.status === "completed") {
+          console.log("Payment completed immediately: ", response);
+          
+          const {customer: {email}, tx_ref: txRef, amount, transaction_id: id} = response;
+          const data = {customer: {email}, txRef, amount, id}
+          await storeProcessedEvent(data);
+          await inEarnings(data);
+          await addSubscription(data);
+          await queryClient.invalidateQueries("userInfo");
+          await queryClient.invalidateQueries("subscriptions");
+        } else if (response.status === "pending") {
+          console.log("Payment is pending verification");
+          // Optionally notify the user of the delay
+        } else {
+          console.log("Payment failed");
+          // Handle failure case
+        }
+  }
+
   return (
     <Carousel className="w-[301px]">
       <CarouselContent>
@@ -129,7 +152,7 @@ export function CarouselFrame() {
                       if (userInfo && userInfo?.plan !== "Pro") {
                         handleFlutterPayment({
                           callback: async (response) => {
-
+                            await handlePayment(response);                                                        
                             closePaymentModal()
                           },
                           onClose: () => {},

@@ -22,6 +22,7 @@ import { ComboboxInput } from '@/components/account/Combobox'
 import useResizeObserver from "use-resize-observer";
 import { ScrollAreaFrame } from '@/components/account/ScrollArea'
 import { Skeleton } from '@/components/ui/skeleton'
+import Pusher from 'pusher-js'
 
 
 const fetchUserEarnings = async (email) => {
@@ -177,6 +178,30 @@ const page = () => {
       {value: "GH"}
     ]
   }
+
+  const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
+
+  useEffect(() => {
+    // Initialize Pusher
+    const pusher = new Pusher(pusherKey, {
+      cluster: 'mt1',
+      encrypted: true,
+    });
+
+    // Subscribe to the channel and bind to the event
+    const channel = pusher.subscribe('transfer-channel');
+    channel.bind('transfer-event', async (data) => {
+      console.log('Received data:', data);
+      if (data.data.transfer.status === "SUCCESSFUL") {
+        
+      }
+    });
+
+    return () => {
+      pusher.unsubscribe('transfer-channel');
+    };
+  }, []);
+  
 
   useEffect(() => {
     if (selectedCountry) {
@@ -525,7 +550,7 @@ const page = () => {
               />
               <Button 
               makeWithdrawalAction={handleMakeWithdrawal}
-              label={"Withdraw"}
+              label={"Request withdrawal"}
               />
             </div>
           )

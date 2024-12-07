@@ -45,8 +45,8 @@ const page = () => {
     });
 
     // Subscribe to the channel and bind to the event
-    const channel = pusher.subscribe('my-channel');
-    channel.bind('my-event', async (data) => {
+    const channel = pusher.subscribe('card-bank-channel');
+    channel.bind('transaction-event', async (data) => {
       console.log('Received data:', data);
       if (data.data.status === "successful") {
         await queryClient.invalidateQueries("userInfo");
@@ -55,7 +55,7 @@ const page = () => {
     });
 
     return () => {
-      pusher.unsubscribe('my-channel');
+      pusher.unsubscribe('card-bank-channel');
     };
   }, []);
   

@@ -24,6 +24,11 @@ export const GET = async (request) => {
     const user = await User.findOne({ email });
     const userBeneficiary = await Beneficiary.findOne({ userId: user._id });
     const userEarning = await Earning.findOne({ userId: user._id });
+    const currentYear = new Date().getFullYear(); // Get current year
+    const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
+    const currentMonthOutEarnings = userEarning?.out?.find(
+      (entry) => entry.year === currentYear && entry.month === currentMonth
+    );
 
     if (!user) {
       console.log("User does not exist");
@@ -45,17 +50,11 @@ export const GET = async (request) => {
       console.log("Your balance is empty");
       return new NextResponse("Your balance is empty", { status: 401 });
     }
-
-    const currentYear = new Date().getFullYear(); // Get current year
-    const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
-    const currentMonthOutEarnings = userEarning?.out?.find(
-      (entry) => entry.year === currentYear && entry.month === currentMonth
-    );
-
     if (currentMonthOutEarnings) {
       console.log("Only one withdraw can be made a month");
       return new NextResponse("Only one withdraw can be made a month", { status: 401 }); 
     }
+
     
     // const payload = {
     //   account_bank,
@@ -67,7 +66,7 @@ export const GET = async (request) => {
     // };
     // const data = {customer: {email}, txRef: uniqueId};
 
-    const txRef = "dfs23fhr7ntg0293052_PMCKDU_1"
+    const txRef = "dfs23fhr7ntg0293054_PMCKDU_1"
     const data = {customer: {email}, txRef};
     const payload = {
       account_bank,
