@@ -30,6 +30,7 @@ const userSchema = new Schema(
     },
     adminKey: {
       type: String,
+      unique: true
     },
   },
   { timestamps: true }

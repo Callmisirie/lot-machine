@@ -30,32 +30,39 @@ export const GET = async (request) => {
       (entry) => entry.year === currentYear && entry.month === currentMonth
     );
 
+    let response;
+
     if (!user) {
       console.log("User does not exist");
-      return new NextResponse("User does not exist", { status: 401 });
+      response = {status: "failed", message:"User does not exist" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
     if (!userBeneficiary) {
       console.log("User beneficiary does not exist");
-      return new NextResponse("User beneficiary does not exist", { status: 401 });
+      response = {status: "failed", message:"User does not exist" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
-    if (!userBeneficiary) {
+    if (!userEarning) {
       console.log("User earnings does not exist");
-      return new NextResponse("User earnings does not exist", { status: 401 });
+      response = {status: "failed", message:"User earnings does not exist" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
     if (beneficiaryId !== userBeneficiary?.beneficiaryId){
       console.log("Beneficiary id doesn't match");
-      return new NextResponse("Beneficiary id doesn't match", { status: 401 });
+      response = {status: "failed", message:"Beneficiary id doesn't match" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
     if (!userEarning?.balance){
       console.log("Your balance is empty");
-      return new NextResponse("Your balance is empty", { status: 401 });
+      response = {status: "failed", message:"Your balance is empty" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
     if (currentMonthOutEarnings) {
       console.log("Only one withdraw can be made a month");
-      return new NextResponse("Only one withdraw can be made a month", { status: 401 }); 
+      response = {status: "failed", message:"Only one withdraw can be made a month" }
+      return new NextResponse(JSON.stringify(response), { status: 200 });
     }
 
-    
     // const payload = {
     //   account_bank,
     //   account_number,
@@ -66,7 +73,7 @@ export const GET = async (request) => {
     // };
     // const data = {customer: {email}, txRef: uniqueId};
 
-    const txRef = "dfs23fhr7ntg0293054_PMCKDU_1"
+    const txRef = "dfs23fhr7ntg0293058_PMCKDU_1"
     const data = {customer: {email}, txRef};
     const payload = {
       account_bank,
@@ -77,7 +84,6 @@ export const GET = async (request) => {
       debit_currency: "NGN"
     };
     
-    let response;
     const storedProcessedEvent = await storeProcessedEvent(data);
     if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
       console.log("Duplicate found");

@@ -9,9 +9,8 @@ import React from 'react'
 const AccountPill = ({
   bankName, 
   accountNumber, 
-  deleteBeneficiary, 
-  beneficiaryId, 
-  email,
+  beneficiaryId,
+  setComfirmationPopoverOpen
 }) => {
   const queryClient = useQueryClient();
   return (
@@ -26,16 +25,7 @@ const AccountPill = ({
         <div className='w-[24px] h-[24px] cursor-pointer'
         onClick={async() => { 
           if (beneficiaryId) {
-            const beneficiaryDetails = JSON.stringify({
-              email,
-              beneficiaryId
-            });
-            const {success} = await deleteBeneficiary(beneficiaryDetails);
-                   
-            if (success) {
-              await queryClient.invalidateQueries("beneficiaryId");
-              await queryClient.invalidateQueries("beneficiary");
-            }
+            setComfirmationPopoverOpen(true);
           }
         }}>
           <Image

@@ -11,6 +11,9 @@ const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 // Initialize Pusher with your credentials
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID, 
@@ -60,17 +63,16 @@ export const POST = async (req) => {
     
     console.log("Webhook payload received:", payload);
 
-    const existingEvent = await verify(payload.id);
-
-    console.log("existing event:", existingEvent);
-
-    if (existingEvent.data.id === payload.id) {
-      if (payload?.status === "successful") {
-        const storedProcessedEvent = await storeProcessedEvent(payload);
-        if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
-          console.log("Duplicate found");
-        } else {
-          if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
+    if (payload?.status === "successful") {
+      await delay(2000);
+      const storedProcessedEvent = await storeProcessedEvent(payload);
+      if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
+        console.log("Duplicate found");
+      } else {
+        if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
+          const existingEvent = await verify(payload.id);
+          
+          if (existingEvent.data.id === payload.id) {
             await addSubscription(payload);
             await inEarnings(payload);
   
@@ -79,10 +81,18 @@ export const POST = async (req) => {
               message: 'Bank or Card transaction processed successfully',
               data: payload, // Send the payload to the frontend
             });
+
+          } else {
+            console.log("This webhook does not valid");
+            return new NextResponse("This webhook does not valid", { status: 401 });
           }
         }
-      } else if (payload?.transfer?.status === "SUCCESSFUL") {
-        if (payload["event.type"] === "Transfer") {
+      }
+    } else if (payload?.transfer?.status === "SUCCESSFUL") {
+      if (payload["event.type"] === "Transfer") {
+        const existingEvent = await verify(payload.transfer.id);
+
+        if (existingEvent.data.id === payload.transfer.id) {
           console.log("Transfer webhook was logged");
 
           // Trigger Pusher for Transfers
@@ -90,15 +100,14 @@ export const POST = async (req) => {
             message: 'Transfer processed successfully',
             data: payload, // Send the payload to the frontend
           });
-        } 
-      } else {
-        console.log("Webhook status is not successful.");
-      }
+        } else {
+          console.log("This webhook does not valid");
+          return new NextResponse("This webhook does not valid", { status: 401 });
+        }
+      } 
     } else {
-      console.log("This webhook does not valid");
-      return new NextResponse("This webhook does not valid", { status: 401 });
+      console.log("Webhook status is not successful.");
     }
-
     // Respond with success
     return new NextResponse("Webhook received successfully", { status: 200 });
   } catch (error) {

@@ -29,7 +29,7 @@ export const POST = async () => {
       { _id: { $in: expiredUserIds }, plan: "pro" },
       { $set: { plan: "free" } }
     );
-    return new NextResponse(`Updated ${result.nModified} users to free plan.`, {status: 200} )
+    return new NextResponse(`Updated ${result.nModified ? result.nModified : 0} users to free plan.`, {status: 200} )
   } catch (error) {
     console.log(error)
     return new NextResponse("error running update subsciptions api." + error, {status: 500} )  

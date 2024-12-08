@@ -25,6 +25,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Pusher from 'pusher-js'
 import Link from 'next/link'
 import crypto from "crypto";
+import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverButton'
+import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
 
 
 const fetchUserEarnings = async (email) => {
@@ -77,7 +79,6 @@ const deleteBeneficiary = async (beneficiaryDetails) => {
   const { success, data } = await res.json();
   return {success, data};
 };
-
 
 const makeWithdrawal = async (beneficiaryDetails) => {
   const res = await fetch(`/api/makeWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
@@ -147,6 +148,11 @@ const page = () => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const { ref, height } = useResizeObserver();  
+  const [comfirmationPopoverOpen, setComfirmationPopoverOpen] = useState(false);
+  const [message, setMessage] = useState({
+    success: false,
+    messageContent: ""
+  })
 
   const currentYear = new Date().getFullYear(); // Get current year
   const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
@@ -269,7 +275,18 @@ const page = () => {
     if (status === "success") {
       await queryClient.invalidateQueries("userEarnings");
     }
-    console.log(message);
+
+    setMessage({
+      success: status === "success" ? true : false,
+      messageContent: message
+    });
+
+    setTimeout(() => {
+      setMessage({
+        success: false,
+        messageContent: ""
+      })
+    }, 5000);
   };
 
   const referralContent = () => {
@@ -345,9 +362,8 @@ const page = () => {
               </div>
             </div>
             <div className='flex flex-col w-full h-fit'>
-              {userInfo.plan !== "Master" && (
-              <div className='flex w-fit h-fit 
-              justify-start items-center gap-1'>
+              <div className={`flex w-fit h-fit 
+              justify-start items-center gap-1 ${userInfo.plan === "Master" && "invisible"}`}>
                 <h2 className='h2 text-n-300'>{referralSplitPercentage()}%</h2>
                 <div className='w-fit h-fit flex items-center gap-1'>
                   <p className='p2b text-n-500'>
@@ -358,10 +374,8 @@ const page = () => {
                     ? "Active" 
                     : "Inactive"}
                   </p>
-
                 </div>
               </div>
-              )}
               {/* <DownloadQrCode 
               userInfo={userInfo}/> */}
               <div className='flex justify-between items-end'>
@@ -578,14 +592,33 @@ const page = () => {
               <AccountPill 
               bankName={userBeneficiary?.beneficiary?.bank_name}
               accountNumber={userBeneficiary?.beneficiary?.account_number}
-              deleteBeneficiary={deleteBeneficiary}
+              setComfirmationPopoverOpen={setComfirmationPopoverOpen}
               beneficiaryId={userBeneficiaryId?.beneficiaryId}
-              email={userInfo?.email}
               />
-              <Button 
-              makeWithdrawalAction={handleMakeWithdrawal}
-              label={"Request withdrawal"}
-              />
+              <div className="flex flex-col justify-center items-center w-full">
+                <div className={`flex w-fit 
+                min-h-[24px] items-center 
+                justify-center mb-1 
+                ${!message?.messageContent && "invisible"}`}>
+                  <Image 
+                    src={message?.success ? cautionAccentGreen : cautionAccentRed} 
+                    width={24} 
+                    height={24} 
+                    alt="cation icon" 
+                    className="" 
+                    priority
+                    />   
+                  <p className={`l3r ${message?.success 
+                    ? "text-accent-green-300" 
+                    : "text-accent-red-300"}`}>
+                      {message?.messageContent}
+                  </p>
+                </div>             
+                <Button 
+                makeWithdrawalAction={handleMakeWithdrawal}
+                label={"Request withdrawal"}
+                />           
+              </div>
             </div>
           )
         }
@@ -818,6 +851,13 @@ const page = () => {
     return (
       <div className='w-full h-full flex flex-col justify-center items-center gap-[32px] relative'
       ref={ref}>
+        {comfirmationPopoverOpen && (
+          <ComfirmationPopoverButton 
+          setComfirmationPopoverOpen={setComfirmationPopoverOpen}
+          deleteBeneficiary={deleteBeneficiary}
+          beneficiaryId={userBeneficiaryId?.beneficiaryId}
+          email={userInfo?.email}/>
+        )}
         <div className='w-[48px] h-[48px] 
         bg-n-900 cursor-pointer rounded-full
         flex justify-center items-center absolute 

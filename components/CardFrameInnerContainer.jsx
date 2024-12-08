@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import PartialContainer from './PartialContainer';
 import FormFrame from './FormFrame';
 import Button from './Button';
@@ -27,13 +26,11 @@ const CardFrameInnerContainer = ({
   partialTPs, setPartialTPs,
   message, setMessage
 }) => {
-  const {isAuthenticated, isLoading, user} = useKindeBrowserClient();
+  const {isAuthenticated, user} = useKindeBrowserClient();
 
   const {
     data: instruments,
     isLoading: instrumentsLoading,
-    isError,
-    refetch,
   } = useQuery({
     queryKey: ["instruments", user?.email],
     queryFn: async () => await fetchInstruments(user.email),
@@ -128,24 +125,24 @@ const CardFrameInnerContainer = ({
           setPartialTPs={setPartialTPs}
           setMessage={setMessage}
         >
-        <div className="pb-4 flex flex-col justify-center items-center gap-1 w-full absolute bottom-0">
-          {message?.messageContent && 
-            <div className='flex gap-1 w-fit h-[24px] items-center justify-center'>
-              <Image 
-                src={message?.success ? cautionAccentGreen : cautionAccentRed} 
-                width={24} 
-                height={24} 
-                alt="cation icon" 
-                className="" 
-                priority
-                />   
-              <p className={`l3r ${message?.success 
-                ? "text-accent-green-300" 
-                : "text-accent-red-300"}`}>
-                  {message?.messageContent}
-              </p>
-            </div>
-          }
+          <div className="pb-4 flex flex-col justify-center items-center gap-1 w-full absolute bottom-0">
+            {message?.messageContent && 
+              <div className='flex gap-1 w-fit h-[24px] items-center justify-center'>
+                <Image 
+                  src={message?.success ? cautionAccentGreen : cautionAccentRed} 
+                  width={24} 
+                  height={24} 
+                  alt="cation icon" 
+                  className="" 
+                  priority
+                  />   
+                <p className={`l3r ${message?.success 
+                  ? "text-accent-green-300" 
+                  : "text-accent-red-300"}`}>
+                    {message?.messageContent}
+                </p>
+              </div>
+            }
             <Button 
               blackButton
               label={machineState === "Machine" ? "Calculate"
