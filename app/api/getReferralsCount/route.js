@@ -11,7 +11,12 @@ export const GET = async (request) => {
     const user = await User.findOne({ email })
     const referrerId = user.referrerId;
 
-    const referredUsers = await User.find({referralId: referrerId});
+    const users = await User.find()
+    const activeUsers = users?.filter((user)  => user?.plan === "Pro");
+    const totalUsers = users?.length;
+    const totalActiveUsers = activeUsers?.length;
+
+    const referredUsers = users?.filter((user)  => user?.referralId === referrerId);
     const activeReferredUsers = referredUsers?.filter((user)  => user?.plan === "Pro");
     const totalReferrals = referredUsers?.length;
     const totalActiveReferrals = activeReferredUsers?.length;
@@ -20,7 +25,10 @@ export const GET = async (request) => {
       userPlan: user.plan, 
       referredUsers, 
       totalReferrals, 
-      totalActiveReferrals
+      totalActiveReferrals,
+      users, 
+      totalUsers, 
+      totalActiveUsers
     }), {status: 200} )
   } catch (error) {
     return new NextResponse("error running referrals count api." + error, {status: 500} )  

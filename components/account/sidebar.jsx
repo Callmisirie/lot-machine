@@ -42,13 +42,11 @@ const Sidebar = () => {
             </h4>
           </Link>
         )}
-        {userInfo.plan !== "Master" && (
-        <Link href={"/account/referral"}>
-          <h4 className={`h4 ${pathname === "/account/referral" ? "text-n-700" : "text-n-500"}`}>
-            Referral
+        <Link href={`/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}`}>
+          <h4 className={`h4 ${pathname === `/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}` ? "text-n-700" : "text-n-500"}`}>
+            {userInfo.plan === "Master" ? "Manager" : "Referral"}
           </h4>
         </Link>
-        )}
         <Link href={"/account/how-it-works"}>
           <h4 className={`h4 ${pathname === "/account/how-it-works" ? "text-n-700" : "text-n-500"}`}>
             How it works

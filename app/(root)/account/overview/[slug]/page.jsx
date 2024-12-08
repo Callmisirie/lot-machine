@@ -16,7 +16,7 @@ import { Loader } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { format } from 'date-fns';
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SelectFrame } from '@/components/account/SelectFrame'
 import { ComboboxInput } from '@/components/account/Combobox'
 import useResizeObserver from "use-resize-observer";
@@ -24,6 +24,7 @@ import { ScrollAreaFrame } from '@/components/account/ScrollArea'
 import { Skeleton } from '@/components/ui/skeleton'
 import Pusher from 'pusher-js'
 import Link from 'next/link'
+import crypto from "crypto";
 
 
 const fetchUserEarnings = async (email) => {
@@ -36,8 +37,8 @@ const fetchUserEarnings = async (email) => {
 const fetchReferralsCount = async (email) => {
   const res = await fetch(`/api/getReferralsCount?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch referral count");
-  const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals } = await res.json();
-  return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals};
+  const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers } = await res.json();
+  return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers};
 };
 
 const fetchGetBanks = async (country) => {
@@ -88,6 +89,9 @@ const makeWithdrawal = async (beneficiaryDetails) => {
 };
 
 const page = () => {
+  const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
+  const secretHash = crypto.createHash("sha256").update(secretKey).digest("hex");
+  const pathname = usePathname(); // Get the current pathname
   const {isAuthenticated, user} = useKindeBrowserClient();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -292,29 +296,39 @@ const page = () => {
               onClick={() => {
                 setIsReferralList(true)
               }}>
-                Show referral list
+                Show {userInfo.plan === "Master" ? "user" : "referral"} list
               </p>
             </div>
             <div className='flex w-full h-fit justify-between items-start'>
               <div className='flex flex-col 
               w-fit pr-2 items-start
               border-n-300 border-r'>
-                <h5 className='h5 text-n-700'>Referrals</h5>
+                <h5 className='h5 text-n-700'>{userInfo.plan === "Master" ? "Users" : "Referrals"}</h5>
                 <div className='flex flex-col w-fit h-fit'>
                   <div className='flex w-fit h-fit gap-1 items-center'>
                     <h4 className='h4 text-n-500'>Total</h4>
                     <h3 className='h3 text-n-300'>
-                      {referralCount?.totalReferrals 
-                      ? formatter.format(referralCount?.totalReferrals)
-                      : 0}
+                      {userInfo.plan === "Master" 
+                      ? referralCount?.totalUsers 
+                        ? formatter.format(referralCount?.totalUsers)
+                        : 0
+                      :referralCount?.totalReferrals 
+                        ? formatter.format(referralCount?.totalReferrals)
+                        : 0 
+                      }
                     </h3>
                   </div>
                   <div className='flex w-fit h-fit gap-1 items-center'>
                     <h6 className='h6 text-n-500'>Active</h6>
                     <h5 className='h5 text-n-300'>
-                      {referralCount?.totalActiveReferrals
+                    {userInfo.plan === "Master" 
+                    ? referralCount?.totalActiveUsers 
+                      ? formatter.format(referralCount?.totalActiveUsers)
+                      : 0
+                    :referralCount?.totalActiveReferrals 
                       ? formatter.format(referralCount?.totalActiveReferrals)
-                      : 0}
+                      : 0 
+                    }
                     </h5>
                   </div>
                 </div>
@@ -331,6 +345,7 @@ const page = () => {
               </div>
             </div>
             <div className='flex flex-col w-full h-fit'>
+              {userInfo.plan !== "Master" && (
               <div className='flex w-fit h-fit 
               justify-start items-center gap-1'>
                 <h2 className='h2 text-n-300'>{referralSplitPercentage()}%</h2>
@@ -346,6 +361,7 @@ const page = () => {
 
                 </div>
               </div>
+              )}
               {/* <DownloadQrCode 
               userInfo={userInfo}/> */}
               <div className='flex justify-between items-end'>
@@ -381,12 +397,20 @@ const page = () => {
         )
       }
       if (isReferralList) {
+        const usersCount = () => {
+          if (userInfo.plan === "Master") {
+            return referralCount.users;
+          } else {
+            return referralCount.referredUsers;
+          }
+        }
+
         return (
           <div className='w-full h-full 
           flex flex-col justify-start gap-2 
           items-center'>
             <div  className='flex flex-col w-full h-fit items-center'>
-              <h6 className='h6 text-n-700 w-fit'>Referral list</h6>
+              <h6 className='h6 text-n-700 w-fit'>{userInfo.plan === "Master" ? "User" : "Referral"} list</h6>
               <div className='w-full flex justify-end'>
                 <div className='w-[27px] h-[27px] 
                 rounded-full flex items-center 
@@ -411,36 +435,46 @@ const page = () => {
                 <div className='w-fit h-fit gap-2 flex items-center'>
                   <h4 className='h4 text-n-700'>Total</h4>
                   <p className='p1b text-n-700'>
-                    {referralCount?.totalReferrals
+                  {userInfo.plan === "Master" 
+                  ? referralCount?.totalUsers 
+                    ? formatter.format(referralCount?.totalUsers)
+                    : 0
+                  :referralCount?.totalReferrals 
                     ? formatter.format(referralCount?.totalReferrals)
-                    : 0}
+                    : 0 
+                  }
                   </p>
                 </div>
                 <div className='w-fit h-fit gap-2 flex items-center'>
                   <h6 className='h6 text-n-700'>Active</h6>
                   <p className='p3r text-n-700'>
-                    {referralCount?.totalActiveReferrals
+                  {userInfo.plan === "Master" 
+                  ? referralCount?.totalActiveUsers 
+                    ? formatter.format(referralCount?.totalActiveUsers)
+                    : 0
+                  :referralCount?.totalActiveReferrals 
                     ? formatter.format(referralCount?.totalActiveReferrals)
-                    : 0}
+                    : 0 
+                  }
                   </p>
                 </div>
               </div>
               <ScrollAreaFrame
                 mainClass={`w-full h-[259px]`}
                 innerClass={`w-full h-full flex flex-col gap-4`}>
-                {referralCount?.referredUsers?.map((referredUser) => {
+                {usersCount()?.map((user) => {
                   return (
                     <div className='w-full h-fit flex 
                     justify-between pb-2 items-start 
                     border-b border-n-300'>
                       <p className='p2r text-n-700'>
-                        {referredUser.username}
+                        {user.username}
                       </p>
                       <p className={`p3r  
-                        ${referredUser?.plan === "Pro" 
+                        ${user?.plan === "Pro" 
                         ? "text-accent-green-300" 
                         : "text-accent-red-300"}`}>
-                        {referredUser?.plan === "Pro" 
+                        {user?.plan === "Pro" 
                         ? "Active"
                         : "Inactive"}
                       </p>
@@ -738,11 +772,23 @@ const page = () => {
     }
   }
 
-  if (userInfo && userInfo.plan === "Master") {
+  if (userInfo && userInfo?.plan === "Master" && userInfo?.adminKey !== secretHash) {
     router.push("/account/profile");
   }  
 
-  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryIdLoading) {
+  if (pathname !== "/account/overview/referral"  && pathname !== "/account/overview/manager") {
+    router.push("/account/profile");
+  } 
+  
+  if (userInfo?.plan === "Master"  && pathname !== "/account/overview/manager") {
+    router.push("/account/profile");
+  } 
+  
+  if (userInfo?.plan === "Pro"  && pathname !== "/account/overview/referral" || userInfo?.plan === "Free"  && pathname !== "/account/overview/referral") {
+    router.push("/account/profile");
+  }
+
+  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryIdLoading ) {
     return (
       <div className='w-full h-full 
       flex flex-col justify-center 
@@ -768,7 +814,7 @@ const page = () => {
     );
   }
 
-  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && userInfo.plan !== "Master" && !userBeneficiaryIdLoading) { 
+  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && !userBeneficiaryIdLoading) { 
     return (
       <div className='w-full h-full flex flex-col justify-center items-center gap-[32px] relative'
       ref={ref}>
@@ -789,7 +835,7 @@ const page = () => {
         </div> 
         {height > 560 && (
           <Header 
-          title={"Referral"}
+          title={userInfo.plan === "Master" ? "Manager" : "Referral"}
           text={"Simple, transparent and enjoyable"}
           />
         )}
