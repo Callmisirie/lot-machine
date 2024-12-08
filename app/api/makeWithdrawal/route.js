@@ -69,11 +69,14 @@ export const GET = async (request) => {
     //   amount: userEarning.balance,
     //   currency,
     //   reference: uniqueId, 
-    //   debit_currency: "NGN"
+    //   debit_currency: "NGN",
+      // meta: {
+      //   email: user.email,
+      // },
     // };
     // const data = {customer: {email}, txRef: uniqueId};
 
-    const txRef = "dfs23fhr7ntg0293058_PMCKDU_1"
+    const txRef = "dfs23fhr7ntg0293115_PMCKDU_1"
     const data = {customer: {email}, txRef};
     const payload = {
       account_bank,
@@ -81,7 +84,10 @@ export const GET = async (request) => {
       amount: userEarning.balance,
       currency,
       reference: txRef, 
-      debit_currency: "NGN"
+      debit_currency: "NGN",
+      meta: {
+        email: user.email,
+      },
     };
     
     const storedProcessedEvent = await storeProcessedEvent(data);

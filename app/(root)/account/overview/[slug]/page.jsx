@@ -28,7 +28,6 @@ import crypto from "crypto";
 import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverButton'
 import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
 
-
 const fetchUserEarnings = async (email) => {
   const res = await fetch(`/api/getUserEarnings?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch user earnings");
@@ -71,6 +70,13 @@ const fetchBeneficiary = async (beneficiaryId) => {
   if (!res.ok) throw new Error("Failed to fetch user beneficiary");
   const { success, beneficiary } = await res.json();  
   return {success, beneficiary};
+};
+
+const fetchTransfers = async (email) => {
+  const res = await fetch(`/api/getTransfers?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user transfers");
+  const { success, transfers } = await res.json();  
+  return {success, transfers};
 };
 
 const deleteBeneficiary = async (beneficiaryDetails) => {
@@ -128,9 +134,19 @@ const page = () => {
     isLoading: userBeneficiaryLoading,
     refetch: userBeneficiaryRefetch
   } = useQuery({
-    queryKey: ["beneficiary", user?.email],
+    queryKey: ["beneficiary", userBeneficiaryId?.beneficiaryId],
     queryFn: async () => await fetchBeneficiary(userBeneficiaryId?.beneficiaryId),
     enabled: !userBeneficiaryIdLoading && !!userBeneficiaryId?.beneficiaryId,
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+  const {
+    data: userTransfers,
+    isLoading: userTransfersLoading,
+    refetch: userTransfersRefetch
+  } = useQuery({
+    queryKey: ["transfers", user?.email],
+    queryFn: async () => await fetchTransfers(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
   
@@ -163,10 +179,22 @@ const page = () => {
     return format(date, 'MMM'); // Returns abbreviated month (e.g., "Nov")
   };
 
+  const currentYearInEarningsEntry = userEarnings?.userEarnings?.in?.filter(
+    (entry) => entry.year === currentYear
+  );
+  
+  const currentYearOutEarningsEntry = userEarnings?.userEarnings?.out?.filter(
+    (entry) => entry.year === currentYear
+  );
+
   const currentMonthEarningsEntry = userEarnings?.userEarnings?.in?.filter(
     (entry) => entry.year === currentYear && entry.month === currentMonth
   );
   
+  const currentYearInEarnings = currentYearInEarningsEntry?.reduce((sum, entry) => sum + entry.amount, 0) || 0;
+
+  const currentYearOutEarnings = currentYearOutEarningsEntry?.reduce((sum, entry) => sum + entry.amount, 0) || 0;
+
   const currentMonthEarnings = currentMonthEarningsEntry?.reduce((sum, entry) => sum + entry.amount, 0) || 0;
 
   const referralSplitPercentage = () => {
@@ -274,6 +302,7 @@ const page = () => {
     const {status, message} = await makeWithdrawal(beneficiaryDetails);
     if (status === "success") {
       await queryClient.invalidateQueries("userEarnings");
+      await queryClient.invalidateQueries("transfers");
     }
 
     setMessage({
@@ -652,7 +681,7 @@ const page = () => {
                 <div className='w-full h-fit 
                 flex flex-col items-start'>
                   <div className='w-fit h-fit flex items-center'>
-                    <h4 className='h4 text-n-700'>2024</h4>
+                    <h4 className='h4 text-n-700'>{currentYear}</h4>
                     <Image
                       src={dropArrowBlack}
                       width={24}
@@ -664,40 +693,59 @@ const page = () => {
                   <div className='w-fit h-fit gap-[32px] flex'>
                     <div className='w-fit h-fit gap-2 flex items-center'>
                       <p className='p3r text-n-500'>in:</p>
-                      <p className='p2r text-n-700'>$142.00</p>
+                      <p className='p2r text-n-700'>
+                        &#8358;{currentYearInEarnings
+                        ? formatter.format(currentYearInEarnings) 
+                        : 0}
+                      </p>
                     </div>
                     <div className='w-fit h-fit gap-2 flex items-center'>
                       <p className='p3r text-n-500'>out:</p>
-                      <p className='p2r text-n-700'>$62.00</p>
+                      <p className='p2r text-n-700'>
+                        &#8358;{currentYearOutEarnings
+                        ? formatter.format(currentYearOutEarnings) 
+                        : 0}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <ScrollAreaFrame
                 mainClass={`w-full h-[242px]`}
                 innerClass={`w-full h-full flex flex-col gap-4`}>
-                  <div className='w-full h-fit flex flex-col
-                  justify-between pb-2 items-start gap-2
-                  border-b border-n-300 cursor-pointer'
-                  onClick={() => {
-                    setIsWithdrawalDetails(true)
-                  }}>
-                    <div className='w-full h-fit items-center flex justify-between'>
-                      <p className='p2r text-n-700 w-fit'>
-                        Withdrawal
-                      </p>
-                      <p className='p2b text-n-700 w-fit'>
-                        -$34.00
-                      </p>
-                    </div>
-                    <div className='w-full h-fit items-center flex justify-between'>
-                      <p className='p3r text-n-500 w-fit'>
-                        Jul 1, 22:40:14
-                      </p>
-                      <p className='p3r text-accent-green-300 w-fit'>
-                        Successful
-                      </p>
-                    </div>
-                  </div>                  
+                  {userTransfers?.transfers?.map((transfer) => {
+                    const isoString = transfer?.created_at;
+                    const formattedDate = format(new Date(isoString), 'MMM d, HH:mm:ss');
+                    return (
+                      <div className='w-full h-fit flex flex-col
+                      justify-between pb-2 items-start gap-2
+                      border-b border-n-300 cursor-pointer'
+                      onClick={() => {
+                        setIsWithdrawalDetails(true)
+                      }}>
+                        <div className='w-full h-fit items-center flex justify-between'>
+                          <p className='p2r text-n-700 w-fit'>
+                            Withdrawal
+                          </p>
+                          <p className='p2b text-n-700 w-fit'>-&#8358;
+                            {transfer?.amount
+                            ? formatter.format(transfer?.amount) 
+                            : 0}
+                          </p>
+                        </div>
+                        <div className='w-full h-fit items-center flex justify-between'>
+                          <p className='p3r text-n-500 w-fit'>
+                            {formattedDate}
+                          </p>
+                          <p className={`p3r 
+                            ${transfer?.status === "SUCCESSFUL" 
+                            ? "text-accent-green-300" 
+                            : "text-accent-red-300"} w-fit`}>
+                            {transfer?.complete_message}
+                          </p>
+                        </div>
+                      </div>                  
+                    )
+                  })}
                 </ScrollAreaFrame>
               </div>
             </div>
