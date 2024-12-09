@@ -1,6 +1,7 @@
 import { splitValue } from "@/common/splitValue";
 import { clipboardBlack } from "@/public/icons/black";
 import Image from "next/image";
+import { TooltipFrame } from "../TooltipFrame";
 
 const ValueField = ({ 
   label, 
@@ -31,14 +32,17 @@ const ValueField = ({
               navigator.clipboard.writeText(value)
             }
           }}>
-            <Image 
-              src={clipboardBlack} 
-              width={24} 
-              height={24} 
-              alt="copy icon" 
-              className="" 
-              priority
-              /> 
+            <TooltipFrame
+            label={"Copy"}>
+              <Image 
+                src={clipboardBlack} 
+                width={24} 
+                height={24} 
+                alt="copy icon" 
+                className="" 
+                priority
+                /> 
+            </TooltipFrame>
           </div>
         )}
       </div>

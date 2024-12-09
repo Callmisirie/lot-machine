@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import React from 'react';
+import { TooltipFrame } from './TooltipFrame';
 
 const PartialContainer = ({
   leftIconImgSrc, rightIconImgSrc,
@@ -30,6 +31,8 @@ const PartialContainer = ({
                   .join(", "))
                 }
               }}>
+                <TooltipFrame
+                label={"Copy"}>
                 <Image
                   src={leftIconImgSrc}
                   width={24}
@@ -38,6 +41,8 @@ const PartialContainer = ({
                   priority
                   className=''
                 />
+
+                </TooltipFrame>
               </div>
             </div>
           </div>

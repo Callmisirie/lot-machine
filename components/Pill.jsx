@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import React from 'react';
+import { TooltipFrame } from './TooltipFrame';
 
 const Pill = ({
   partialTP, rightIconImgSrc, 
@@ -35,13 +36,15 @@ const Pill = ({
             navigator.clipboard.writeText(partialTP)
           }
         }}>
-          <Image
-            src={rightIconImgSrc}
-            width={24}
-            height={24}
-            alt='left icon'
-            priority
-          />
+          <TooltipFrame label={"Copy"}>
+            <Image
+              src={rightIconImgSrc}
+              width={24}
+              height={24}
+              alt='left icon'
+              priority
+            />
+          </TooltipFrame>
         </div>
       :null}
     </div>

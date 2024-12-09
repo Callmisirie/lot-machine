@@ -11,7 +11,8 @@ export const GET = async (request) => {
     const user = await User.findOne({ email })
     const referrerId = user.referrerId;
 
-    const users = await User.find()
+    let users = await User.find()
+    users = users?.filter((user)  => user?.plan === "Pro" || user?.plan === "Free");
     const activeUsers = users?.filter((user)  => user?.plan === "Pro");
     const totalUsers = users?.length;
     const totalActiveUsers = activeUsers?.length;

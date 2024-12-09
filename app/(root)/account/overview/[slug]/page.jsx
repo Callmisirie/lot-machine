@@ -27,6 +27,7 @@ import Link from 'next/link'
 import crypto from "crypto";
 import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverButton'
 import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
+import { TooltipFrame } from '@/components/TooltipFrame'
 
 const addBeneficiary = async (beneficiaryDetails) => {
   const res = await fetch(`/api/addBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
@@ -420,14 +421,17 @@ const page = () => {
                   }
                 }}
                 >
-                  <Image 
-                  src={clipboardBlack} 
-                  width={24} 
-                  height={24} 
-                  alt="clipboard icon" 
-                  className="" 
-                  priority
-                  /> 
+                  <TooltipFrame
+                  label={"Copy"}>
+                    <Image 
+                    src={clipboardBlack} 
+                    width={24} 
+                    height={24} 
+                    alt="clipboard icon" 
+                    className="" 
+                    priority
+                    /> 
+                  </TooltipFrame>
                 </div>
               </div>
             </div>
@@ -843,13 +847,17 @@ const page = () => {
                           <p  className='p3r text-n-700'>
                             swdfw289489w00
                           </p>
-                          <Image
-                            src={clipboardBlack}
-                            width={14}
-                            height={14}
-                            alt='clipboard icon'
-                            priority
-                          />
+                          <TooltipFrame 
+                          label={"Copy"}>
+                            <Image
+                              src={clipboardBlack}
+                              width={14}
+                              height={14}
+                              alt='clipboard icon'
+                              priority
+                              className='cursor-pointer'
+                            />
+                          </TooltipFrame>
                         </div>
                       </div>
                       <div className='w-full h-fit flex justify-between items-center'>
