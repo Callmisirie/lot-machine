@@ -6,6 +6,9 @@ const subscriptionSchema = new Schema(
       type: Schema.Types.ObjectId, // Corrected this line
       required: true,
       ref: "User", // Reference the User model for better querying
+    }, 
+    paymentPlanId: {
+      type: Number
     },
     subscriptions: [
       {
@@ -15,7 +18,7 @@ const subscriptionSchema = new Schema(
         period: {
           type: String,
         },
-        tx_ref: {
+        flw_ref: {
           type: String,
         },
         payment_type: {

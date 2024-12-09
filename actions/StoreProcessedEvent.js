@@ -16,19 +16,19 @@ const storeProcessedEvent = async (response) => {
         // Create a new stored processed event list for the user
         userStoredProcessedEvents = await StoredProcessedEvent.create({
           userId: user._id,
-          storedProcessedEvents: [{ tx_ref: response.txRef }]
+          storedProcessedEvents: [{ flw_ref: response.flwRef }]
         });
         console.log("Stored processed event to db");
         return { success: true, stored: false, message: "Stored processed event to db" };
       } else {
-        const storedProcessedEventExists = userStoredProcessedEvents.storedProcessedEvents.find((processedEvent) => processedEvent.tx_ref === response.txRef);
+        const storedProcessedEventExists = userStoredProcessedEvents.storedProcessedEvents.find((processedEvent) => processedEvent.flw_ref === response.flwRef);
         
         if (storedProcessedEventExists) {
           console.log("Processed event already stored to db");
           return { success: true, stored: true, message: "Event already stored" };
         } else {
           // Add the new stored processed event to the existing list
-          userStoredProcessedEvents.storedProcessedEvents.push({ tx_ref: response.txRef});
+          userStoredProcessedEvents.storedProcessedEvents.push({ flw_ref: response.flwRef});
           await userStoredProcessedEvents.save(); // Save changes to the database
           console.log("Stored processed event to db");
           return { success: true, stored: false, message: "Stored processed event to db" };

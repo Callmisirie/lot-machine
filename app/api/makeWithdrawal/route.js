@@ -74,16 +74,16 @@ export const GET = async (request) => {
       //   email: user.email,
       // },
     // };
-    // const data = {customer: {email}, txRef: uniqueId};
+    // const data = {customer: {email}, flwRef: uniqueId};
 
-    const txRef = "dfs23fhr7ntg0293117_PMCKDU_1"
-    const data = {customer: {email}, txRef};
+    const flwRef = "dfs23fhr7ntg0293121_PMCKDU_1"
+    const data = {customer: {email}, flwRef};
     const payload = {
       account_bank,
       account_number,
       amount: userEarning.balance,
       currency,
-      reference: txRef, 
+      reference: flwRef, 
       debit_currency: "NGN",
       meta: {
         email: user.email,

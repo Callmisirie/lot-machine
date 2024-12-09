@@ -9,7 +9,7 @@ const storedProcessedEventSchema = new Schema(
     },
     storedProcessedEvents: [
       {
-        tx_ref: {
+        flw_ref: {
           type: String,
         },
       },

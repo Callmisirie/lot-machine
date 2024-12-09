@@ -21,7 +21,7 @@ const earningSchema = new Schema(
       amount: {
         type: Number
       },
-      tx_ref: {
+      flw_ref: {
         type: String
       },
     }],
@@ -35,7 +35,7 @@ const earningSchema = new Schema(
       amount: {
         type: Number
       },
-      tx_ref: {
+      flw_ref: {
         type: String
       },
     }]

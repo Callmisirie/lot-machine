@@ -91,6 +91,13 @@
   @apply font-poppins font-normal text-[12px] leading-[150%]
 }
 
+.l3br {
+  @apply font-poppins font-semibold text-[12px] leading-[150%] 
+  lg:font-montserrat lg:font-normal lg:text-[4px] lg:leading-[125%] 
+  transition-all duration-300
+
+}
+
 /* Prevent text selection */
 .no-select {
   user-select: none;

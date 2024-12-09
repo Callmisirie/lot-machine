@@ -18,7 +18,7 @@ const processInEarnings = async (response, earner, earnings, splitShare, user) =
           year: currentYear,
           month: currentMonth,
           amount: splitShare,
-          tx_ref: response.txRef
+          flw_ref: response.flwRef
         }]
       });
     } else {
@@ -28,7 +28,7 @@ const processInEarnings = async (response, earner, earnings, splitShare, user) =
         year: currentYear,
         month: currentMonth,
         amount: splitShare,
-        tx_ref: response.txRef
+        flw_ref: response.flwRef
       });
     }
     

@@ -17,8 +17,15 @@ import { homeWhite } from '@/public/icons/white';
 const fetchSubscriptions = async (email) => {
   const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch subscriptions");
-  const { success, subscriptions } = await res.json();
-  return {success, subscriptions}
+  const { success, paymentPlanId, subscriptions } = await res.json();
+  return {success, paymentPlanId, subscriptions}
+};
+
+const cancelSubscription = async (email) => {
+  const res = await fetch(`/api/cancelSubscription?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to cancel subsciption");
+  const response = await res.json();
+  return { status: response.status, message: response.message, data: response.data };
 };
 
 const page = () => {
@@ -36,7 +43,7 @@ const page = () => {
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   const { ref, height } = useResizeObserver();  
 
-  if (!userInfo) {
+  if (!userInfo || subscriptionsLoading) {
     return (
       <div className='w-full h-full 
       flex flex-col justify-center 
@@ -49,20 +56,20 @@ const page = () => {
           gap-[20px]'>
             <Skeleton
             className="w-[153px] h-[52px]
-            bg-n-100 rounded-[8px] relative" />
+            bg-n-300/25 rounded-[8px] relative" />
             <Skeleton
             className="w-[278px] h-[20px]
-            bg-n-100 rounded-[4px] " />
+            bg-n-300/25 rounded-[4px] " />
           </div>
         )}
         <Skeleton
         className="w-[300px] h-[420px]
-        bg-n-100 rounded-[32px]" />
+        bg-n-300/25 rounded-[32px]" />
       </div>
     );
   }
 
-  if (userInfo) {
+  if (userInfo && !subscriptionsLoading) {
     const latestSubscription = () => {
       if (!subscriptionsLoading && subscriptions.success && subscriptions.subscriptions) {
         const latest = subscriptions?.subscriptions[subscriptions?.subscriptions?.length - 1];
@@ -140,10 +147,15 @@ const page = () => {
                     </p>
                   </div>)}
                 </div>
-                {latestSubscription?.().payment_type === 'card' && (
-                <button className={`w-fit p3b text-accent-red-300 cursor-pointer`}>
-                  Cancel subscription
-                </button>)}
+                {latestSubscription?.().payment_type === 'card' && subscriptions.paymentPlanId ? (
+                  <button className={`w-fit p3b text-accent-red-300 cursor-pointer`}
+                  onClick={async() => {
+                    await cancelSubscription(userInfo?.email);
+                    await queryClient.invalidateQueries("beneficiary");
+                  }}>
+                    Cancel subscription
+                  </button>) 
+                : null}
               </div>
             </div>
           </div>

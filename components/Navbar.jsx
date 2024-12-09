@@ -32,12 +32,17 @@ const Navbar = () => {
         <div className='w-fit h-fit flex items-center'>
           {userInfo && userInfo.plan === "Free" 
           ? <Link href={"/account/plans"}
-            className='relative -right-2'>
+            className='relative -right-2 
+            max-md:-right-2 transition-all duration-300'>
               <div className='flex justify-center 
-              items-center w-[146px] h-[48px] p-4
+              items-center w-[146px] h-[48px]
               rounded-tl-[16px] rounded-bl-[16px]
-              bg-n-900 shadow-md'>
-                  <p className='l3b text-n-100'>Get pro plan</p>     
+              bg-n-900 shadow-md max-md:h-[32px]
+              max-md:w-[98px] max-md:rounded-tl-[16px] 
+              max-md:rounded-bl-[16px] transition-all duration-100'>
+                <p className='l3b text-n-100'>
+                  Get pro plan
+                </p>     
               </div>
             </Link>
           : null}

@@ -52,12 +52,14 @@ const addSubscription = async (response) => {
         // Create a new subscription list for the user
         userSubscriptions = await Subscription.create({
           userId: user._id,
-          subscriptions: [{ plan, period, tx_ref: response.txRef, payment_type, endDate}]
+          paymentPlanId: response.paymentPlan,
+          subscriptions: [{ plan, period, flw_ref: response.flwRef, payment_type, endDate}]
         });
         console.log("Subscription list created");
       } else {
         // Add the new subscription to the existing list
-        userSubscriptions.subscriptions.push({ plan, period, tx_ref: response.txRef, payment_type, endDate});
+        userSubscriptions.paymentPlanId = response.paymentPlan;
+        userSubscriptions.subscriptions.push({ plan, period, flw_ref: response.flwRef, payment_type, endDate});
         await userSubscriptions.save(); // Save changes to the database
         console.log("Subscription added to existing list");
       }

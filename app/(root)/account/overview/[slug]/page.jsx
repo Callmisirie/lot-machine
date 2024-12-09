@@ -844,6 +844,7 @@ const page = () => {
                       <div className='w-full h-fit flex justify-between items-center'>
                         <p className='p3r text-n-500'>Transaction ref</p>
                         <div className='flex items-center gap-1'>
+                          {/* add copy function */}
                           <p  className='p3r text-n-700'>
                             swdfw289489w00
                           </p>
@@ -905,15 +906,15 @@ const page = () => {
           gap-[20px]'>
             <Skeleton
             className="w-[153px] h-[52px]
-            bg-n-100 rounded-[8px] relative" />
+            bg-n-300/25 rounded-[8px] relative" />
             <Skeleton
             className="w-[278px] h-[20px]
-            bg-n-100 rounded-[4px] " />
+            bg-n-300/25 rounded-[4px] " />
           </div>
         )}
         <Skeleton
         className="w-[325px] h-[420px]
-        bg-n-100 rounded-[32px]" />
+        bg-n-300/25 rounded-[32px]" />
       </div>
     );
   }

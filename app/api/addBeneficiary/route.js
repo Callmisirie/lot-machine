@@ -41,8 +41,6 @@ export const GET = async (request) => {
 
       await storeBeneficiary(email, data);
     }
-
-    console.log(response);
     
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

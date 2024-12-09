@@ -21,7 +21,7 @@ const Sidebar = () => {
         items-start gap-[58px] py-[32px]`}>
           {Array.from({length: 4}).map((_, index) => (
             <Skeleton key={index}
-            className="w-full h-[36px] rounded-[8px] bg-n-100" />
+            className="w-full h-[36px] rounded-[8px] bg-n-300/25" />
           ))}
       </div>
       );

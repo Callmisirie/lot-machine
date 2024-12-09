@@ -11,9 +11,6 @@ const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-
 // Initialize Pusher with your credentials
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID, 
@@ -79,11 +76,9 @@ export const POST = async (req) => {
           return payload
         } else if (payload?.transfer?.status === "SUCCESSFUL") {
           const {transfer : {reference, meta: {email}}} = payload;
-          return {customer: {email}, txRef: reference};
+          return {customer: {email}, flwRef: reference};
         }
       }
-
-      await delay(5000);
       
       const storedProcessedEvent = await storeProcessedEvent(data());
       if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {

@@ -115,7 +115,7 @@ export const outEarnings = async (email, response) => {
         year: currentYear,
         month: currentMonth,
         amount: response.amount,
-        tx_ref: response.reference
+        flw_ref: response.reference
       });
       await earnings.save();
       console.log("Out earnings updated successfully");

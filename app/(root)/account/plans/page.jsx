@@ -80,15 +80,15 @@ const page = () => {
           gap-[20px]'>
             <Skeleton
             className="w-[153px] h-[52px]
-            bg-n-100 rounded-[8px] relative" />
+            bg-n-300/25 rounded-[8px] relative" />
             <Skeleton
             className="w-[278px] h-[20px]
-            bg-n-100 rounded-[4px] " />
+            bg-n-300/25 rounded-[4px] " />
           </div>
         )}
         <Skeleton
         className="w-[300px] h-[420px]
-        bg-n-100 rounded-[32px]" />
+        bg-n-300/25 rounded-[32px]" />
       </div>
     );
   }
