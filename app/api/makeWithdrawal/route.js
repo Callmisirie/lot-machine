@@ -76,7 +76,7 @@ export const GET = async (request) => {
     // };
     // const data = {customer: {email}, txRef: uniqueId};
 
-    const txRef = "dfs23fhr7ntg0293115_PMCKDU_1"
+    const txRef = "dfs23fhr7ntg0293117_PMCKDU_1"
     const data = {customer: {email}, txRef};
     const payload = {
       account_bank,

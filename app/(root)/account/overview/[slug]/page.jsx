@@ -28,55 +28,13 @@ import crypto from "crypto";
 import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverButton'
 import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
 
-const fetchUserEarnings = async (email) => {
-  const res = await fetch(`/api/getUserEarnings?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user earnings");
-  const { success, userEarnings } = await res.json();
-  return {success, userEarnings};
-};
-
-const fetchReferralsCount = async (email) => {
-  const res = await fetch(`/api/getReferralsCount?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch referral count");
-  const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers } = await res.json();
-  return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers};
-};
-
-const fetchGetBanks = async (country) => {
-  const res = await fetch(`/api/getBanks?country=${country}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch banks");
-  const { status, data } = await res.json();
-  return { status, data };
-};
-
 const addBeneficiary = async (beneficiaryDetails) => {
   const res = await fetch(`/api/addBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to add beneficiary");
   const response = await res.json();
-  return { status: response.status, data: response.data };
-};
-
-const fetchBeneficiaryId = async (email) => {
-  const res = await fetch(`/api/getBeneficiaryId?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch beneficiaryId");
-  const { success, beneficiaryId } = await res.json();
-  return { success, beneficiaryId }
-};
-
-const fetchBeneficiary = async (beneficiaryId) => {
-  const res = await fetch(`/api/getBeneficiary?beneficiaryId=${beneficiaryId}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user beneficiary");
-  const { success, beneficiary } = await res.json();  
-  return {success, beneficiary};
-};
-
-const fetchTransfers = async (email) => {
-  const res = await fetch(`/api/getTransfers?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user transfers");
-  const { success, transfers } = await res.json();  
-  return {success, transfers};
+  return { status: response.status, message: response.message, data: response.data };
 };
 
 const deleteBeneficiary = async (beneficiaryDetails) => {
@@ -93,6 +51,41 @@ const makeWithdrawal = async (beneficiaryDetails) => {
   if (!res.ok) throw new Error("Failed to make withdrawal");
   const response = await res.json();
   return { status: response.status, message: response.message, data: response.data };
+};
+
+const fetchUserEarnings = async (email) => {
+  const res = await fetch(`/api/getUserEarnings?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user earnings");
+  const { success, userEarnings } = await res.json();
+  return {success, userEarnings};
+};
+
+const fetchReferralsCount = async (email) => {
+  const res = await fetch(`/api/getReferralsCount?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch referral count");
+  const { success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers } = await res.json();
+  return {success, userPlan, referredUsers, totalReferrals, totalActiveReferrals, users, totalUsers, totalActiveUsers};
+};
+
+const fetchGetBanks = async (country) => {
+  const res = await fetch(`/api/getBanks?country=${encodeURIComponent(country)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch banks");
+  const { status, data } = await res.json();
+  return { status, data };
+};
+
+const fetchBeneficiary = async (email) => {
+  const res = await fetch(`/api/getBeneficiary?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch beneficiary");
+  const { success, userBeneficiary } = await res.json();
+  return { success, userBeneficiary }
+};
+
+const fetchTransfers = async (email) => {
+  const res = await fetch(`/api/getTransfers?email=${encodeURIComponent(email)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user transfers");
+  const { success, transfers } = await res.json();  
+  return {success, transfers};
 };
 
 const page = () => {
@@ -121,22 +114,12 @@ const page = () => {
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
   const {
-    data: userBeneficiaryId,
-    isLoading: userBeneficiaryIdLoading,
-  } = useQuery({
-    queryKey: ["beneficiaryId", user?.email],
-    queryFn: async () => await fetchBeneficiaryId(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
-  const {
     data: userBeneficiary,
     isLoading: userBeneficiaryLoading,
-    refetch: userBeneficiaryRefetch
   } = useQuery({
-    queryKey: ["beneficiary", userBeneficiaryId?.beneficiaryId],
-    queryFn: async () => await fetchBeneficiary(userBeneficiaryId?.beneficiaryId),
-    enabled: !userBeneficiaryIdLoading && !!userBeneficiaryId?.beneficiaryId,
+    queryKey: ["beneficiary", user?.email],
+    queryFn: async () => await fetchBeneficiary(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
   const {
@@ -269,34 +252,46 @@ const page = () => {
   }
   
   const handleAddBankAction = async () => {
-    if (!selectedBank || !accountNumber || !userInfo) return;
+    if (!selectedCountry || !selectedBank || !accountNumber || !userInfo) return;
 
       const selectedBankCode = countryBanks.find((bank) => bank.name === selectedBank)?.code;
       const beneficiaryDetails = JSON.stringify({
         email: userInfo?.email,
         accountNumber,
         accountBank: selectedBankCode,
-        beneficiaryName: userInfo?.name
+        beneficiaryName: userInfo?.name,
+        currency: selectedCountry === "NG" ? "NGN" : "GHS"
       });
       
-      const {status} = await addBeneficiary(beneficiaryDetails);
+      const {status, message} = await addBeneficiary(beneficiaryDetails);
       if (status === "success") {
         setSelectedBank("");
         setAccountNumber("");
-        await queryClient.invalidateQueries("beneficiaryId");
         await queryClient.invalidateQueries("beneficiary");
       }
+
+      setMessage({
+        success: status === "success" ? true : false,
+        messageContent: message
+      });
+  
+      setTimeout(() => {
+        setMessage({
+          success: false,
+          messageContent: ""
+        })
+      }, 5000);
   };
   
   const handleMakeWithdrawal = async () => {
-    if (!userBeneficiaryId?.beneficiaryId || !userInfo || !userBeneficiary) return;
+    if (!userBeneficiary?.userBeneficiary?.beneficiaryId || !userInfo || !userBeneficiary) return;
 
     const beneficiaryDetails = JSON.stringify({
       email: userInfo?.email,
-      currency: "NGN",
-      beneficiaryId: userBeneficiaryId?.beneficiaryId,
-      account_number: userBeneficiary?.beneficiary?.account_number, 
-      account_bank: userBeneficiary?.beneficiary?.bank_code
+      currency: userBeneficiary?.userBeneficiary?.currency,
+      beneficiaryId: userBeneficiary?.userBeneficiary?.beneficiaryId,
+      account_number: userBeneficiary?.userBeneficiary?.accountNumber, 
+      account_bank: userBeneficiary?.userBeneficiary?.bankCode
     });
     
     const {status, message} = await makeWithdrawal(beneficiaryDetails);
@@ -587,10 +582,30 @@ const page = () => {
                 handleChange={setAccountNumber}
                 />
               </div>
-              <div className='w-full'>
-                <DualButton 
-                addBankAction={handleAddBankAction}
-                cancelAction={handleCancelAction}/>
+              <div className="flex flex-col justify-center items-center w-full">
+                <div className={`flex w-fit 
+                min-h-[24px] items-center 
+                justify-center mb-1 
+                ${!message?.messageContent && "invisible"}`}>
+                  <Image 
+                    src={message?.success ? cautionAccentGreen : cautionAccentRed} 
+                    width={24} 
+                    height={24} 
+                    alt="cation icon" 
+                    className="" 
+                    priority
+                    />   
+                  <p className={`l3r ${message?.success 
+                    ? "text-accent-green-300" 
+                    : "text-accent-red-300"}`}>
+                      {message?.messageContent}
+                  </p>
+                </div>             
+                <div className='w-full'>
+                  <DualButton 
+                  addBankAction={handleAddBankAction}
+                  cancelAction={handleCancelAction}/>
+                </div>         
               </div>
             </div>
           )
@@ -619,10 +634,10 @@ const page = () => {
                 </p>
               </div>
               <AccountPill 
-              bankName={userBeneficiary?.beneficiary?.bank_name}
-              accountNumber={userBeneficiary?.beneficiary?.account_number}
+              bankName={userBeneficiary?.userBeneficiary?.bankName}
+              accountNumber={userBeneficiary?.userBeneficiary?.accountNumber}
               setComfirmationPopoverOpen={setComfirmationPopoverOpen}
-              beneficiaryId={userBeneficiaryId?.beneficiaryId}
+              beneficiaryId={userBeneficiary?.userBeneficiary?.beneficiaryId}
               />
               <div className="flex flex-col justify-center items-center w-full">
                 <div className={`flex w-fit 
@@ -869,7 +884,7 @@ const page = () => {
     router.push("/account/profile");
   }
 
-  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryIdLoading ) {
+  if (!userInfo || userEarningsLoading || !userEarnings?.success  || referralCountLoading || !referralCount?.success || userBeneficiaryLoading ) {
     return (
       <div className='w-full h-full 
       flex flex-col justify-center 
@@ -895,7 +910,7 @@ const page = () => {
     );
   }
 
-  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && !userBeneficiaryIdLoading) { 
+  if (userInfo && !userEarningsLoading && userEarnings?.success && !referralCountLoading && referralCount?.success && !userBeneficiaryLoading) { 
     return (
       <div className='w-full h-full flex flex-col justify-center items-center gap-[32px] relative'
       ref={ref}>
@@ -903,7 +918,7 @@ const page = () => {
           <ComfirmationPopoverButton 
           setComfirmationPopoverOpen={setComfirmationPopoverOpen}
           deleteBeneficiary={deleteBeneficiary}
-          beneficiaryId={userBeneficiaryId?.beneficiaryId}
+          beneficiaryId={userBeneficiary?.userBeneficiary?.beneficiaryId}
           email={userInfo?.email}/>
         )}
         <div className='w-[48px] h-[48px] 

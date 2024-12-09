@@ -1,23 +1,22 @@
-import Flutterwave from "flutterwave-node-v3";
 import { NextResponse } from "next/server";
-
-const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
-const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
-
-const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
+import { connectMongoDB } from "@/lib/mongodb";
+import User from "@/models/user";
+import Beneficiary from '@/models/beneficiary';
 
 export const GET = async (request) => {
+  const email = request.nextUrl.searchParams.get("email");
+  
   try {
-    // Parse the query parameters
-    const beneficiaryId = request.nextUrl.searchParams.get("beneficiaryId");
-    
-    // Example fetch action (modify payload if necessary)
-    const response = await flw.Beneficiary.fetch({ id: beneficiaryId }); // Replace with dynamic ID
-    console.log("Fetched beneficiary: ", response);
-    return new NextResponse(JSON.stringify({success: response.status === "success" ? true : false, beneficiary: response.data}), {status: 200} )
-    
+    await connectMongoDB();
+
+    const user = await User.findOne({ email })
+    const userBeneficiary = await Beneficiary.findOne({ userId: user._id });
+
+    return new NextResponse(JSON.stringify({
+      success: userBeneficiary ? true : false, 
+      userBeneficiary
+    }), {status: 200} )
   } catch (error) {
-    console.error("Error in fetching beneficiary API:", error);
-    return new NextResponse(`Error processing request: ${error.message}`, { status: 500 });
+    return new NextResponse("error running beneficiary api." + error, {status: 500} )  
   }
-};
+}

@@ -20,7 +20,6 @@ const ComfirmationPopoverButton = ({
       const {success} = await deleteBeneficiary(beneficiaryDetails);
              
       if (success) {
-        await queryClient.invalidateQueries("beneficiaryId");
         await queryClient.invalidateQueries("beneficiary");
         setComfirmationPopoverOpen(false);
       }

@@ -1,4 +1,4 @@
-import storeBeneficiaryId from "@/actions/storeBeneficiaryId";
+import storeBeneficiary from "@/actions/storeBeneficiary";
 import Flutterwave from "flutterwave-node-v3";
 import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
@@ -15,7 +15,7 @@ export const GET = async (request) => {
     await connectMongoDB();
     // Parse the query parameters
     const beneficiaryDetails = JSON.parse(request.nextUrl.searchParams.get("beneficiaryDetails"));
-    const { email, accountNumber, accountBank, beneficiaryName } = beneficiaryDetails;
+    const { email, accountNumber, accountBank, beneficiaryName, currency } = beneficiaryDetails;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -36,8 +36,14 @@ export const GET = async (request) => {
     };
     const response = await flw.Beneficiary.create(payload);
     if (response.status === "success") {
-      await storeBeneficiaryId(email, response.data.id);
+      const {data: {id, account_number, bank_code, bank_name}} = response;
+      const data = {id, account_number, bank_code, bank_name, currency};
+
+      await storeBeneficiary(email, data);
     }
+
+    console.log(response);
+    
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error("Error in add beneficiary API:", error);
