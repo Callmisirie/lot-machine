@@ -37,7 +37,7 @@ export function CarouselFrame() {
   });
 
   const amount = 200;
-  const getAmount = (duration) => {
+  const getPaymentType = (duration) => {
     const firstPayment = () => {
       if (subscriptions?.success) {
         const numberOfSubscription = subscriptions?.subscriptions?.length;
@@ -54,23 +54,24 @@ export function CarouselFrame() {
     if (duration === "Month") {
       if (userInfo?.referralId) {
         if (firstPayment()) {
-          return amount * 0.5;
+          return {amount: amount * 0.5, paymentPlan: 70900};
         } else {
-          return amount;
+          return {amount: amount, paymentPlan: 70900};
         }
       } else {
-        return amount;
+        return {amount: amount, paymentPlan: 70900};
       }
     }
     if (duration === "Year") {
-      return amount * 10;
+      return {amount: amount * 10, paymentPlan: 70900};
     }
   }
   const config = {
     public_key: TEST_FLUTTERWAVE_PUBLIC_KEY ,
     tx_ref: uniqueId,
-    amount: getAmount(paymentDurationState),
+    amount: getPaymentType(paymentDurationState).amount,
     currency: 'NGN',
+    payment_plan: getPaymentType(paymentDurationState).paymentPlan,
     customer: {
       email: userInfo?.email,
       name: userInfo?.name,
@@ -89,7 +90,9 @@ export function CarouselFrame() {
   const handleFlutterPayment = useFlutterwave(config);
 
   const handlePayment = async (response) => {
-        if (response.status === "completed") {
+        if (response.charge_response_code === "00" && response.status === "completed" ||
+          response.charge_response_code === "00" && response.status === "successful"
+        ) {
           console.log("Payment completed immediately: ", response);
           
           const {customer: {email}, tx_ref: txRef, amount, transaction_id: id} = response;
@@ -105,7 +108,7 @@ export function CarouselFrame() {
         } else {
           console.log("Payment failed");
           // Handle failure case
-        }
+        }     
   }
 
   return (
@@ -137,7 +140,7 @@ export function CarouselFrame() {
               <div className='w-fit h-fit flex flex-col gap-2 items-start'>
                   <div className='w-fit flex items-center gap-2'>
                     <h3 className='h3 text-n-900'>
-                      &#8358;{formatter.format(getAmount(paymentDurationState))} 
+                      &#8358;{formatter.format(getPaymentType(paymentDurationState).amount)} 
                     </h3>
                     <h5 className='h5 text-n-500'>/{paymentDurationState}</h5>
                   </div>

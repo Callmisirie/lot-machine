@@ -83,12 +83,13 @@ export const POST = async (req) => {
         }
       }
 
+      await delay(5000);
+      
       const storedProcessedEvent = await storeProcessedEvent(data());
       if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
         console.log("Duplicate found");
       } else {
         if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
-          await delay(5000);
           const existingEvent = await verify(payload.id);
           
           if (existingEvent.data.id === payload.id) {
