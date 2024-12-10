@@ -38,6 +38,9 @@ const earningSchema = new Schema(
       flw_ref: {
         type: String
       },
+      status: {
+        type: String
+      }
     }]
   },
   { timestamps: true }

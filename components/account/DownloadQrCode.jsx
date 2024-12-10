@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import QRCode from 'qrcode';
 import Image from "next/image";
-import { lmImage, lmLogo } from "@/public";
+import { referralCard, xReferralCard } from "@/public";
 
 
 const DownloadQrCode = ({userInfo}) => {
@@ -45,58 +45,24 @@ const DownloadQrCode = ({userInfo}) => {
 
   if (userInfo && qrCodeSrc) {
     return (
-      <div className="w-fit h-fit">     
+      <div className="w-fit h-fit absolute">     
         <div ref={cardRef} 
-        className='w-[504px] h-[319px] bg-white'>
-          <div className='w-full h-full relative overflow-clip
-          bg-custom-opacity-25 flex p-[32px]
-          justify-between z-20'>
-          <div className='absolute -left-[185px] top-[0px] z-10'>
-            <Image 
-              src={lmImage} 
-              width="auto" 
-              height="auto" 
-              alt='lm bg image'
-              className="w-[370px] h-[264px]"
-              priority
-              />         
-          </div>
-            <div className='flex flex-col 
-            justify-between items-start w-fit h-full'>
-              <div className='flex flex-col w-fit h-fit'>
-                <div className='flex items-end'>
-                  <Image 
-                    src={lmLogo} 
-                    width={48} 
-                    height={48} 
-                    alt='logo'
-                    priority
-                    />
-                    <h3 className='h6 text-n-700'>Lot machine</h3>     
-                </div>
-                <div className='w-[273px] h-[73px]'>
-                  <h6 className='h6 text-n-700'>Enjoy the full 
-                    <span className='h4'>{" "}benefits{" "}</span>
-                    of your trading 
-                    <span className='h4'>{" "}positions.</span></h6>
-                </div>
-              </div>
-              <p className='p1b text-n-900'>lotmachine.com</p>
-            </div>
-              <div className='flex flex-col items-end justify-end gap-1'>
-                <p className='p3b text-n-500 w-[150px] h-fit'>
-                  Scan QR for <span className="p2b"> 50% </span>off first monthly payment.
-                </p>     
-                <Image 
-                  src={qrCodeSrc} 
-                  width={150} 
-                  height={150} 
-                  alt='QR code'
-                  priority
-                  className="border-2 rounded-[8px] border-n-900"
-                  />
-              </div>
-            </div>
+        className='w-[504px] h-[319px] bg-white relative'>
+          <Image 
+            src={xReferralCard} 
+            width={504} 
+            height={319} 
+            alt='Referral card'
+            priority
+            />
+          <Image 
+            src={qrCodeSrc} 
+            width={150} 
+            height={150} 
+            alt='QR code'
+            priority
+            className="border-2 rounded-[8px] border-n-900 absolute bottom-8 right-8"
+            />
         </div>
         <button className="p2b text-n-500 hover:text-n-700 text-center w-full"
         onClick={handleDownload}>

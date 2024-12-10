@@ -71,7 +71,7 @@ const page = () => {
 
   if (userInfo && !subscriptionsLoading) {
     const latestSubscription = () => {
-      if (!subscriptionsLoading && subscriptions.success && subscriptions.subscriptions) {
+      if (!subscriptionsLoading && subscriptions?.success && subscriptions?.subscriptions) {
         const latest = subscriptions?.subscriptions[subscriptions?.subscriptions?.length - 1];
         const subscriptionEndDate = format(new Date(latest?.endDate), 'dd/MM/yyyy');
         const payment_type = latest?.payment_type

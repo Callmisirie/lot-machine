@@ -78,10 +78,10 @@ const FormFrame = ({
             messageContent: "",
           });
         }, 5000);
-    
+        
         return;
       }
-    
+
       const res = await createPartial(
         user?.email,
         selectInstrument,
@@ -97,7 +97,7 @@ const FormFrame = ({
         setPartialTPs([""]);
         queryClient.invalidateQueries("partials"); 
       }
-    
+
       await setMessage({
         success: res.success,
         messageContent: res.message,
@@ -116,14 +116,14 @@ const FormFrame = ({
     if (machineState === "Add instrument") {
       if (!instrument) {
         return;
-      }   
+      } 
       const res = await addInstrument(user?.email, instrument, nickname);
       if (res.success) {
         setInstrument("");
         setNickname("");
         queryClient.invalidateQueries("instruments"); 
       }
-    
+      
       await setMessage({
         success: res.success, 
         messageContent: res.message
