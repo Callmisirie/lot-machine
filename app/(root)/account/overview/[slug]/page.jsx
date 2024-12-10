@@ -45,13 +45,13 @@ const deleteBeneficiary = async (beneficiaryDetails) => {
   return {success, data};
 };
 
-const makeWithdrawal = async (beneficiaryDetails) => {
-  const res = await fetch(`/api/makeWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
+const requestWithdrawal = async (beneficiaryDetails) => {
+  const res = await fetch(`/api/requestWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to make withdrawal");
-  const response = await res.json();
-  return { status: response.status, message: response.message, data: response.data };
+  if (!res.ok) throw new Error("Failed to request withdrawal");
+  const {success, message} = await res.json();
+  return { success, message };
 };
 
 const fetchUserEarnings = async (email) => {
@@ -285,7 +285,7 @@ const page = () => {
       }, 5000);
   };
   
-  const handleMakeWithdrawal = async () => {
+  const handleRequestWithdrawal = async () => {
     if (!userBeneficiary?.userBeneficiary?.beneficiaryId || !userInfo || !userBeneficiary) return;
 
     const beneficiaryDetails = JSON.stringify({
@@ -296,14 +296,14 @@ const page = () => {
       account_bank: userBeneficiary?.userBeneficiary?.bankCode
     });
     
-    const {status, message} = await makeWithdrawal(beneficiaryDetails);
-    if (status === "success") {
+    const {success, message} = await requestWithdrawal(beneficiaryDetails);
+    if (success) {
       await queryClient.invalidateQueries("userEarnings");
       await queryClient.invalidateQueries("transfers");
     }
 
     setMessage({
-      success: status === "success" ? true : false,
+      success: success ? true : false,
       messageContent: message
     });
 
@@ -599,7 +599,7 @@ const page = () => {
               <div className="flex flex-col justify-center items-center w-full">
                 <div className={`flex w-fit 
                 min-h-[24px] items-center 
-                justify-center mb-1 
+                justify-center mb-1 gap-1
                 ${!message?.messageContent && "invisible"}`}>
                   <Image 
                     src={message?.success ? cautionAccentGreen : cautionAccentRed} 
@@ -656,7 +656,7 @@ const page = () => {
               <div className="flex flex-col justify-center items-center w-full">
                 <div className={`flex w-fit 
                 min-h-[24px] items-center 
-                justify-center mb-1 
+                justify-center mb-1 gap-1
                 ${!message?.messageContent && "invisible"}`}>
                   <Image 
                     src={message?.success ? cautionAccentGreen : cautionAccentRed} 
@@ -673,7 +673,7 @@ const page = () => {
                   </p>
                 </div>             
                 <Button 
-                makeWithdrawalAction={handleMakeWithdrawal}
+                requestWithdrawalAction={handleRequestWithdrawal}
                 label={"Request withdrawal"}
                 />           
               </div>

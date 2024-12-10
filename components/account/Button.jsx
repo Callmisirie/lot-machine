@@ -2,7 +2,7 @@ import { bankWhite } from '@/public/icons/white';
 import Image from 'next/image';
 import React from 'react'
 
-const Button = ({label, makeWithdrawalAction}) => {
+const Button = ({label, requestWithdrawalAction}) => {
   return (
     <div
     className={`flex items-center 
@@ -10,8 +10,8 @@ const Button = ({label, makeWithdrawalAction}) => {
       w-full h-[48px] cursor-pointer 
       rounded-[16px] shadow-md gap-2`}
       onClick={async() => {
-        if (makeWithdrawalAction) {
-          await makeWithdrawalAction();
+        if (requestWithdrawalAction) {
+          await requestWithdrawalAction();
         }
       }}>
         <p className='text-n-100 l1b'>

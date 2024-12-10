@@ -7,6 +7,7 @@ import Earning from "@/models/earning";
 import { v4 as uuidv4 } from 'uuid';
 import { outEarnings } from "@/actions/earnings";
 import storeProcessedEvent from "@/actions/StoreProcessedEvent";
+import BulkWithdrawal from "@/models/bulkWithdrawal";
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
@@ -34,33 +35,33 @@ export const GET = async (request) => {
 
     if (!user) {
       console.log("User does not exist");
-      response = {status: "failed", message:"User does not exist" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      response = {success: "failed", message:"User does not exist" }
+      return new NextResponse(JSON.stringify({success: false, message:"User does not exist"}), { status: 200 });
     }
     if (!userBeneficiary) {
       console.log("User beneficiary does not exist");
-      response = {status: "failed", message:"User does not exist" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      response = {success: "failed", message:"User does not exist" }
+      return new NextResponse(JSON.stringify({success: false, message:"User does not exist"}), { status: 200 });
     }
     if (!userEarning) {
       console.log("User earnings does not exist");
-      response = {status: "failed", message:"User earnings does not exist" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      response = {success: "failed", message:"User earnings does not exist" }
+      return new NextResponse(JSON.stringify({success: false, message:"User earnings does not exist"}), { status: 200 });
     }
     if (beneficiaryId !== userBeneficiary?.beneficiaryId){
       console.log("Beneficiary id doesn't match");
-      response = {status: "failed", message:"Beneficiary id doesn't match" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      response = {success: "failed", message:"Beneficiary id doesn't match" }
+      return new NextResponse(JSON.stringify({success: false, message:"Beneficiary id doesn't match"}), { status: 200 });
     }
     if (!userEarning?.balance){
       console.log("Your balance is empty");
-      response = {status: "failed", message:"Your balance is empty" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      response = {statusuccess: "failed", message:"Your balance is empty" }
+      return new NextResponse(JSON.stringify({success: false, message:"Your balance is empty"}), { status: 200 });
     }
     if (currentMonthOutEarnings) {
-      console.log("Only one withdraw can be made a month");
-      response = {status: "failed", message:"Only one withdraw can be made a month" }
-      return new NextResponse(JSON.stringify(response), { status: 200 });
+      console.log("One withdrawal per month");
+      response = {success: "failed", message:"One withdrawal per month" }
+      return new NextResponse(JSON.stringify({success: false, message:"One withdrawal per month"}), { status: 200 });
     }
 
     // const payload = {
@@ -76,7 +77,7 @@ export const GET = async (request) => {
     // };
     // const data = {customer: {email}, flwRef: uniqueId};
 
-    const flwRef = "dfs23fhr7ntg0293121_PMCKDU_1"
+    const flwRef = "dfs23fhr7ntg0293148_PMCKDU_1";
     const data = {customer: {email}, flwRef};
     const payload = {
       account_bank,
@@ -95,16 +96,36 @@ export const GET = async (request) => {
       console.log("Duplicate found");
       return new NextResponse("Duplicate found", { status: 401 });
     } else {
-      response = await flw.Transfer.initiate(payload);
-      if (response?.status === "success") {
-        outEarnings(email, response?.data);
+      const bulkWithdrawal = await BulkWithdrawal.findOne();
+      
+      if(!bulkWithdrawal) {
+        await BulkWithdrawal.create({
+          bulkWithdrawals: [{
+            account_bank, account_number,
+            amount: userEarning.balance, 
+            currency, reference: flwRef,
+            debit_currency: "NGN", email
+          }]
+        })
+      } else {
+        bulkWithdrawal.bulkWithdrawals.push({
+          account_bank, account_number,
+          amount: userEarning.balance, 
+          currency, reference: flwRef,
+          debit_currency: "NGN", email
+        })
       }
+
+      bulkWithdrawal.save();
+      // const data = {amount: userEarning.balance, reference: uniqueId}
+      const data = {amount: userEarning.balance, reference: flwRef}
+      await outEarnings(email, data);
     }
       
-    console.log("Withdrawal: ", response);
-    return NextResponse.json(response, { status: 200 });
+    console.log("Your withdrawal request has be made");
+    return NextResponse.json({success: true, message: "Your withdrawal request has be made"}, { status: 200 });
   } catch (error) {
-    console.error("Error in withdrawal API:", error);
-    return new NextResponse(`Error processing request: ${error.message}`, { status: 500 });
+    console.error("Error in withdrawal request:", error);
+    return new NextResponse({success: true, message: "Your withdrawal request failed"}, { status: 500 });
   }
 };
