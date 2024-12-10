@@ -17,11 +17,13 @@ const Sidebar = () => {
     if (!userInfo) {
       return (
         <div className={`w-full h-full 
-        flex flex-col justify-start 
-        items-start gap-[58px] py-[32px]`}>
+        flex md:flex-col gap-[58px] py-[32px] 
+         max-md:py-4 max-md:h-fit
+        transition-all duration-300`}>
           {Array.from({length: 4}).map((_, index) => (
             <Skeleton key={index}
-            className="w-full h-[36px] rounded-[8px] bg-n-300/25" />
+            className="w-full h-[36px] rounded-[8px] 
+            max-md:h-[24px] max-md:rounded-[4px] bg-n-300/25" />
           ))}
       </div>
       );
@@ -29,30 +31,33 @@ const Sidebar = () => {
 
     if (userInfo ) {
       return (
-        <div className={`w-full h-fit flex flex-col gap-[58px] py-[32px]`}>
-        <Link href={"/account/profile"}>
-          <h4 className={`h4 ${pathname === "/account/profile" ? "text-n-700" : "text-n-500"}`}>
-            Profile
-          </h4>
-        </Link>
-        {userInfo.plan !== "Master" && (
-          <Link href={"/account/plans"}>
-            <h4 className={`h4 ${pathname === "/account/plans" ? "text-n-700" : "text-n-500"}`}>
-              Plans
+        <div className={`w-full h-fit 
+        flex md:flex-col md:gap-[58px] py-[32px] 
+        max-md:py-4 max-md:h-fit max-md:justify-between
+        transition-all duration-300`}>
+          <Link href={"/account/profile"}>
+            <h4 className={`h4r2 ${pathname === "/account/profile" ? "text-n-700" : "text-n-500"}`}>
+              Profile
             </h4>
           </Link>
-        )}
-        <Link href={`/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}`}>
-          <h4 className={`h4 ${pathname === `/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}` ? "text-n-700" : "text-n-500"}`}>
-            {userInfo.plan === "Master" ? "Manager" : "Referral"}
-          </h4>
-        </Link>
-        <Link href={"/account/how-it-works"}>
-          <h4 className={`h4 ${pathname === "/account/how-it-works" ? "text-n-700" : "text-n-500"}`}>
-            How it works
-          </h4>
-        </Link>
-      </div>
+          {userInfo.plan !== "Master" && (
+            <Link href={"/account/plans"}>
+              <h4 className={`h4r2 ${pathname === "/account/plans" ? "text-n-700" : "text-n-500"}`}>
+                Plans
+              </h4>
+            </Link>
+          )}
+          <Link href={`/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}`}>
+            <h4 className={`h4r2 ${pathname === `/account/overview/${userInfo.plan === "Master" ? "manager" : "referral"}` ? "text-n-700" : "text-n-500"}`}>
+              {userInfo.plan === "Master" ? "Manager" : "Referral"}
+            </h4>
+          </Link>
+          <Link href={"/account/how-it-works"}>
+            <h4 className={`h4r2 ${pathname === "/account/how-it-works" ? "text-n-700" : "text-n-500"}`}>
+              How it works
+            </h4>
+          </Link>
+        </div>
       );
     }
   }
@@ -60,9 +65,12 @@ const Sidebar = () => {
   return (
     <div
     className="h-full w-[300px] 
-    bg-white rounded-tr-[32px]
-    border border-n-300 border-r-[1px] 
-    border-t-[1px] px-[32px]"
+    max-md:h-fit max-md:w-full
+    bg-white md:rounded-tr-[32px]
+    border-n-300 md:border-r-[1px] 
+    max-md:border-b-[1px]
+    md:border-t-[1px] px-[32px] 
+    transition-all duration-300"
     >
      {sidebarContent()}
     </div>

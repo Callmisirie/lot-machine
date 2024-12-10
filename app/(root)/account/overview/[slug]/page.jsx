@@ -149,6 +149,7 @@ const page = () => {
   const [accountNumber, setAccountNumber] = useState("");
   const { ref, height } = useResizeObserver();  
   const [comfirmationPopoverOpen, setComfirmationPopoverOpen] = useState(false);
+  const [showReferralCard, setShowReferralCard] = useState(false);
   const [message, setMessage] = useState({
     success: false,
     messageContent: ""
@@ -401,8 +402,17 @@ const page = () => {
                   </p>
                 </div>
               </div>
-              {/* <DownloadQrCode 
-              userInfo={userInfo}/> */}
+              <div className='flex w-fit h-fit mb-4'>
+                {showReferralCard && (
+                  <DownloadQrCode 
+                  setShowReferralCard={setShowReferralCard}
+                  userInfo={userInfo}/>
+                )}
+                <button className="l3b text-n-500 hover:text-n-700 text-center w-fit"
+                onClick={() => setShowReferralCard(true)}>
+                  Show referral card
+                </button>
+              </div>
               <div className='flex justify-between items-end'>
                 <div className='flex w-fit h-fit 
                 flex-col items-start'>
@@ -934,7 +944,7 @@ const page = () => {
         bg-n-900 cursor-pointer rounded-full
         flex justify-center items-center absolute 
         left-8 top-8 max-md:left-4 max-md:top-2 
-        transition-all duration-300'>
+        transition-all duration-300 z-20'>
           <Link href={"/"}>
             <Image
               src={homeWhite}

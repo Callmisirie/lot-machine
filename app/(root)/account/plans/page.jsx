@@ -101,7 +101,7 @@ const page = () => {
         bg-n-900 cursor-pointer rounded-full
         flex justify-center items-center absolute 
         left-8 top-8 max-md:left-4 max-md:top-2 
-        transition-all duration-300'>
+        transition-all duration-300 z-20'>
           <Link href={"/"}>
             <Image
               src={homeWhite}

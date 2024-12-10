@@ -40,7 +40,7 @@ const Navbar = () => {
               bg-n-900 shadow-md max-md:h-[32px]
               max-md:w-[98px] max-md:rounded-tl-[16px] 
               max-md:rounded-bl-[16px] transition-all duration-100'>
-                <p className='l3b text-n-100'>
+                <p className='l3b2 text-n-100'>
                   Get pro plan
                 </p>     
               </div>

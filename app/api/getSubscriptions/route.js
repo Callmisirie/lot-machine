@@ -11,6 +11,14 @@ export const GET = async (request) => {
 
     const user = await User.findOne({ email })
     const userSubscriptions = await Subscription.findOne({ userId: user._id });
+
+    if (!userSubscriptions) { 
+      return new NextResponse(JSON.stringify({
+        success: true, 
+        message: "User subscription does not exists"
+      }), {status: 200} )
+    }
+
     const {subscriptions, paymentPlanId} = userSubscriptions;
     return new NextResponse(JSON.stringify({
       success: true, 

@@ -34,6 +34,11 @@
   @apply font-poppins font-semibold text-[24px] leading-[150%]
 }
 
+.h4r2 {
+  @apply font-poppins font-semibold text-[24px] leading-[150%] 
+  max-md:font-montserrat max-md:text-[16px] max-md:leading-[125%]
+}
+
 .h5 {
   @apply font-poppins font-semibold text-[18px] leading-[150%]
 }
@@ -91,12 +96,11 @@
   @apply font-poppins font-normal text-[12px] leading-[150%]
 }
 
-.l3br {
-  @apply font-poppins font-semibold text-[12px] leading-[150%] 
-  lg:font-montserrat lg:font-normal lg:text-[4px] lg:leading-[125%] 
-  transition-all duration-300
-
+.l3b2 {
+  @apply font-poppins font-semibold text-[12px] leading-[150%]
+  max-md:font-normal max-md:text-[12px] max-md:leading-[125%]
 }
+
 
 /* Prevent text selection */
 .no-select {
