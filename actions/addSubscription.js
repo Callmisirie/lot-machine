@@ -28,6 +28,8 @@ const addSubscription = async (response) => {
     const res = await verify(response.id);
     const {data: {payment_type, meta: {duration}}} = res;
   
+    console.log("Data of the payment, check if subs has meta: ", res);
+    
     const planDetails = () => {
       let endDate = new Date(); // Current date
       if (duration === "Month") {

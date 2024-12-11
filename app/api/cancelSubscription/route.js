@@ -35,19 +35,16 @@ export const GET = async (request) => {
     }
     
     if (getSubsciptionResponse.status === "success") {
-      getSubsciptionResponse = getSubsciptionResponse.data.filter((subscription) => {
-        return subscription.status === "active"
-      });
-
-      getSubsciptionResponse.map(async(subscription) => {
-        const payload={
-          id: subscription.id
-        }
-        const cancelSubscriptionResponse = await flw.Subscription.cancel(payload);
-        
-        console.log(cancelSubscriptionResponse);
-        return response = cancelSubscriptionResponse;
-      })
+      await Promise.all(
+        getSubsciptionResponse.data
+          .filter((subscription) => subscription.status === "active")
+          .map(async (subscription) => {
+            const payload = { id: subscription.id };
+            const cancelSubscriptionResponse = await flw.Subscription.cancel(payload);
+            console.log(cancelSubscriptionResponse);
+            return cancelSubscriptionResponse;
+          })
+      );      
     }
 
     userSubscriptions.paymentPlanId = 0;

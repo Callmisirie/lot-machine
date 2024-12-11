@@ -63,7 +63,7 @@ export function CarouselFrame() {
       }
     }
     if (duration === "Year") {
-      return {amount: amount * 10, paymentPlan: 70900};
+      return {amount: amount * 10, paymentPlan: 70901};
     }
   }
   const config = {
@@ -77,7 +77,10 @@ export function CarouselFrame() {
       name: userInfo?.name,
       phone_number: '***********',
     }, 
-    meta: { duration: paymentDurationState },
+    meta: { 
+      duration: paymentDurationState,
+      initialPayment: true
+    },
     customizations: {
       title: 'Lot Machine',
       description: paymentDurationState === "Month" 
