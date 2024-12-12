@@ -12,10 +12,12 @@ const createCustomTemplate = async (email, customValue) => {
     if (user) {
       const userCustomTemplete = await CustomTemplate.findOne({userId: user._id});
 
-      if (!userCustomTemplete) {
+      if (!userCustomTemplete && user.plan !== "Free") {
         await CustomTemplate.create({userId: user._id, customValue});
         console.log("Successfully created custom template");
-        return true;
+        return { success: true, message: "Successfully created custom template"};;
+      } else {
+        return { success: false, message: "Can't create custom template on free plan" };
       }
 
     } else {

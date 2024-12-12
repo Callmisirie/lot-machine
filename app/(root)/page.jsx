@@ -125,6 +125,7 @@ export default function Home() {
               setPartialTPs={setPartialTPs}
               message={message}
               setMessage={setMessage}
+              userInfo={userInfo}
             />
           </CardFrame>
         )

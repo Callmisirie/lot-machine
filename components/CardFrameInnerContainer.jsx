@@ -24,7 +24,7 @@ const CardFrameInnerContainer = ({
   setSelectInstrument, setSelectedInstrumentId,
   setComfirmationPopoverState, setComfirmationPopoverOpen,
   partialTPs, setPartialTPs,
-  message, setMessage
+  message, setMessage, userInfo
 }) => {
   const {isAuthenticated, user} = useKindeBrowserClient();
 
@@ -46,6 +46,7 @@ const CardFrameInnerContainer = ({
         setServerUpdate={setServerUpdate}
         setMessage={setMessage}
         message={message}
+        userInfo={userInfo}
       >
         <div className="pb-4 flex flex-col justify-center items-center gap-1 w-full absolute bottom-0">
           {message?.messageContent && 
@@ -124,6 +125,7 @@ const CardFrameInnerContainer = ({
           partialTPs={partialTPs}
           setPartialTPs={setPartialTPs}
           setMessage={setMessage}
+          userInfo={userInfo}
         >
           <div className="pb-4 flex flex-col justify-center items-center gap-1 w-full absolute bottom-0">
             {message?.messageContent && 

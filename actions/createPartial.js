@@ -31,6 +31,12 @@ const createPartial = async (email, instrument, lotSize, finalTP, partialTPs) =>
         });
         console.log("Partial list created");
       } else {
+        if (user.plan === "Free" && userPartials.partials?.length >= 3) {
+          return { success: false, message: "Partial slots are filled up" };
+        } 
+        if (user.plan !== "Free" && userPartials.partials?.length >= 12) {
+          return { success: false, message: "Partial slots are filled up" };
+        }   
         // Add the new instrument to the existing list
         userPartials.partials.push({ instrument, nickname, lotSize, finalTP, partialTPs });
         await userPartials.save(); // Save changes to the database

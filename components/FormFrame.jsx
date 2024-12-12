@@ -19,7 +19,7 @@ const FormFrame = ({
   setSelectInstrument, partialTPs, 
   setPartialTPs, setComfirmationPopoverState,
   setComfirmationPopoverOpen,
-  setMessage
+  setMessage, userInfo
 }) => {
   const [lotSize, setLotSize] = useState("");
   const [finalTP, setFinalTP] = useState("");
@@ -216,10 +216,10 @@ const FormFrame = ({
                 small
               />
             ))}
-            {partialTPs?.length < 4 ? (
+            {partialTPs?.length < (userInfo.plan !== "Free" ? 4 : 2) ? (
               <div
                 className={`${
-                  partialTPs.length < 4
+                  partialTPs.length < (userInfo.plan !== "Free" ? 4 : 2)
                     ? "cursor-pointer"
                     : " cursor-not-allowed"
                 } w-full h-[32px] flex justify-center items-center`}

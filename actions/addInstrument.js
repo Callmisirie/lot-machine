@@ -22,6 +22,12 @@ const addInstrument = async (email, instrument, nickname) => {
         });
         console.log("Instrument list created");
       } else {
+        if (user.plan === "Free" && userInstruments.instruments?.length >= 3) {
+          return { success: false, message: "Instrument slots are filled up" };
+        } 
+        if (user.plan !== "Free" && userInstruments.instruments?.length >= 6) {
+          return { success: false, message: "Instrument slots are filled up" };
+        }   
         // Add the new instrument to the existing list
         userInstruments.instruments.push({ instrument, nickname });
         await userInstruments.save(); // Save changes to the database
