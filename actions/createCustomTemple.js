@@ -14,19 +14,19 @@ const createCustomTemplate = async (email, customValue) => {
 
       if (!userCustomTemplete && user.plan !== "Free") {
         await CustomTemplate.create({userId: user._id, customValue});
-        console.log("Successfully created custom template");
-        return { success: true, message: "Successfully created custom template"};;
+        console.log("Created Successfully");
+        return { success: true, message: "Created Successfully"};;
       } else {
-        return { success: false, message: "Can't create custom template on free plan" };
+        return { success: false, message: "Free plan, can't create" };
       }
 
     } else {
       console.log("User does not exists");
-      return false; 
+      return { success: false, message: "User does not exists" };
     }   
   } catch (error) {
     console.log("Failed to create custom template: ", error);
-    return false;
+    return { success: false, message: "Error, failed to create" };
   }
 };
 

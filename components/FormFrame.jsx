@@ -19,7 +19,7 @@ const FormFrame = ({
   setSelectInstrument, partialTPs, 
   setPartialTPs, setComfirmationPopoverState,
   setComfirmationPopoverOpen,
-  setMessage, userInfo
+  setMessage, userInfo, setCustomTemplateMessage
 }) => {
   const [lotSize, setLotSize] = useState("");
   const [finalTP, setFinalTP] = useState("");
@@ -148,6 +148,19 @@ const FormFrame = ({
         setCustomTemplate("");
         queryClient.invalidateQueries("userCustomTemplate"); 
       }
+
+      await setCustomTemplateMessage({
+        success: res.success,
+        messageContent: res.message,
+      });
+    
+      setTimeout(() => {
+        setCustomTemplateMessage({
+          success: false,
+          messageContent: "",
+        });
+      }, 5000);
+      
       setServerUpdate(!serverUpdate);
     }
   } 

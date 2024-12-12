@@ -7,9 +7,9 @@ const DualButton = ({
 }) => {
   return (
     <div className="flex px-2 
-    py-4 gap-4 w-full 
+    pt-4 max-md:pt-2 gap-4 w-full 
     justify-center items-center 
-    relative top-[88px] max-md:top-[20px]">
+    ">
       <div
       className={`flex items-center 
       justify-center bg-white w-[124px] 

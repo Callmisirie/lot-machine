@@ -12,6 +12,7 @@ import { cancelBlack, deleteIconBlack } from "@/public/icons/black";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import { ScrollBar } from "./ui/scroll-area";
+import { cautionAccentGreen, cautionAccentRed } from "@/public/icons/accent";
 
 const ChartFrameInnerContainer = ({
   chartState, partials, 
@@ -25,6 +26,10 @@ const ChartFrameInnerContainer = ({
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
   const {isAuthenticated, user} = useKindeBrowserClient();
+  const [customTemplateMessage, setCustomTemplateMessage] = useState({
+    success: false,
+    messageContent: ""
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -48,19 +53,42 @@ const ChartFrameInnerContainer = ({
   if (chartState === "Template") {
     return (
       !userCustomTemplate ? 
-        <div className="flex flex-col justify-start items-center w-full h-full">
+        <div className="flex flex-col justify-between items-center w-full h-full">
           <FormFrame
             chartState={chartState}
             customTemplate={customTemplate}
             setCustomTemplate={setCustomTemplate}
             serverUpdate={serverUpdate}
             setServerUpdate={setServerUpdate}
+            setCustomTemplateMessage={setCustomTemplateMessage}
           >
+          <div className="flex flex-col 
+          justify-center items-center w-full h-fit 
+          relative bottom-[-41px] max-md:bottom-[0px]">
+            <div className={`flex w-fit 
+              min-h-[24px] items-center 
+              justify-center mb-1 gap-1
+              ${!customTemplateMessage?.messageContent && "invisible"}`}>
+              <Image 
+                src={customTemplateMessage?.success ? cautionAccentGreen : cautionAccentRed} 
+                width={24} 
+                height={24} 
+                alt="cation icon" 
+                className="" 
+                priority
+                />   
+              <p className={`l3r ${customTemplateMessage?.success 
+                ? "text-accent-green-300" 
+                : "text-accent-red-300"}`}>
+                  {customTemplateMessage?.messageContent}
+              </p>
+            </div>
             <DualButton 
               leftLabel={"Cancel"}
               rightlabel={"Save"}
               valueReset={setCustomTemplate}
-            />
+            />            
+          </div>
           </FormFrame>
         </div>
         
