@@ -16,7 +16,7 @@ import ComfirmationPopoverButton from "@/components/ComfirmationPopoverButton";
 import Image from "next/image";
 import { boltWhite, cancelWhite } from "@/public/icons/white";
 import Button from "@/components/Button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import useResizeObserver from "use-resize-observer";
 
@@ -50,6 +50,8 @@ export default function Home() {
   const [userCustomTemplateId, setUserCustomTemplateId] = useState("")
   const [partialTPs, setPartialTPs] = useState([""]);
   const [subIsWrapped, setSubIsWrapped] = useState(false);
+  const queryClient = useQueryClient();
+  const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
   const [message, setMessage] = useState({
     success: false,
     messageContent: ""
@@ -85,7 +87,7 @@ export default function Home() {
     }
   }, []);
 
-  if (isLoading || partialsLoading) {
+  if (isLoading || partialsLoading || !userInfo) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -101,7 +103,7 @@ export default function Home() {
     redirect(paths.auth());
   }
 
-  if (isAuthenticated && !partialsLoading && partials) {
+  if (isAuthenticated && !partialsLoading && partials && userInfo) {
     const machine = () => {
       if (subIsWrapped && machinePopoverOpen || !subIsWrapped && !machinePopoverOpen) {
         return (
@@ -247,6 +249,7 @@ export default function Home() {
                     setComfirmationPopoverOpen={setComfirmationPopoverOpen}
                     setUserCustomTemplateId={setUserCustomTemplateId}
                     userCustomTemplate={userCustomTemplate}
+                    userInfo={userInfo}
                   />
                 </ChartCardFrame>
               </div>

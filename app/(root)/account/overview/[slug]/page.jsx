@@ -28,6 +28,7 @@ import crypto from "crypto";
 import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverButton'
 import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
 import { TooltipFrame } from '@/components/TooltipFrame'
+import { caution } from '@/public/icons'
 
 const addBeneficiary = async (beneficiaryDetails) => {
   const res = await fetch(`/api/addBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
@@ -45,11 +46,11 @@ const deleteBeneficiary = async (beneficiaryDetails) => {
   return {success, data};
 };
 
-const requestWithdrawal = async (beneficiaryDetails) => {
-  const res = await fetch(`/api/requestWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
+const makeWithdrawal = async (beneficiaryDetails) => {
+  const res = await fetch(`/api/makeWithdrawal?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to request withdrawal");
+  if (!res.ok) throw new Error("Failed to make withdrawal");
   const {success, message} = await res.json();
   return { success, message };
 };
@@ -147,13 +148,14 @@ const page = () => {
   const [countryBanks, setCountryBanks] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [amount, setAmount] = useState("");
   const { ref, height } = useResizeObserver();  
   const [comfirmationPopoverOpen, setComfirmationPopoverOpen] = useState(false);
   const [showReferralCard, setShowReferralCard] = useState(false);
   const [message, setMessage] = useState({
     success: false,
     messageContent: ""
-  })
+  });
 
   const currentYear = new Date().getFullYear(); // Get current year
   const currentMonth = new Date().getMonth() + 1; // Get current month (0-indexed)
@@ -285,28 +287,43 @@ const page = () => {
       }, 5000);
   };
   
-  const handleRequestWithdrawal = async () => {
+  const handleMakeWithdrawal = async () => {
     if (!userBeneficiary?.userBeneficiary?.beneficiaryId || !userInfo || !userBeneficiary) return;
+
+    if(!amount) {
+      setMessage({
+        success: false,
+        messageContent: "No withdrawal amount was set"
+      });
+      setTimeout(() => {
+        setMessage({
+          success: false,
+          messageContent: ""
+        })
+      }, 5000);
+      return
+    }
 
     const beneficiaryDetails = JSON.stringify({
       email: userInfo?.email,
       currency: userBeneficiary?.userBeneficiary?.currency,
       beneficiaryId: userBeneficiary?.userBeneficiary?.beneficiaryId,
       account_number: userBeneficiary?.userBeneficiary?.accountNumber, 
-      account_bank: userBeneficiary?.userBeneficiary?.bankCode
+      account_bank: userBeneficiary?.userBeneficiary?.bankCode,
+      amount
     });
     
-    const {success, message} = await requestWithdrawal(beneficiaryDetails);
+    const {success, message} = await makeWithdrawal(beneficiaryDetails);
     if (success) {
       await queryClient.invalidateQueries("userEarnings");
       await queryClient.invalidateQueries("transfers");
     }
 
+    setAmount("");
     setMessage({
       success: success ? true : false,
       messageContent: message
     });
-
     setTimeout(() => {
       setMessage({
         success: false,
@@ -653,30 +670,55 @@ const page = () => {
               setComfirmationPopoverOpen={setComfirmationPopoverOpen}
               beneficiaryId={userBeneficiary?.userBeneficiary?.beneficiaryId}
               />
-              <div className="flex flex-col justify-center items-center w-full">
+              {userInfo.plan === "Master" && userInfo?.adminKey === secretHash ? (
+                <div className="flex flex-col justify-center items-center w-full">
+                  <Input 
+                  label={"Amount"}
+                  type={"number"}
+                  name={"Amount"}
+                  value={amount}
+                  handleChange={setAmount}
+                  />
+                  <div className={`flex w-fit 
+                  min-h-[24px] items-center 
+                  justify-center mt-2 mb-1 gap-1
+                  ${!message?.messageContent && "invisible"}`}>
+                    <Image 
+                      src={message?.success ? cautionAccentGreen : cautionAccentRed} 
+                      width={24} 
+                      height={24} 
+                      alt="cation icon" 
+                      className="" 
+                      priority
+                      />   
+                    <p className={`l3r ${message?.success 
+                      ? "text-accent-green-300" 
+                      : "text-accent-red-300"}`}>
+                        {message?.messageContent}
+                    </p>
+                  </div>  
+                  <Button 
+                  makeWithdrawalAction={handleMakeWithdrawal}
+                  label={"Withdraw"}
+                  />           
+                </div>)
+              : (
                 <div className={`flex w-fit 
-                min-h-[24px] items-center 
-                justify-center mb-1 gap-1
-                ${!message?.messageContent && "invisible"}`}>
-                  <Image 
-                    src={message?.success ? cautionAccentGreen : cautionAccentRed} 
-                    width={24} 
-                    height={24} 
-                    alt="cation icon" 
-                    className="" 
-                    priority
-                    />   
-                  <p className={`l3r ${message?.success 
-                    ? "text-accent-green-300" 
-                    : "text-accent-red-300"}`}>
-                      {message?.messageContent}
-                  </p>
-                </div>             
-                <Button 
-                requestWithdrawalAction={handleRequestWithdrawal}
-                label={"Request withdrawal"}
-                />           
-              </div>
+                  min-h-[24px] items-center 
+                  justify-center mb-1 gap-1`}>
+                    <Image 
+                      src={caution} 
+                      width={24} 
+                      height={24} 
+                      alt="cation icon" 
+                      className="" 
+                      priority
+                      />   
+                    <p className={`p3r text-n-300}`}>
+                      Auto payouts are made on the 1st.
+                    </p>
+                  </div>   
+              )}          
             </div>
           )
         }
@@ -711,13 +753,14 @@ const page = () => {
                 flex flex-col items-start'>
                   <div className='w-fit h-fit flex items-center'>
                     <h4 className='h4 text-n-700'>{currentYear}</h4>
-                    <Image
+                    {/* Add year selection in future if wanted */}
+                    {/* <Image
                       src={dropArrowBlack}
                       width={24}
                       height={24}
                       alt='drop arrow icon'
                       priority
-                    />
+                    /> */}
                   </div>
                   <div className='w-fit h-fit gap-[32px] flex'>
                     <div className='w-fit h-fit gap-2 flex items-center'>

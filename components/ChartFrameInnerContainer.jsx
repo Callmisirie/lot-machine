@@ -20,7 +20,7 @@ const ChartFrameInnerContainer = ({
   setTemplateState, selectedPartialTPIndex, 
   setSelectedPartialTPIndex, setComfirmationPopoverOpen,
   setComfirmationPopoverState, setUserCustomTemplateId, 
-  userCustomTemplate
+  userCustomTemplate, userInfo
 }) => {
   const [selectedPartialTPs, setSelectedPartialTPs] = useState([]);
   const [customTemplate, setCustomTemplate] = useState("");
@@ -78,6 +78,7 @@ const ChartFrameInnerContainer = ({
             setComfirmationPopoverOpen={setComfirmationPopoverOpen}
             setComfirmationPopoverState={setComfirmationPopoverState}
             setUserCustomTemplateId={setUserCustomTemplateId}
+            userInfo={userInfo}
           />
         </div>
     )
@@ -105,6 +106,7 @@ const ChartFrameInnerContainer = ({
                 blackPill
                 partialTP={partialTP}
                 copy
+                userInfo={userInfo}
               />
             </div>
           </div>
