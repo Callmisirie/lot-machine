@@ -25,9 +25,7 @@ const verify = async (transaction_id) => {
 
 const addSubscription = async (response) => {
   try {
-    const res = await verify(response.id);
-    console.log(res);
-    
+    const res = await verify(response.id);    
     const {data: {payment_type, meta: {duration}}} = res;
     
     const planDetails = () => {

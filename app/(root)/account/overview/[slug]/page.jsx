@@ -29,6 +29,7 @@ import ComfirmationPopoverButton from '@/components/account/ComfirmationPopoverB
 import { cautionAccentGreen, cautionAccentRed } from '@/public/icons/accent'
 import { TooltipFrame } from '@/components/TooltipFrame'
 import { caution } from '@/public/icons'
+import { splitValue } from '@/common/splitValue'
 
 const addBeneficiary = async (beneficiaryDetails) => {
   const res = await fetch(`/api/addBeneficiary?beneficiaryDetails=${encodeURIComponent(beneficiaryDetails)}`, {
@@ -141,6 +142,7 @@ const page = () => {
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
   const [isWithdrawalDetails, setIsWithdrawalDetails] = useState(false)
+  const [selectedTransferId, setSelectedTransferId] = useState("")
   const [selectedBank, setSelectedBank] = useState("")
   const formatter = new Intl.NumberFormat('en-US', {
     notation: "compact",
@@ -722,7 +724,7 @@ const page = () => {
                       className="" 
                       priority
                       />   
-                    <p className={`p3r text-n-300}`}>
+                    <p className={`p3r text-n-700`}>
                       Auto payouts are made on the 1st.
                     </p>
                   </div>   
@@ -792,7 +794,9 @@ const page = () => {
                 <ScrollAreaFrame
                 mainClass={`w-full h-[242px]`}
                 innerClass={`w-full h-full flex flex-col gap-4`}>
-                  {userTransfers?.transfers?.map((transfer) => {
+                  {userTransfers?.transfers?.filter((transfer) => {
+                    const transferYear = new Date(transfer.created_at).getFullYear();
+                    return transferYear === new Date().getFullYear()}).map((transfer) => {
                     const isoString = transfer?.created_at;
                     const formattedDate = format(new Date(isoString), 'MMM d, HH:mm:ss');
                     return (
@@ -800,7 +804,8 @@ const page = () => {
                       justify-between pb-2 items-start gap-2
                       border-b border-n-300 cursor-pointer'
                       onClick={() => {
-                        setIsWithdrawalDetails(true)
+                        setIsWithdrawalDetails(true);
+                        setSelectedTransferId(transfer.id)
                       }}>
                         <div className='w-full h-fit items-center flex justify-between'>
                           <p className='p2r text-n-700 w-fit'>
@@ -817,10 +822,13 @@ const page = () => {
                             {formattedDate}
                           </p>
                           <p className={`p3r 
-                            ${transfer?.status === "SUCCESSFUL" 
-                            ? "text-accent-green-300" 
-                            : "text-accent-red-300"} w-fit`}>
-                            {transfer?.complete_message}
+                          ${transfer?.status === "SUCCESSFUL" 
+                          ? "text-accent-green-300" 
+                          : transfer?.status === "FAILED" 
+                          ? "text-accent-red-300" 
+                          : "text-n-500"} w-fit`}>
+                            {transfer.status.charAt(0).toUpperCase() + 
+                            transfer.status.slice(1).toLowerCase()}
                           </p>
                         </div>
                       </div>                  
@@ -832,6 +840,9 @@ const page = () => {
           )
         }
         if (isWithdrawalDetails) {
+          let selectedTransferDetails = userTransfers.transfers.find((transfer) => {
+            return transfer.id === selectedTransferId
+          })
           return (
             <div className='w-full h-full 
             flex flex-col justify-start gap-2 
@@ -876,8 +887,16 @@ const page = () => {
               <div className='w-full h-fit gap-[32px] flex flex-col'>
                   <div className='w-full h-fit flex flex-col gap-2 items-center justify-center'>
                     <p className='p1b text-n-700'>Withdrawal</p>
-                    <h5 className='h5 text-n-700'>-$34.00</h5>
-                    <p className='p3r text-accent-green-300'>Successful</p>
+                    <h5 className='h5 text-n-700'>-&#8358;{selectedTransferDetails.amount}</h5>
+                    <p className={`p3r 
+                    ${selectedTransferDetails?.status === "SUCCESSFUL" 
+                    ? "text-accent-green-300" 
+                    : selectedTransferDetails?.status === "FAILED" 
+                    ? "text-accent-red-300" 
+                    : "text-n-500"} w-fit`}>
+                      {selectedTransferDetails.status.charAt(0).toUpperCase() + 
+                      selectedTransferDetails.status.slice(1).toLowerCase()}
+                    </p>
                   </div>
                   <div className='flex flex-col gap-4 items-start'>
                     <div className='w-full h-fit pb-2'>
@@ -886,9 +905,15 @@ const page = () => {
                     <div className='w-full h-fit flex flex-col gap-2'>
                       <div className='w-full h-fit flex justify-between items-center'>
                         <p className='p3r text-n-500'>Recipient details</p>
-                        <p  className='p3r text-n-700'>
-                          Opay | 8108166172
-                        </p>
+                        <div className='w-full h-fit flex text-n-700'>
+                          <p className='p3r w-fit'>
+                            {splitValue(selectedTransferDetails.bank_name)}  
+                          </p>
+                          &nbsp;|&nbsp;
+                          <p className='p3r w-fit'>
+                            {selectedTransferDetails.account_number}
+                          </p>
+                        </div>
                       </div>
                       <div className='w-full h-fit flex justify-between items-center'>
                         <p className='p3r text-n-500'>Transaction type</p>
@@ -899,33 +924,38 @@ const page = () => {
                       <div className='w-full h-fit flex justify-between items-center'>
                         <p className='p3r text-n-500'>Amount paid</p>
                         <p  className='p3r text-n-700'>
-                          $34.00
+                          &#8358;{selectedTransferDetails.amount}
                         </p>
                       </div>
                       <div className='w-full h-fit flex justify-between items-center'>
-                        <p className='p3r text-n-500'>Transaction ref</p>
+                        <p className='p3r text-n-500'>Flutterwave ref</p>
                         <div className='flex items-center gap-1'>
-                          {/* add copy function */}
                           <p  className='p3r text-n-700'>
-                            swdfw289489w00
+                            {splitValue(selectedTransferDetails.reference)}
                           </p>
-                          <TooltipFrame 
-                          label={"Copy"}>
-                            <Image
-                              src={clipboardBlack}
-                              width={14}
-                              height={14}
-                              alt='clipboard icon'
-                              priority
-                              className='cursor-pointer'
-                            />
-                          </TooltipFrame>
+                          <div className='w-fit h-fit'
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedTransferDetails.reference);
+                          }}
+                          >
+                            <TooltipFrame 
+                            label={"Copy"}>
+                              <Image
+                                src={clipboardBlack}
+                                width={14}
+                                height={14}
+                                alt='clipboard icon'
+                                priority
+                                className='cursor-pointer'
+                              />
+                            </TooltipFrame>
+                          </div>
                         </div>
                       </div>
                       <div className='w-full h-fit flex justify-between items-center'>
                         <p className='p3r text-n-500'>Transaction date</p>
-                        <p  className='p3r text-n-700'>
-                          Jul 1, 22:40:14
+                        <p  className='p3r text-n-700'> 
+                          {format(new Date(selectedTransferDetails?.created_at), 'MMM d, HH:mm:ss')}
                         </p>
                       </div>
                     </div>

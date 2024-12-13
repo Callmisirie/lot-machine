@@ -2,9 +2,9 @@ import mongoose, { models, Schema } from "mongoose";
 
 const instrumentSchema = new Schema({
   userId: {
-    type: Schema.Types.ObjectId, // Corrected this line
+    type: Schema.Types.ObjectId, 
     required: true,
-    ref: "User", // Reference the User model for better querying
+    ref: "User", 
     unique: true,
   },
   instruments: [
