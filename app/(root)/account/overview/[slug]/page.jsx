@@ -136,6 +136,7 @@ const page = () => {
   });
   
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const subscriptions = queryClient.getQueryData(["subscriptions", user?.email]);
   const [tabButtonState, setTabButtonState] = useState("Statistics")
   const [isReferralList, setIsReferralList] = useState(false)
   const [isWithdrawalHistory, setIsWithdrawalHistory] = useState(false)
@@ -425,8 +426,13 @@ const page = () => {
                   setShowReferralCard={setShowReferralCard}
                   userInfo={userInfo}/>
                 )}
-                <button className="l3b text-n-500 hover:text-n-700 text-center w-fit"
-                onClick={() => setShowReferralCard(true)}>
+                <button className={`l3b text-n-500 hover:text-n-700 text-center w-fit 
+                ${userInfo?.plan !== "Master" 
+                && !subscriptions?.subscriptions?.length && "invisible"}`}
+                onClick={() => {
+                  if (userInfo?.plan !== "Master" && !subscriptions?.subscriptions?.length) return;
+                  setShowReferralCard(true);
+                }}>
                   Show referral card
                 </button>
               </div>
@@ -439,8 +445,10 @@ const page = () => {
                   </p>
                 </div>
                 <div 
-                className='cursor-pointer'
+                className={`cursor-pointer ${userInfo?.plan !== "Master" 
+                  && !subscriptions?.subscriptions?.length && "invisible"}`}
                 onClick={() => {
+                  if (userInfo?.plan !== "Master" && !subscriptions?.subscriptions?.length) return;
                   if (userInfo?.referrerId) {
                     navigator.clipboard.writeText(
                       `http://localhost:3000/?referral=${userInfo?.referrerId}`

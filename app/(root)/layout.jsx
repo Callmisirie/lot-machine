@@ -11,6 +11,13 @@ const fetchUserInfo = async (email) => {
   return res.json();
 };
 
+const fetchSubscriptions = async (email) => {
+  const res = await fetch(`/api/getSubscriptions?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch subscriptions");
+  const { success, paymentPlanId, subscriptions } = await res.json();
+  return {success, paymentPlanId, subscriptions}
+};
+
 export default function RootLayout({ children }) {
   const {isAuthenticated, user} = useKindeBrowserClient();
   const {
@@ -22,8 +29,17 @@ export default function RootLayout({ children }) {
     enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
+  const {
+    data: subscriptions,
+    isLoading: subscriptionsLoading,
+  } = useQuery({
+    queryKey: ["subscriptions", user?.email],
+    queryFn: async () => await fetchSubscriptions(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
 
-  if (userInfoLoading || !userInfo) {
+  if (userInfoLoading || !userInfo || subscriptionsLoading || !subscriptions.success) {
     return (
       <main className="h-screen w-full flex flex-col">
         <Navbar />
@@ -38,7 +54,7 @@ export default function RootLayout({ children }) {
     );
   } 
 
-  if (!userInfoLoading && userInfo ) {
+  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) {
     return (
       <main className="h-screen w-full flex flex-col">
         <Navbar />

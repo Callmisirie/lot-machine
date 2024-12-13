@@ -26,9 +26,9 @@ const verify = async (transaction_id) => {
 const addSubscription = async (response) => {
   try {
     const res = await verify(response.id);
+    console.log(res);
+    
     const {data: {payment_type, meta: {duration}}} = res;
-  
-    console.log("Data of the payment, check if subs has meta: ", res);
     
     const planDetails = () => {
       let endDate = new Date(); // Current date

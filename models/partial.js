@@ -4,7 +4,8 @@ const partialSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "User" // Reference the User model for better querying
+    ref: "User", // Reference the User model for better querying
+    unique: true,
   },
   partials: [
     {

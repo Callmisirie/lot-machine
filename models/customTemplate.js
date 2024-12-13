@@ -4,7 +4,8 @@ const customTemplateSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId, // Corrected this line
     required: true,
-    ref: "User" // Reference the User model for better querying
+    ref: "User", // Reference the User model for better querying
+    unique: true,
   },
     customValue: {
       type: Number,

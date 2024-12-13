@@ -11,6 +11,8 @@ const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Initialize Pusher with your credentials
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID, 
@@ -60,7 +62,7 @@ export const POST = async (req) => {
 
     // Parse the payload (req.body is a ReadableStream)
     const rawBody = await req.text();
-    const payload = JSON.parse(rawBody);
+    let payload = JSON.parse(rawBody);
 
     // Verify the webhook signature
     if (signature !== secretHash) {
@@ -71,18 +73,27 @@ export const POST = async (req) => {
     console.log("Webhook payload received:", payload);
     
     if (payload?.status === "successful" || payload?.transfer?.status === "SUCCESSFUL") {
+
       const data = () => {
         if (payload?.status === "successful") {
-          return payload
+          if (payload.orderRef.slice(0, 3) === "URF") {
+            payload.flwRef = payload.txRef;
+          }
+          return payload;
         } else if (payload?.transfer?.status === "SUCCESSFUL") {
           const {transfer : {reference, meta: {email}}} = payload;
           return {customer: {email}, flwRef: reference};
         }
       }
+
+      if (payload.orderRef.slice(0, 3) === "URF") {
+        await delay(5000);
+      }
       
       const storedProcessedEvent = await storeProcessedEvent(data());
       if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
         console.log("Duplicate found");
+        return new NextResponse("Duplicate found", { status: 401 });
       } else {
         if (payload["event.type"] === "BANK_TRANSFER_TRANSACTION" || "CARD_TRANSACTION") {
           const existingEvent = await verify(payload.id);

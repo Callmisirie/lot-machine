@@ -78,8 +78,7 @@ export function CarouselFrame() {
       phone_number: '***********',
     }, 
     meta: { 
-      duration: paymentDurationState,
-      initialPayment: true
+      duration: paymentDurationState
     },
     customizations: {
       title: 'Lot Machine',
@@ -93,25 +92,29 @@ export function CarouselFrame() {
   const handleFlutterPayment = useFlutterwave(config);
 
   const handlePayment = async (response) => {
-        // if (response.charge_response_code === "00" && response.status === "completed" ||
-        //   response.charge_response_code === "00" && response.status === "successful"
-        // ) {
-        //   console.log("Payment completed immediately: ", response);
+        if (response.charge_response_code === "00" && response.status === "completed" ||
+          response.charge_response_code === "00" && response.status === "successful"
+        ) {
+          console.log("Payment completed immediately: ", response);
           
-        //   const {customer: {email}, flw_ref: flwRef, amount, transaction_id: id} = response;
-        //   const data = {customer: {email}, flwRef, amount, id}
-        //   await storeProcessedEvent(data);
-        //   await inEarnings(data);
-        //   await addSubscription(data);
-        //   await queryClient.invalidateQueries("userInfo");
-        //   await queryClient.invalidateQueries("subscriptions");
-        // } else if (response.status === "pending") {
-        //   console.log("Payment is pending verification");
-        //   // Optionally notify the user of the delay
-        // } else {
-        //   console.log("Payment failed");
-        //   // Handle failure case
-        // }     
+          const {customer: {email}, tx_ref: flwRef, amount, transaction_id: id} = response;
+          const data = {customer: {email}, flwRef, amount, id}
+          const storedProcessedEvent = await storeProcessedEvent(data);
+          if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
+            console.log("Duplicate found");
+          } else {
+            await inEarnings(data);
+            await addSubscription(data);
+          }
+          await queryClient.invalidateQueries("userInfo");
+          await queryClient.invalidateQueries("subscriptions");
+        } else if (response.status === "pending") {
+          console.log("Payment is pending verification");
+          // Optionally notify the user of the delay
+        } else {
+          console.log("Payment failed");
+          // Handle failure case
+        }     
   }
 
   return (

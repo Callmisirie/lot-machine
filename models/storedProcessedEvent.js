@@ -6,6 +6,7 @@ const storedProcessedEventSchema = new Schema(
       type: Schema.Types.ObjectId, // Corrected this line
       required: true,
       ref: "User", // Reference the User model for better querying
+      unique: true,
     },
     storedProcessedEvents: [
       {
