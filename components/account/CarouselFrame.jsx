@@ -6,6 +6,7 @@ import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { useQueryClient } from '@tanstack/react-query'
 import { v4 as uuidv4 } from 'uuid';
+import pLimit from 'p-limit';
 
 import {
   Carousel,
@@ -35,6 +36,8 @@ export function CarouselFrame() {
     notation: "compact",
     compactDisplay: "short"
   });
+  // Initialize p-limit with concurrency 1
+  const limit = pLimit(1);
 
   const amount = 200;
   const getPaymentType = (duration) => {
@@ -99,7 +102,11 @@ export function CarouselFrame() {
           
           const {customer: {email}, tx_ref: flwRef, amount, transaction_id: id} = response;
           const data = {customer: {email}, flwRef, amount, id}
-          const storedProcessedEvent = await storeProcessedEvent(data);
+
+           // Modify the storeProcessedEvent to use p-limit
+          const limitedStoreProcessedEvent = (data) => limit(() => storeProcessedEvent(data));
+          const storedProcessedEvent = await limitedStoreProcessedEvent(data);
+
           if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
             console.log("Duplicate found");
           } else {

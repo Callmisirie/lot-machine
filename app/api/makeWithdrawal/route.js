@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { outEarnings } from "@/actions/earnings";
 import storeProcessedEvent from "@/actions/StoreProcessedEvent";
 import crypto from "crypto";
+import pLimit from 'p-limit';
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
@@ -16,6 +17,9 @@ const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET
 
 export const GET = async (request) => {
   const uniqueId = uuidv4();
+  // Initialize p-limit with concurrency 1
+  const limit = pLimit(1);
+
   try {
     await connectMongoDB();
     // Parse the query parameters
@@ -93,7 +97,8 @@ export const GET = async (request) => {
       },
     };
     
-    const storedProcessedEvent = await storeProcessedEvent(data);
+    const limitedStoreProcessedEvent = (data) => limit(() => storeProcessedEvent(data));
+    const storedProcessedEvent = await limitedStoreProcessedEvent(data);
     if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
       console.log("Duplicate found");
       return new NextResponse("Duplicate found", { status: 401 });

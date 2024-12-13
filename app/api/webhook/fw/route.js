@@ -5,13 +5,12 @@ import storeProcessedEvent from "@/actions/StoreProcessedEvent";
 import Pusher from 'pusher';
 import addSubscription from "@/actions/addSubscription";
 import { inEarnings } from "@/actions/earnings";
+import pLimit from 'p-limit';
 
 const TEST_FLUTTERWAVE_PUBLIC_KEY = process.env.TEST_FLUTTERWAVE_PUBLIC_KEY;
 const TEST_FLUTTERWAVE_SECRET_KEY = process.env.TEST_FLUTTERWAVE_SECRET_KEY;
 
 const flw = new Flutterwave(TEST_FLUTTERWAVE_PUBLIC_KEY, TEST_FLUTTERWAVE_SECRET_KEY);
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Initialize Pusher with your credentials
 const pusher = new Pusher({
@@ -55,6 +54,8 @@ const resendHooks = async (id) => {
 export const POST = async (req) => {
   const secretKey = process.env.SECRET_KEY;
   const secretHash = crypto.createHash("sha256").update(secretKey).digest("hex");
+  // Initialize p-limit with concurrency 1
+  const limit = pLimit(1);
 
   try {
     // Retrieve the 'verif-hash' from headers
@@ -85,12 +86,11 @@ export const POST = async (req) => {
           return {customer: {email}, flwRef: reference};
         }
       }
-
-      if (payload.orderRef.slice(0, 3) === "URF") {
-        await delay(5000);
-      }
       
-      const storedProcessedEvent = await storeProcessedEvent(data());
+        // Modify the storeProcessedEvent to use p-limit
+      const limitedStoreProcessedEvent = (data) => limit(() => storeProcessedEvent(data));
+      const storedProcessedEvent = await limitedStoreProcessedEvent(data());
+      
       if (storedProcessedEvent?.success && storedProcessedEvent?.stored) {
         console.log("Duplicate found");
         return new NextResponse("Duplicate found", { status: 401 });
