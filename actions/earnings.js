@@ -42,6 +42,11 @@ export const inEarnings = async (response) => {
     const referrer = await User.findOne({referrerId});
     let referrerEarnings = await Earning.findOne({ userId: referrer._id });
 
+    console.log({
+      user, adminUser, referrerId, referrer, referrerEarnings
+    });
+    
+
     
     if (!adminUser) {
       console.log("Admin user does not exist");
@@ -51,7 +56,7 @@ export const inEarnings = async (response) => {
     let adminUserEarnings = await Earning.findOne({ userId: adminUser._id });
     
     const referralCount = await getReferrals(response.customer.email);
-    const {referralPercentage, adminPercentage} = referralSplitPercentage(referrer.userId !== adminUser.userId ? referrer : null, referralCount.totalActiveReferrals)
+    const {referralPercentage, adminPercentage} = referralSplitPercentage(referrer._id !== adminUser._id ? referrer : null, referralCount.totalActiveReferrals)
     const amount = response.amount;
     const splitShare = (splitType) => {
       const split = (amount * splitType) / 100;
@@ -63,7 +68,7 @@ export const inEarnings = async (response) => {
       return { success: false, message: "User does not exist" };
     }
 
-    if (referrer && referrer.plan === "Pro" && referrer.userId !== adminUser.userId) {
+    if (referrer && referrer.plan === "Pro" && referrer._id !== adminUser._id) {
       if (!referralCount.success) {
         console.log("Couldn't get total active referral list");
         return {success: false, message: "Couldn't get total active referral list"}

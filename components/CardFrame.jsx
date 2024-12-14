@@ -3,8 +3,7 @@ import ThreeSwitch from './ThreeSwitch';
 
 const CardFrame = ({
   children, threeSwitch, 
-  staticTitle, smallFrame, 
-  machineState, setMachineState, 
+  staticTitle, machineState, setMachineState, 
 }) => {
  
   return (

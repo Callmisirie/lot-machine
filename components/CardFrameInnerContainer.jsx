@@ -10,13 +10,7 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import Image from "next/image";
 import { cautionAccentRed, cautionAccentGreen } from "@/public/icons/accent";
-import { useQuery } from "@tanstack/react-query";
-
-const fetchInstruments = async (email) => {
-  const res = await fetch(`/api/getInstruments?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch instruments");
-  return res.json();
-};
+import { useQueryClient } from "@tanstack/react-query";
 
 const CardFrameInnerContainer = ({
   machineState, serverUpdate, 
@@ -26,17 +20,9 @@ const CardFrameInnerContainer = ({
   partialTPs, setPartialTPs,
   message, setMessage, userInfo
 }) => {
-  const {isAuthenticated, user} = useKindeBrowserClient();
-
-  const {
-    data: instruments,
-    isLoading: instrumentsLoading,
-  } = useQuery({
-    queryKey: ["instruments", user?.email],
-    queryFn: async () => await fetchInstruments(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });   
+  const {user} = useKindeBrowserClient();
+  const queryClient = useQueryClient();
+  const instruments = queryClient.getQueryData(["instruments", user?.email]);  
 
   if (machineState === "Add instrument") {
     return (

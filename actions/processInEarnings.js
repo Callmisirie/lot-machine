@@ -9,6 +9,8 @@ const processInEarnings = async (response, earner, earnings, splitShare, user) =
    const currentYear = new Date().getFullYear();
    const currentMonth = new Date().getMonth() + 1; 
 
+   console.log({response, earner, earnings, splitShare, user});
+   
    if (!earnings) {
      // Create a new Earning document if it doesn't exist
      earnings = await Earning.create({

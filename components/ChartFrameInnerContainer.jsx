@@ -8,7 +8,7 @@ import Image from "next/image";
 import { clipboardWhite } from "@/public/icons/white";
 import FormFrame from "./FormFrame";
 import DualButton from "./DualButton";
-import { cancelBlack, deleteIconBlack } from "@/public/icons/black";
+import { deleteIconBlack } from "@/public/icons/black";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { ScrollAreaFrame } from "./ScrollArea";
 import { ScrollBar } from "./ui/scroll-area";

@@ -1,8 +1,6 @@
 "use client";
 
-import paths from "@/common/paths";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CardFrame from "@/components/CardFrame";
 import PartialContainer from "@/components/PartialContainer";
 import { clipboardBlack, deleteIconBlack } from "@/public/icons/black";
@@ -16,21 +14,9 @@ import ComfirmationPopoverButton from "@/components/ComfirmationPopoverButton";
 import Image from "next/image";
 import { boltWhite, cancelWhite } from "@/public/icons/white";
 import Button from "@/components/Button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import useResizeObserver from "use-resize-observer";
-
-const fetchPartials = async (email) => {
-  const res = await fetch(`/api/getPartials?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch partials");
-  return res.json();
-};
-
-const fetchUserCustomTemplate = async (email) => {
-  const res = await fetch(`/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch user custom template");
-  return res.json();
-};
 
 export default function Home() {
   const [machineState, setMachineState] = useState("Machine");
@@ -52,42 +38,17 @@ export default function Home() {
   const [subIsWrapped, setSubIsWrapped] = useState(false);
   const queryClient = useQueryClient();
   const userInfo = queryClient.getQueryData(["userInfo", user?.email]);
+  const partials = queryClient.getQueryData(["partials", user?.email]);
+  const userCustomTemplate = queryClient.getQueryData(["userCustomTemplate", user?.email]);
   const [message, setMessage] = useState({
     success: false,
     messageContent: ""
   });
   const { ref, height } = useResizeObserver();  
-  const {
-    data: partials,
-    isLoading: partialsLoading,
-  } = useQuery({
-    queryKey: ["partials", user?.email],
-    queryFn: async () => await fetchPartials(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  });
-
-  const {
-    data: userCustomTemplate,
-    isLoading: userCustomTemplateLoading,
-  } = useQuery({
-    queryKey: ["userCustomTemplate", user?.email],
-    queryFn: async () => await fetchUserCustomTemplate(user.email),
-    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-  }); 
 
   const firstName =  user?.given_name.charAt(0).toUpperCase() + user?.given_name.slice(1).toLowerCase();
-  
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const referral = queryParams.get("referral");
-    if (referral) {
-      localStorage.setItem("referralId", referral);
-    }
-  }, []);
 
-  if (isLoading || partialsLoading || !userInfo) {
+  if (isLoading || !isAuthenticated || !userInfo) {
     return (
       <div className="w-full h-full flex justify-center items-center relative">
         <div className="flex flex-col items-center gap-2">
@@ -99,11 +60,7 @@ export default function Home() {
     );
   }
 
-  if (!isLoading && !isAuthenticated) {
-    redirect(paths.auth());
-  }
-
-  if (isAuthenticated && !partialsLoading && partials && userInfo) {
+  if (isAuthenticated && userInfo) {
     const machine = () => {
       if (subIsWrapped && machinePopoverOpen || !subIsWrapped && !machinePopoverOpen) {
         return (

@@ -24,6 +24,8 @@ const userAuth = async (referralId) => {
   };
 
   if (referralId !== "isLoading") {
+    console.log({user});
+    
     try {
       await connectMongoDB();    
       const userExists = await User.findOne({email});
@@ -83,7 +85,7 @@ const userAuth = async (referralId) => {
         return { success: true, adminKey };
       } else {
         console.log("User already exists");
-        return { success: true, adminKey: userExists.adminKey }; 
+        return { success: true, adminKey: userExists?.adminKey }; 
       }   
     } catch (error) {
       console.log("Failed to authenticate user on mongoDB: ", error);

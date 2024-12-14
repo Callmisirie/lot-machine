@@ -87,7 +87,7 @@ export const POST = async (req) => {
         }
       }
       
-        // Modify the storeProcessedEvent to use p-limit
+      // Modify the storeProcessedEvent to use p-limit
       const limitedStoreProcessedEvent = (data) => limit(() => storeProcessedEvent(data));
       const storedProcessedEvent = await limitedStoreProcessedEvent(data());
       

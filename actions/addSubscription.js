@@ -26,7 +26,7 @@ const verify = async (transaction_id) => {
 const addSubscription = async (response) => {
   try {
     const res = await verify(response.id);    
-    const {data: {payment_type, meta: {duration}}} = res;
+    const {data: {payment_type, meta: {duration}, plan: paymentPlanId}} = res;
     
     const planDetails = () => {
       let endDate = new Date(); // Current date
@@ -52,13 +52,13 @@ const addSubscription = async (response) => {
         // Create a new subscription list for the user
         userSubscriptions = await Subscription.create({
           userId: user._id,
-          paymentPlanId: response.paymentPlan,
+          paymentPlanId,
           subscriptions: [{ plan, period, flw_ref: response.flwRef, payment_type, endDate}]
         });
         console.log("Subscription list created");
       } else {
         // Add the new subscription to the existing list
-        userSubscriptions.paymentPlanId = response.paymentPlan;
+        userSubscriptions.paymentPlanId = paymentPlanId;
         userSubscriptions.subscriptions.push({ plan, period, flw_ref: response.flwRef, payment_type, endDate});
         await userSubscriptions.save(); // Save changes to the database
         console.log("Subscription added to existing list");

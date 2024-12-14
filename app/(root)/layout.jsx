@@ -4,6 +4,10 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import paths from "@/common/paths";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const fetchUserInfo = async (email) => {
   const res = await fetch(`/api/getUserInfo?email=${email}`, { cache: "no-store" });
@@ -18,8 +22,27 @@ const fetchSubscriptions = async (email) => {
   return {success, paymentPlanId, subscriptions}
 };
 
+const fetchPartials = async (email) => {
+  const res = await fetch(`/api/getPartials?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch partials");
+  return res.json();
+};
+
+const fetchInstruments = async (email) => {
+  const res = await fetch(`/api/getInstruments?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch instruments");
+  return res.json();
+};
+
+const fetchUserCustomTemplate = async (email) => {
+  const res = await fetch(`/api/getCustomTemplate?email=${email}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch user custom template");
+  return res.json();
+};
+
 export default function RootLayout({ children }) {
-  const {isAuthenticated, user} = useKindeBrowserClient();
+  const pathname = usePathname(); // Get the current pathname
+  const {isLoading, isAuthenticated, user} = useKindeBrowserClient();
   const {
     data: userInfo,
     isLoading: userInfoLoading,
@@ -39,7 +62,49 @@ export default function RootLayout({ children }) {
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
   });
 
-  if (userInfoLoading || !userInfo || subscriptionsLoading || !subscriptions.success) {
+  const {
+    isLoading: partialsLoading,
+  } = useQuery({
+    queryKey: ["partials", user?.email],
+    queryFn: async () => await fetchPartials(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+
+  const {
+    isLoading: userCustomTemplateLoading,
+  } = useQuery({
+    queryKey: ["userCustomTemplate", user?.email],
+    queryFn: async () => await fetchUserCustomTemplate(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  }); 
+
+  const {
+    isLoading: instrumentsLoading,
+  } = useQuery({
+    queryKey: ["instruments", user?.email],
+    queryFn: async () => await fetchInstruments(user.email),
+    enabled: isAuthenticated && user?.email !== undefined, // Only fetch when authenticated
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+  });
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const referral = queryParams.get("referral");
+    if (referral) {
+      localStorage.setItem("referralId", referral);
+    }
+  }, []);
+
+  if (!isLoading && !isAuthenticated && pathname !== "/auth") {
+    redirect(paths.auth());
+  }
+  
+  if (isLoading || !isAuthenticated || userInfoLoading || 
+    !userInfo || subscriptionsLoading || !subscriptions.success ||
+    partialsLoading || userCustomTemplateLoading || instrumentsLoading
+  ) {
     return (
       <main className="h-screen w-full flex flex-col">
         <Navbar />
@@ -53,8 +118,12 @@ export default function RootLayout({ children }) {
       </main>
     );
   } 
-
-  if (!userInfoLoading && userInfo && !subscriptionsLoading && subscriptions.success) {
+  
+  if (!isLoading && !userInfoLoading && 
+    userInfo && !subscriptionsLoading && 
+    subscriptions.success && !partialsLoading && 
+    !userCustomTemplateLoading && !instrumentsLoading
+  ) {
     return (
       <main className="h-screen w-full flex flex-col">
         <Navbar />
